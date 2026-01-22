@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "BudgetTracker",
+    "slug": "budget-tracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.budgettracker"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.budgettracker"
+    },
+    "plugins": [
+      "expo-sqlite"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "aef9cadd-8e48-4e3e-9a50-d11c415ffdb4"
+      }
+    }
+  }
+}

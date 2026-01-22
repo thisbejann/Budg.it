@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install @react-navigation/native @react-navigation/bottom-tabs @react-navigation/native-stack react-native-screens zustand react-hook-form @hookform/resolvers zod date-fns lucide-react-native react-native-svg react-native-calendars @react-native-async-storage/async-storage)"
+    ]
+  }
+}
