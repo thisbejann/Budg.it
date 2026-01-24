@@ -19,6 +19,8 @@
     "date-fns": "^4.1.0",
     "expo": "^54.0.32",
     "expo-dev-client": "~6.0.20",
+    "expo-file-system": "~19.0.21",
+    "expo-sharing": "~14.0.8",
     "expo-sqlite": "~16.0.10",
     "expo-status-bar": "~3.0.9",
     "lucide-react-native": "^0.562.0",

@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, SectionList } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Plus, Wallet, CreditCard, Users, HandCoins } from 'lucide-react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
@@ -88,9 +88,11 @@ export function AccountsScreen() {
     }
   }, [activeLedgerId]);
 
-  useEffect(() => {
-    loadAccounts();
-  }, [loadAccounts]);
+  useFocusEffect(
+    useCallback(() => {
+      loadAccounts();
+    }, [loadAccounts])
+  );
 
   const getIcon = (iconName: string, color: string = '#fff') => {
     const IconComponent = (LucideIcons as any)[

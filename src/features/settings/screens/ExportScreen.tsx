@@ -164,9 +164,16 @@ export function ExportScreen() {
       } else {
         Alert.alert('Success', `File saved to: ${fileUri}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error exporting data:', error);
-      Alert.alert('Error', 'Failed to export data');
+      if (error?.message?.includes('native module') || error?.message?.includes('ExpoSharing')) {
+        Alert.alert(
+          'Rebuild Required',
+          'Export feature requires a new development build. Run: eas build --profile development --platform android'
+        );
+      } else {
+        Alert.alert('Error', 'Failed to export data');
+      }
     } finally {
       setIsExporting(false);
     }
