@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
-import { VictoryPie, VictoryBar, VictoryChart, VictoryAxis, VictoryLine, VictoryTheme } from 'victory-native';
+import { VictoryPie, VictoryBar, VictoryChart, VictoryAxis, VictoryTheme } from 'victory-native';
 import type { CategorySpending } from '../../../types/database';
 import { Screen, SimpleHeader } from '../../../shared/components/layout';
 import { Card, CardHeader, CardTitle, CardContent } from '../../../shared/components/ui';
