@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, ScrollView, SafeAreaView, StatusBar, RefreshControl } from 'react-native';
-import { COLORS } from '../../../constants/colors';
+import { View, ScrollView, StatusBar, RefreshControl, useColorScheme } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { COLORS, COLORS_DARK } from '../../../constants/colors';
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -21,7 +22,9 @@ export function Screen({
   className,
   contentClassName,
 }: ScreenProps) {
-  const Container = safeArea ? SafeAreaView : View;
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const colors = isDark ? COLORS_DARK : COLORS;
 
   const content = scrollable ? (
     <ScrollView
@@ -41,10 +44,25 @@ export function Screen({
   );
 
   return (
-    <Container className={`flex-1 bg-background ${className || ''}`}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      {content}
-    </Container>
+    <>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={colors.background}
+      />
+      {safeArea ? (
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: colors.background }}
+          edges={['top', 'left', 'right']}
+          className={className}
+        >
+          {content}
+        </SafeAreaView>
+      ) : (
+        <View className={`flex-1 bg-background ${className || ''}`}>
+          {content}
+        </View>
+      )}
+    </>
   );
 }
 

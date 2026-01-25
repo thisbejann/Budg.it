@@ -76,7 +76,7 @@ DatabaseProvider initializes the database and creates default ledger on first ru
 
 ## Git
 
-- Create a new branch for each feature/fix
+- ALWAYS Create a new branch for each feature/fix/enhancements. I will preface the requests with "FEATURE:" or "FIX:" or "ENHANCEMENT" to indicate the type of change.
 - Commit often with clear messages
 - Open PRs against `main` for review
 - Always name your branches with prefix 'jannjaspher/' followed by a descriptive name, e.g., 'jannjaspher/add-transaction-form' to indicate that i made the change

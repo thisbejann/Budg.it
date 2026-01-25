@@ -8,13 +8,14 @@ import {
   BookOpen,
   Download,
   Info,
+  Users,
 } from 'lucide-react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import { Screen, SimpleHeader } from '../../../shared/components/layout';
 import { Card, CardHeader, CardTitle, CardContent } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -25,7 +26,7 @@ interface SettingItemProps {
   onPress: () => void;
 }
 
-function SettingItem({ icon, title, description, onPress }: SettingItemProps) {
+function SettingItem({ icon, title, description, onPress, colors }: SettingItemProps & { colors: any }) {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -33,7 +34,7 @@ function SettingItem({ icon, title, description, onPress }: SettingItemProps) {
       activeOpacity={0.7}
     >
       <View className="flex-row items-center gap-3">
-        <View className="h-10 w-10 items-center justify-center rounded-lg bg-secondary">
+        <View className="h-10 w-10 items-center justify-center rounded-xl bg-secondary">
           {icon}
         </View>
         <View>
@@ -43,7 +44,7 @@ function SettingItem({ icon, title, description, onPress }: SettingItemProps) {
           )}
         </View>
       </View>
-      <ChevronRight size={20} color={COLORS.mutedForeground} />
+      <ChevronRight size={20} color={colors.mutedForeground} />
     </TouchableOpacity>
   );
 }
@@ -51,6 +52,7 @@ function SettingItem({ icon, title, description, onPress }: SettingItemProps) {
 export function SettingsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { activeLedger } = useLedgerStore();
+  const { colors } = useTheme();
 
   return (
     <Screen>
@@ -74,24 +76,35 @@ export function SettingsScreen() {
           </CardHeader>
           <CardContent>
             <SettingItem
-              icon={<Tags size={20} color={COLORS.primary} />}
+              icon={<Tags size={20} color={colors.primary} />}
               title="Categories"
               description="Manage expense and income categories"
               onPress={() => navigation.navigate('Categories')}
+              colors={colors}
             />
             <View className="h-px bg-border" />
             <SettingItem
-              icon={<Bookmark size={20} color={COLORS.primary} />}
+              icon={<Bookmark size={20} color={colors.primary} />}
               title="Quick Add Templates"
               description="Save frequent transactions for quick entry"
               onPress={() => navigation.navigate('Templates')}
+              colors={colors}
             />
             <View className="h-px bg-border" />
             <SettingItem
-              icon={<BookOpen size={20} color={COLORS.primary} />}
+              icon={<Users size={20} color={colors.primary} />}
+              title="People"
+              description="Manage contacts for owed/debt accounts"
+              onPress={() => navigation.navigate('Persons')}
+              colors={colors}
+            />
+            <View className="h-px bg-border" />
+            <SettingItem
+              icon={<BookOpen size={20} color={colors.primary} />}
               title="Ledgers"
               description="Manage multiple ledgers (personal, business)"
               onPress={() => navigation.navigate('Ledgers')}
+              colors={colors}
             />
           </CardContent>
         </Card>
@@ -103,10 +116,11 @@ export function SettingsScreen() {
           </CardHeader>
           <CardContent>
             <SettingItem
-              icon={<Download size={20} color={COLORS.primary} />}
+              icon={<Download size={20} color={colors.primary} />}
               title="Export Data"
               description="Export transactions to CSV"
               onPress={() => navigation.navigate('Export')}
+              colors={colors}
             />
           </CardContent>
         </Card>
@@ -118,8 +132,8 @@ export function SettingsScreen() {
           </CardHeader>
           <CardContent>
             <View className="flex-row items-center gap-3 py-3">
-              <View className="h-10 w-10 items-center justify-center rounded-lg bg-secondary">
-                <Info size={20} color={COLORS.primary} />
+              <View className="h-10 w-10 items-center justify-center rounded-xl bg-secondary">
+                <Info size={20} color={colors.primary} />
               </View>
               <View>
                 <Text className="text-base font-medium text-foreground">

@@ -26,14 +26,15 @@ export type RootStackParamList = {
   Templates: undefined;
   Ledgers: undefined;
   Export: undefined;
+  Charts: undefined;
+  Persons: undefined;
 };
 
-// Bottom Tab Navigator params
+// Bottom Tab Navigator params (Charts removed, now a modal)
 export type MainTabParamList = {
   Home: undefined;
   Transactions: { date?: string } | undefined;
   Accounts: undefined;
-  Charts: undefined;
   Settings: undefined;
 };
 
