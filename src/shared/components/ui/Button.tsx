@@ -6,6 +6,7 @@ import {
   TouchableOpacityProps,
   View,
 } from 'react-native';
+import { COLORS } from '../../../constants/colors';
 
 type ButtonVariant = 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
 type ButtonSize = 'default' | 'sm' | 'lg' | 'icon';
@@ -75,7 +76,7 @@ export function Button({
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === 'default' || variant === 'destructive' ? '#fff' : '#3b82f6'}
+          color={variant === 'default' || variant === 'destructive' ? COLORS.primaryForeground : COLORS.primary}
           size="small"
         />
       ) : typeof children === 'string' ? (

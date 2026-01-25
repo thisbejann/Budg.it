@@ -1,5 +1,6 @@
 import React, { forwardRef } from 'react';
 import { TextInput, TextInputProps, View, Text } from 'react-native';
+import { COLORS } from '../../../constants/colors';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -31,7 +32,7 @@ export const Input = forwardRef<TextInput, InputProps>(
               flex-1 py-3 text-base text-foreground
               ${className || ''}
             `}
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={COLORS.mutedForeground}
             {...props}
           />
           {rightIcon && <View className="ml-2">{rightIcon}</View>}

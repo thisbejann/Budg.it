@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, ViewProps } from 'react-native';
+import { COLORS } from '../../../constants/colors';
 
 type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning';
 
@@ -13,8 +14,13 @@ const variantStyles: Record<BadgeVariant, string> = {
   secondary: 'bg-secondary',
   destructive: 'bg-destructive',
   outline: 'border border-input bg-transparent',
-  success: 'bg-green-500',
-  warning: 'bg-yellow-500',
+  success: '',
+  warning: '',
+};
+
+const variantColors: Partial<Record<BadgeVariant, string>> = {
+  success: COLORS.income,
+  warning: '#eab308',
 };
 
 const variantTextStyles: Record<BadgeVariant, string> = {
@@ -26,7 +32,9 @@ const variantTextStyles: Record<BadgeVariant, string> = {
   warning: 'text-white',
 };
 
-export function Badge({ variant = 'default', children, className, ...props }: BadgeProps) {
+export function Badge({ variant = 'default', children, className, style, ...props }: BadgeProps) {
+  const bgColor = variantColors[variant];
+
   return (
     <View
       className={`
@@ -34,6 +42,7 @@ export function Badge({ variant = 'default', children, className, ...props }: Ba
         ${variantStyles[variant]}
         ${className || ''}
       `}
+      style={[bgColor ? { backgroundColor: bgColor } : undefined, style]}
       {...props}
     >
       {typeof children === 'string' ? (
@@ -62,10 +71,10 @@ interface AccountTypeBadgeProps {
 }
 
 const accountTypeColors: Record<string, string> = {
-  debit: 'bg-green-500',
-  credit: 'bg-orange-500',
-  owed: 'bg-blue-500',
-  debt: 'bg-red-500',
+  debit: COLORS.accountDebit,
+  credit: COLORS.accountCredit,
+  owed: COLORS.accountOwed,
+  debt: COLORS.accountDebt,
 };
 
 const accountTypeLabels: Record<string, string> = {
@@ -77,7 +86,10 @@ const accountTypeLabels: Record<string, string> = {
 
 export function AccountTypeBadge({ type }: AccountTypeBadgeProps) {
   return (
-    <View className={`inline-flex items-center rounded-full px-2.5 py-0.5 ${accountTypeColors[type]}`}>
+    <View
+      className="inline-flex items-center rounded-full px-2.5 py-0.5"
+      style={{ backgroundColor: accountTypeColors[type] }}
+    >
       <Text className="text-xs font-semibold text-white">
         {accountTypeLabels[type]}
       </Text>

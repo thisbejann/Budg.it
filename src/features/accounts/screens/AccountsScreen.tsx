@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, SectionList } from 'react-native';
+import { View, Text, TouchableOpacity, SectionList, ActivityIndicator } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Plus, Wallet, CreditCard, Users, HandCoins } from 'lucide-react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -94,7 +94,7 @@ export function AccountsScreen() {
     }, [loadAccounts])
   );
 
-  const getIcon = (iconName: string, color: string = '#fff') => {
+  const getIcon = (iconName: string, color: string = COLORS.primaryForeground) => {
     const IconComponent = (LucideIcons as any)[
       iconName.split('-').map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1))).join('')
     ] || LucideIcons.Circle;
@@ -156,12 +156,16 @@ export function AccountsScreen() {
           onPress={() => navigation.navigate('AddAccount')}
           className="flex-row items-center gap-1 rounded-lg bg-primary px-3 py-1.5"
         >
-          <Plus size={16} color="#fff" />
+          <Plus size={16} color={COLORS.primaryForeground} />
           <Text className="text-sm font-medium text-white">Add Account</Text>
         </TouchableOpacity>
       </View>
 
-      {sections.length === 0 ? (
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
+      ) : sections.length === 0 ? (
         <EmptyState
           icon={<Wallet size={48} color={COLORS.mutedForeground} />}
           title="No accounts yet"

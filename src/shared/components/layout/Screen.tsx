@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, ScrollView, SafeAreaView, StatusBar, RefreshControl } from 'react-native';
+import { COLORS } from '../../../constants/colors';
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -41,7 +42,7 @@ export function Screen({
 
   return (
     <Container className={`flex-1 bg-background ${className || ''}`}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
       {content}
     </Container>
   );
