@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Plus, Calendar as CalendarIcon, List } from 'lucide-react-native';
 import { Calendar } from 'react-native-calendars';
@@ -142,7 +142,7 @@ export function TransactionsScreen() {
               viewMode === 'list' ? 'bg-primary' : 'bg-secondary'
             }`}
           >
-            <List size={16} color={viewMode === 'list' ? '#fff' : COLORS.foreground} />
+            <List size={16} color={viewMode === 'list' ? COLORS.primaryForeground : COLORS.foreground} />
             <Text
               className={`text-sm font-medium ${
                 viewMode === 'list' ? 'text-white' : 'text-foreground'
@@ -159,7 +159,7 @@ export function TransactionsScreen() {
           >
             <CalendarIcon
               size={16}
-              color={viewMode === 'calendar' ? '#fff' : COLORS.foreground}
+              color={viewMode === 'calendar' ? COLORS.primaryForeground : COLORS.foreground}
             />
             <Text
               className={`text-sm font-medium ${
@@ -174,7 +174,7 @@ export function TransactionsScreen() {
           onPress={() => navigation.navigate('AddTransaction')}
           className="rounded-full bg-primary p-2"
         >
-          <Plus size={20} color="#fff" />
+          <Plus size={20} color={COLORS.primaryForeground} />
         </TouchableOpacity>
       </View>
 
@@ -189,7 +189,7 @@ export function TransactionsScreen() {
             calendarBackground: COLORS.background,
             textSectionTitleColor: COLORS.mutedForeground,
             selectedDayBackgroundColor: COLORS.primary,
-            selectedDayTextColor: '#ffffff',
+            selectedDayTextColor: COLORS.primaryForeground,
             todayTextColor: COLORS.primary,
             dayTextColor: COLORS.foreground,
             textDisabledColor: COLORS.mutedForeground,
@@ -218,24 +218,30 @@ export function TransactionsScreen() {
       )}
 
       {/* Transaction List */}
-      <FlatList
-        data={filteredTransactions}
-        renderItem={renderTransaction}
-        keyExtractor={(item) => item.id.toString()}
-        ListEmptyComponent={
-          <EmptyState
-            icon={<LucideIcons.Receipt size={48} color={COLORS.mutedForeground} />}
-            title="No transactions"
-            description={
-              viewMode === 'calendar'
-                ? 'No transactions on this day'
-                : 'Start tracking your expenses'
-            }
-            actionLabel="Add Transaction"
-            onAction={() => navigation.navigate('AddTransaction')}
-          />
-        }
-      />
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
+      ) : (
+        <FlatList
+          data={filteredTransactions}
+          renderItem={renderTransaction}
+          keyExtractor={(item) => item.id.toString()}
+          ListEmptyComponent={
+            <EmptyState
+              icon={<LucideIcons.Receipt size={48} color={COLORS.mutedForeground} />}
+              title="No transactions"
+              description={
+                viewMode === 'calendar'
+                  ? 'No transactions on this day'
+                  : 'Start tracking your expenses'
+              }
+              actionLabel="Add Transaction"
+              onAction={() => navigation.navigate('AddTransaction')}
+            />
+          }
+        />
+      )}
     </Screen>
   );
 }
