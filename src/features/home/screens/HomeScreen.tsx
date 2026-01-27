@@ -118,10 +118,10 @@ export function HomeScreen() {
       <View className="px-4 py-6 pb-24">
         {/* Header with Ledger Name */}
         <Animated.View entering={FadeInDown.delay(0).duration(400)} className="mb-6">
-          <Text className="text-2xl font-bold text-foreground">
+          <Text className="text-2xl font-bold" style={{ color: colors.foreground }}>
             {activeLedger?.name || 'Budget Tracker'}
           </Text>
-          <Text className="text-sm text-muted-foreground">
+          <Text className="text-sm" style={{ color: colors.mutedForeground }}>
             {formatMonthYear(getToday())}
           </Text>
         </Animated.View>
@@ -129,28 +129,29 @@ export function HomeScreen() {
         {/* Balance Hero Card */}
         <Animated.View entering={FadeInDown.delay(100).duration(400)} className="mb-4">
           <GlassCard className="items-center py-6">
-            <Text className="text-sm text-muted-foreground mb-1">Net Worth</Text>
+            <Text className="text-sm mb-1" style={{ color: colors.mutedForeground }}>Net Worth</Text>
             <Text
-              className={`text-3xl font-bold ${
-                balanceSummary.netWorth >= 0 ? 'text-green-600' : 'text-red-600'
-              }`}
+              className="text-3xl font-bold"
+              style={{ color: balanceSummary.netWorth >= 0 ? '#22c55e' : '#ef4444' }}
             >
               {formatPHP(balanceSummary.netWorth)}
             </Text>
             <View className="flex-row items-center gap-4 mt-4">
               <TouchableOpacity
                 onPress={() => navigation.navigate('Transfer')}
-                className="flex-row items-center gap-2 rounded-full bg-secondary px-4 py-2"
+                className="flex-row items-center gap-2 rounded-full px-4 py-2"
+                style={{ backgroundColor: colors.secondary }}
               >
                 <ArrowLeftRight size={16} color={colors.foreground} />
-                <Text className="text-sm font-medium text-foreground">Transfer</Text>
+                <Text className="text-sm font-medium" style={{ color: colors.foreground }}>Transfer</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => navigation.navigate('Main', { screen: 'Accounts' })}
-                className="flex-row items-center gap-2 rounded-full bg-secondary px-4 py-2"
+                className="flex-row items-center gap-2 rounded-full px-4 py-2"
+                style={{ backgroundColor: colors.secondary }}
               >
                 <Wallet size={16} color={colors.foreground} />
-                <Text className="text-sm font-medium text-foreground">Accounts</Text>
+                <Text className="text-sm font-medium" style={{ color: colors.foreground }}>Accounts</Text>
               </TouchableOpacity>
             </View>
           </GlassCard>
@@ -162,12 +163,12 @@ export function HomeScreen() {
           <View className="w-1/2 px-1.5 mb-3">
             <GlassCard>
               <View className="flex-row items-center gap-2 mb-2">
-                <View className="h-8 w-8 rounded-full bg-green-500/20 items-center justify-center">
+                <View className="h-8 w-8 rounded-full items-center justify-center" style={{ backgroundColor: 'rgba(34, 197, 94, 0.2)' }}>
                   <TrendingUp size={16} color="#22c55e" />
                 </View>
-                <Text className="text-xs text-muted-foreground">Income</Text>
+                <Text className="text-xs" style={{ color: colors.mutedForeground }}>Income</Text>
               </View>
-              <Text className="text-lg font-bold text-green-600">
+              <Text className="text-lg font-bold" style={{ color: '#22c55e' }}>
                 {formatPHPCompact(monthlyIncome)}
               </Text>
             </GlassCard>
@@ -177,12 +178,12 @@ export function HomeScreen() {
           <View className="w-1/2 px-1.5 mb-3">
             <GlassCard>
               <View className="flex-row items-center gap-2 mb-2">
-                <View className="h-8 w-8 rounded-full bg-red-500/20 items-center justify-center">
+                <View className="h-8 w-8 rounded-full items-center justify-center" style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)' }}>
                   <TrendingDown size={16} color="#ef4444" />
                 </View>
-                <Text className="text-xs text-muted-foreground">Expenses</Text>
+                <Text className="text-xs" style={{ color: colors.mutedForeground }}>Expenses</Text>
               </View>
-              <Text className="text-lg font-bold text-red-600">
+              <Text className="text-lg font-bold" style={{ color: '#ef4444' }}>
                 {formatPHPCompact(monthlySpending)}
               </Text>
             </GlassCard>
@@ -192,16 +193,19 @@ export function HomeScreen() {
           <View className="w-1/2 px-1.5">
             <GlassCard>
               <View className="flex-row items-center gap-2 mb-2">
-                <View className={`h-8 w-8 rounded-full items-center justify-center ${netSavings >= 0 ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                <View
+                  className="h-8 w-8 rounded-full items-center justify-center"
+                  style={{ backgroundColor: netSavings >= 0 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
+                >
                   {netSavings >= 0 ? (
                     <ArrowDownLeft size={16} color="#22c55e" />
                   ) : (
                     <ArrowUpRight size={16} color="#ef4444" />
                   )}
                 </View>
-                <Text className="text-xs text-muted-foreground">Net Savings</Text>
+                <Text className="text-xs" style={{ color: colors.mutedForeground }}>Net Savings</Text>
               </View>
-              <Text className={`text-lg font-bold ${netSavings >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <Text className="text-lg font-bold" style={{ color: netSavings >= 0 ? '#22c55e' : '#ef4444' }}>
                 {formatPHPCompact(Math.abs(netSavings))}
               </Text>
             </GlassCard>
@@ -211,13 +215,13 @@ export function HomeScreen() {
           <View className="w-1/2 px-1.5">
             <GlassCardPressable onPress={() => navigation.navigate('Charts')}>
               <View className="flex-row items-center gap-2 mb-2">
-                <View className="h-8 w-8 rounded-full bg-primary/20 items-center justify-center">
+                <View className="h-8 w-8 rounded-full items-center justify-center" style={{ backgroundColor: `${colors.primary}33` }}>
                   <BarChart3 size={16} color={colors.primary} />
                 </View>
-                <Text className="text-xs text-muted-foreground">Analytics</Text>
+                <Text className="text-xs" style={{ color: colors.mutedForeground }}>Analytics</Text>
               </View>
               <View className="flex-row items-center justify-between">
-                <Text className="text-sm font-semibold text-primary">View Charts</Text>
+                <Text className="text-sm font-semibold" style={{ color: colors.primary }}>View Charts</Text>
                 <ChevronRight size={16} color={colors.primary} />
               </View>
             </GlassCardPressable>
@@ -238,9 +242,8 @@ export function HomeScreen() {
                 {categorySpending.map((cat, index) => (
                   <View
                     key={cat.category_id}
-                    className={`flex-row items-center justify-between py-2 ${
-                      index < categorySpending.length - 1 ? 'border-b border-border' : ''
-                    }`}
+                    className="flex-row items-center justify-between py-2"
+                    style={index < categorySpending.length - 1 ? { borderBottomWidth: 1, borderBottomColor: colors.border } : undefined}
                   >
                     <View className="flex-row items-center gap-3">
                       <IconAvatar
@@ -248,15 +251,15 @@ export function HomeScreen() {
                         icon={getIcon(cat.category_icon, '#fff')}
                         backgroundColor={cat.category_color}
                       />
-                      <Text className="text-sm font-medium text-foreground">
+                      <Text className="text-sm font-medium" style={{ color: colors.foreground }}>
                         {cat.category_name}
                       </Text>
                     </View>
                     <View className="items-end">
-                      <Text className="text-sm font-semibold text-foreground">
+                      <Text className="text-sm font-semibold" style={{ color: colors.foreground }}>
                         {formatPHP(cat.total_amount)}
                       </Text>
-                      <Text className="text-xs text-muted-foreground">
+                      <Text className="text-xs" style={{ color: colors.mutedForeground }}>
                         {cat.percentage.toFixed(1)}%
                       </Text>
                     </View>
@@ -278,7 +281,7 @@ export function HomeScreen() {
             </CardHeader>
             <CardContent>
               {recentTransactions.length === 0 ? (
-                <Text className="py-4 text-center text-sm text-muted-foreground">
+                <Text className="py-4 text-center text-sm" style={{ color: colors.mutedForeground }}>
                   No transactions yet
                 </Text>
               ) : (
@@ -286,9 +289,8 @@ export function HomeScreen() {
                   <TouchableOpacity
                     key={transaction.id}
                     onPress={() => navigation.navigate('TransactionDetail', { transactionId: transaction.id })}
-                    className={`flex-row items-center justify-between py-3 ${
-                      index < recentTransactions.length - 1 ? 'border-b border-border' : ''
-                    }`}
+                    className="flex-row items-center justify-between py-3"
+                    style={index < recentTransactions.length - 1 ? { borderBottomWidth: 1, borderBottomColor: colors.border } : undefined}
                   >
                     <View className="flex-row items-center gap-3">
                       <IconAvatar
@@ -297,18 +299,17 @@ export function HomeScreen() {
                         backgroundColor={transaction.category_color || colors.mutedForeground}
                       />
                       <View>
-                        <Text className="text-sm font-medium text-foreground">
+                        <Text className="text-sm font-medium" style={{ color: colors.foreground }}>
                           {transaction.category_name || 'Uncategorized'}
                         </Text>
-                        <Text className="text-xs text-muted-foreground">
+                        <Text className="text-xs" style={{ color: colors.mutedForeground }}>
                           {formatDate(transaction.date)} • {transaction.account_name || 'Unknown Account'}
                         </Text>
                       </View>
                     </View>
                     <Text
-                      className={`text-sm font-semibold ${
-                        transaction.type === 'expense' ? 'text-red-600' : 'text-green-600'
-                      }`}
+                      className="text-sm font-semibold"
+                      style={{ color: transaction.type === 'expense' ? '#ef4444' : '#22c55e' }}
                     >
                       {transaction.type === 'expense' ? '-' : '+'}
                       {formatPHP(transaction.amount)}

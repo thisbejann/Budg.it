@@ -15,38 +15,30 @@ interface CardPressableProps extends TouchableOpacityProps {
   variant?: CardVariant;
 }
 
-const shouldUseFallback = () => {
-  return Platform.OS === 'android' && Platform.Version < 31;
-};
+// Use BlurView only on iOS where it works well
+const useBlur = Platform.OS === 'ios';
 
-export function Card({ children, className, variant = 'glass', ...props }: CardProps) {
-  const { isDark, glass } = useTheme();
+export function Card({ children, className, variant = 'glass', style, ...props }: CardProps) {
+  const { isDark, colors } = useTheme();
 
-  if (variant === 'solid') {
-    return (
-      <View
-        className={`rounded-2xl border border-border bg-card p-4 shadow-sm ${className || ''}`}
-        {...props}
-      >
-        {children}
-      </View>
-    );
-  }
-
-  // Glass variant
-  const useFallback = shouldUseFallback();
   const containerStyle = {
     borderRadius: 16,
     overflow: 'hidden' as const,
     borderWidth: 1,
-    borderColor: glass.border,
+    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+    backgroundColor: isDark ? 'rgba(30, 41, 59, 0.6)' : 'rgba(255, 255, 255, 0.7)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   };
 
-  if (useFallback) {
+  if (variant === 'solid' || !useBlur) {
     return (
       <View
         className={`p-4 ${className || ''}`}
-        style={[containerStyle, { backgroundColor: glass.card }]}
+        style={[containerStyle, style]}
         {...props}
       >
         {children}
@@ -54,10 +46,11 @@ export function Card({ children, className, variant = 'glass', ...props }: CardP
     );
   }
 
+  // iOS: Use BlurView for real frosted glass effect
   return (
-    <View style={containerStyle} {...props}>
+    <View style={[{ borderRadius: 16, overflow: 'hidden' }, style]} {...props}>
       <BlurView
-        intensity={isDark ? 40 : 60}
+        intensity={isDark ? 50 : 80}
         tint={isDark ? 'dark' : 'light'}
         className={`p-4 ${className || ''}`}
         style={{ flex: 1 }}
@@ -68,35 +61,27 @@ export function Card({ children, className, variant = 'glass', ...props }: CardP
   );
 }
 
-export function CardPressable({ children, className, variant = 'glass', ...props }: CardPressableProps) {
-  const { isDark, glass } = useTheme();
+export function CardPressable({ children, className, variant = 'glass', style, ...props }: CardPressableProps) {
+  const { isDark } = useTheme();
 
-  if (variant === 'solid') {
-    return (
-      <TouchableOpacity
-        className={`rounded-2xl border border-border bg-card p-4 shadow-sm ${className || ''}`}
-        activeOpacity={0.7}
-        {...props}
-      >
-        {children}
-      </TouchableOpacity>
-    );
-  }
-
-  // Glass variant
-  const useFallback = shouldUseFallback();
   const containerStyle = {
     borderRadius: 16,
     overflow: 'hidden' as const,
     borderWidth: 1,
-    borderColor: glass.border,
+    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+    backgroundColor: isDark ? 'rgba(30, 41, 59, 0.6)' : 'rgba(255, 255, 255, 0.7)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   };
 
-  if (useFallback) {
+  if (variant === 'solid' || !useBlur) {
     return (
       <TouchableOpacity
         className={`p-4 ${className || ''}`}
-        style={[containerStyle, { backgroundColor: glass.card }]}
+        style={[containerStyle, style]}
         activeOpacity={0.7}
         {...props}
       >
@@ -105,14 +90,15 @@ export function CardPressable({ children, className, variant = 'glass', ...props
     );
   }
 
+  // iOS: Use BlurView for real frosted glass effect
   return (
     <TouchableOpacity
-      style={containerStyle}
+      style={[{ borderRadius: 16, overflow: 'hidden' }, style]}
       activeOpacity={0.7}
       {...props}
     >
       <BlurView
-        intensity={isDark ? 40 : 60}
+        intensity={isDark ? 50 : 80}
         tint={isDark ? 'dark' : 'light'}
         className={`p-4 ${className || ''}`}
         style={{ flex: 1 }}
@@ -131,10 +117,12 @@ export function CardHeader({ children, className, ...props }: CardProps) {
   );
 }
 
-export function CardTitle({ children, className, ...props }: TextProps & { children: React.ReactNode }) {
+export function CardTitle({ children, className, style, ...props }: TextProps & { children: React.ReactNode }) {
+  const { colors } = useTheme();
   return (
     <Text
-      className={`text-lg font-semibold leading-none tracking-tight text-card-foreground ${className || ''}`}
+      className={`text-lg font-semibold leading-none tracking-tight ${className || ''}`}
+      style={[{ color: colors.foreground }, style]}
       {...props}
     >
       {children}
@@ -142,9 +130,14 @@ export function CardTitle({ children, className, ...props }: TextProps & { child
   );
 }
 
-export function CardDescription({ children, className, ...props }: TextProps & { children: React.ReactNode }) {
+export function CardDescription({ children, className, style, ...props }: TextProps & { children: React.ReactNode }) {
+  const { colors } = useTheme();
   return (
-    <Text className={`text-sm text-muted-foreground ${className || ''}`} {...props}>
+    <Text
+      className={`text-sm ${className || ''}`}
+      style={[{ color: colors.mutedForeground }, style]}
+      {...props}
+    >
       {children}
     </Text>
   );

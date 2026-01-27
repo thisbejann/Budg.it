@@ -15,12 +15,8 @@ interface GlassCardPressableProps extends TouchableOpacityProps {
   noPadding?: boolean;
 }
 
-// Check if device should use fallback (low-end device detection)
-const shouldUseFallback = () => {
-  // On Android, BlurView can be expensive on lower-end devices
-  // For now, always use blur but can be extended with device checks
-  return Platform.OS === 'android' && Platform.Version < 31;
-};
+// Use BlurView only on iOS where it works well
+const useBlur = Platform.OS === 'ios';
 
 export function GlassCard({
   children,
@@ -30,31 +26,35 @@ export function GlassCard({
   style,
   ...props
 }: GlassCardProps) {
-  const { isDark, glass } = useTheme();
+  const { isDark } = useTheme();
   const blurIntensity = intensity ?? (isDark ? 50 : 80);
-  const useFallback = shouldUseFallback();
 
   const containerStyle = {
     borderRadius: 20,
     overflow: 'hidden' as const,
-    borderWidth: 1.5,
-    borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.6)',
-    shadowColor: isDark ? '#000' : '#64748b',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: isDark ? 0.3 : 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   };
+
+  const glassBackground = isDark
+    ? 'rgba(30, 41, 59, 0.6)'
+    : 'rgba(255, 255, 255, 0.7)';
 
   const padding = noPadding ? '' : 'p-4';
 
-  if (useFallback) {
+  if (!useBlur) {
+    // Android: Use semi-transparent background (no blur)
     return (
       <View
         className={`${padding} ${className || ''}`}
         style={[
           containerStyle,
-          { backgroundColor: isDark ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.5)' },
+          { backgroundColor: glassBackground },
           style,
         ]}
         {...props}
@@ -64,16 +64,14 @@ export function GlassCard({
     );
   }
 
+  // iOS: Use BlurView for real frosted glass effect
   return (
     <View style={[containerStyle, style]} {...props}>
       <BlurView
         intensity={blurIntensity}
         tint={isDark ? 'dark' : 'light'}
         className={`${padding} ${className || ''}`}
-        style={{
-          flex: 1,
-          backgroundColor: isDark ? 'rgba(30,41,59,0.3)' : 'rgba(255,255,255,0.15)',
-        }}
+        style={{ flex: 1 }}
       >
         {children}
       </BlurView>
@@ -89,31 +87,35 @@ export function GlassCardPressable({
   style,
   ...props
 }: GlassCardPressableProps) {
-  const { isDark, glass } = useTheme();
+  const { isDark } = useTheme();
   const blurIntensity = intensity ?? (isDark ? 50 : 80);
-  const useFallback = shouldUseFallback();
 
   const containerStyle = {
     borderRadius: 20,
     overflow: 'hidden' as const,
-    borderWidth: 1.5,
-    borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.6)',
-    shadowColor: isDark ? '#000' : '#64748b',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: isDark ? 0.3 : 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   };
+
+  const glassBackground = isDark
+    ? 'rgba(30, 41, 59, 0.6)'
+    : 'rgba(255, 255, 255, 0.7)';
 
   const padding = noPadding ? '' : 'p-4';
 
-  if (useFallback) {
+  if (!useBlur) {
+    // Android: Use semi-transparent background (no blur)
     return (
       <TouchableOpacity
         className={`${padding} ${className || ''}`}
         style={[
           containerStyle,
-          { backgroundColor: isDark ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.5)' },
+          { backgroundColor: glassBackground },
           style,
         ]}
         activeOpacity={0.7}
@@ -124,6 +126,7 @@ export function GlassCardPressable({
     );
   }
 
+  // iOS: Use BlurView for real frosted glass effect
   return (
     <TouchableOpacity
       style={[containerStyle, style]}
@@ -134,10 +137,7 @@ export function GlassCardPressable({
         intensity={blurIntensity}
         tint={isDark ? 'dark' : 'light'}
         className={`${padding} ${className || ''}`}
-        style={{
-          flex: 1,
-          backgroundColor: isDark ? 'rgba(30,41,59,0.3)' : 'rgba(255,255,255,0.15)',
-        }}
+        style={{ flex: 1 }}
       >
         {children}
       </BlurView>
