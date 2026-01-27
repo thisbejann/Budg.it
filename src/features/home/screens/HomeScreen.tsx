@@ -103,15 +103,15 @@ export function HomeScreen() {
       {/* Decorative gradient background for glassmorphism effect */}
       <View className="absolute inset-0 overflow-hidden" pointerEvents="none">
         <View
-          className="absolute -top-20 -right-20 h-64 w-64 rounded-full opacity-30"
+          className="absolute -top-10 -right-10 h-72 w-72 rounded-full opacity-50"
           style={{ backgroundColor: colors.primary }}
         />
         <View
-          className="absolute top-40 -left-32 h-48 w-48 rounded-full opacity-20"
+          className="absolute top-48 -left-24 h-56 w-56 rounded-full opacity-40"
           style={{ backgroundColor: '#22c55e' }}
         />
         <View
-          className="absolute top-96 -right-16 h-40 w-40 rounded-full opacity-20"
+          className="absolute top-[400px] -right-10 h-48 w-48 rounded-full opacity-35"
           style={{ backgroundColor: '#8b5cf6' }}
         />
       </View>

@@ -54,7 +54,7 @@ export function GlassCard({
         className={`${padding} ${className || ''}`}
         style={[
           containerStyle,
-          { backgroundColor: isDark ? 'rgba(30,41,59,0.85)' : 'rgba(255,255,255,0.85)' },
+          { backgroundColor: isDark ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.5)' },
           style,
         ]}
         {...props}
@@ -72,7 +72,7 @@ export function GlassCard({
         className={`${padding} ${className || ''}`}
         style={{
           flex: 1,
-          backgroundColor: isDark ? 'rgba(30,41,59,0.4)' : 'rgba(255,255,255,0.4)',
+          backgroundColor: isDark ? 'rgba(30,41,59,0.3)' : 'rgba(255,255,255,0.15)',
         }}
       >
         {children}
@@ -113,7 +113,7 @@ export function GlassCardPressable({
         className={`${padding} ${className || ''}`}
         style={[
           containerStyle,
-          { backgroundColor: isDark ? 'rgba(30,41,59,0.85)' : 'rgba(255,255,255,0.85)' },
+          { backgroundColor: isDark ? 'rgba(30,41,59,0.7)' : 'rgba(255,255,255,0.5)' },
           style,
         ]}
         activeOpacity={0.7}
@@ -136,7 +136,7 @@ export function GlassCardPressable({
         className={`${padding} ${className || ''}`}
         style={{
           flex: 1,
-          backgroundColor: isDark ? 'rgba(30,41,59,0.4)' : 'rgba(255,255,255,0.4)',
+          backgroundColor: isDark ? 'rgba(30,41,59,0.3)' : 'rgba(255,255,255,0.15)',
         }}
       >
         {children}
