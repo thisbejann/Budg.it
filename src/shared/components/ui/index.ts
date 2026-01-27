@@ -1,4 +1,4 @@
-export { Button, IconButton } from './Button';
+export { Button, IconButton, FAB } from './Button';
 export {
   Card,
   CardPressable,
@@ -8,6 +8,7 @@ export {
   CardContent,
   CardFooter,
 } from './Card';
+export { GlassCard, GlassCardPressable } from './GlassCard';
 export { Input, CurrencyInput } from './Input';
 export { Select, type SelectOption } from './Select';
 export {

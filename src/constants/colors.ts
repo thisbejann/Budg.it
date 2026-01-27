@@ -53,6 +53,68 @@ export const COLORS = {
   },
 };
 
+// Dark theme colors
+export const COLORS_DARK = {
+  // shadcn-inspired dark colors
+  background: '#0f172a',
+  foreground: '#f8fafc',
+  card: '#1e293b',
+  cardForeground: '#f8fafc',
+  primary: '#3b82f6',
+  primaryForeground: '#f8fafc',
+  secondary: '#334155',
+  secondaryForeground: '#f8fafc',
+  muted: '#334155',
+  mutedForeground: '#94a3b8',
+  accent: '#334155',
+  accentForeground: '#f8fafc',
+  destructive: '#ef4444',
+  destructiveForeground: '#f8fafc',
+  border: '#334155',
+  input: '#334155',
+  ring: '#3b82f6',
+
+  // Account type colors (same as light)
+  accountDebit: '#22c55e',
+  accountCredit: '#f97316',
+  accountOwed: '#3b82f6',
+  accountDebt: '#ef4444',
+
+  // Transaction type colors (same as light)
+  income: '#22c55e',
+  expense: '#ef4444',
+
+  // Chart colors palette (same as light)
+  chartColors: [
+    '#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6',
+    '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#6b7280',
+  ],
+
+  // Gradient backgrounds for cards (same as light)
+  gradients: {
+    debit: ['#22c55e', '#16a34a'],
+    credit: ['#f97316', '#ea580c'],
+    owed: ['#3b82f6', '#2563eb'],
+    debt: ['#ef4444', '#dc2626'],
+  },
+};
+
+// Glass/Frosted glass colors for glassmorphism effect
+export const GLASS = {
+  light: {
+    background: 'rgba(255,255,255,0.7)',
+    border: 'rgba(255,255,255,0.5)',
+    card: 'rgba(255,255,255,0.6)',
+    overlay: 'rgba(255,255,255,0.3)',
+  },
+  dark: {
+    background: 'rgba(30,41,59,0.7)',
+    border: 'rgba(255,255,255,0.1)',
+    card: 'rgba(30,41,59,0.6)',
+    overlay: 'rgba(0,0,0,0.3)',
+  },
+};
+
 // Color picker options for categories
 export const CATEGORY_COLORS = [
   '#ef4444', // Red

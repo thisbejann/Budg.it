@@ -1,44 +1,111 @@
 import React, { forwardRef } from 'react';
-import { TextInput, TextInputProps, View, Text } from 'react-native';
+import { TextInput, TextInputProps, View, Text, Platform } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
+
+type InputVariant = 'default' | 'glass';
 
 interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  variant?: InputVariant;
 }
 
+const shouldUseFallback = () => {
+  return Platform.OS === 'android' && Platform.Version < 31;
+};
+
 export const Input = forwardRef<TextInput, InputProps>(
-  ({ label, error, leftIcon, rightIcon, className, ...props }, ref) => {
+  ({ label, error, leftIcon, rightIcon, className, variant = 'default', ...props }, ref) => {
+    const { isDark, glass, colors } = useTheme();
+    const useFallback = shouldUseFallback();
+
+    const renderInputContent = (additionalStyle?: object) => (
+      <View
+        className="flex-row items-center px-4"
+        style={additionalStyle}
+      >
+        {leftIcon && <View className="mr-3">{leftIcon}</View>}
+        <TextInput
+          ref={ref}
+          className={`
+            flex-1 py-4 text-base text-foreground
+            ${className || ''}
+          `}
+          style={{ minHeight: 48 }}
+          placeholderTextColor={colors.mutedForeground}
+          {...props}
+        />
+        {rightIcon && <View className="ml-3">{rightIcon}</View>}
+      </View>
+    );
+
+    const renderGlassInput = () => {
+      const containerStyle = {
+        borderRadius: 12,
+        overflow: 'hidden' as const,
+        borderWidth: 1,
+        borderColor: error ? COLORS.destructive : glass.border,
+      };
+
+      if (useFallback) {
+        return (
+          <View
+            style={[containerStyle, { backgroundColor: glass.card }]}
+          >
+            {renderInputContent()}
+          </View>
+        );
+      }
+
+      return (
+        <View style={containerStyle}>
+          <BlurView
+            intensity={isDark ? 30 : 50}
+            tint={isDark ? 'dark' : 'light'}
+          >
+            {renderInputContent()}
+          </BlurView>
+        </View>
+      );
+    };
+
+    const renderDefaultInput = () => (
+      <View
+        className={`
+          flex-row items-center rounded-xl border bg-background px-4
+          ${error ? 'border-destructive' : 'border-input'}
+          ${props.editable === false ? 'bg-muted opacity-50' : ''}
+        `}
+      >
+        {leftIcon && <View className="mr-3">{leftIcon}</View>}
+        <TextInput
+          ref={ref}
+          className={`
+            flex-1 py-4 text-base text-foreground
+            ${className || ''}
+          `}
+          style={{ minHeight: 48 }}
+          placeholderTextColor={colors.mutedForeground}
+          {...props}
+        />
+        {rightIcon && <View className="ml-3">{rightIcon}</View>}
+      </View>
+    );
+
     return (
       <View className="w-full">
         {label && (
-          <Text className="mb-1.5 text-sm font-medium text-foreground">
+          <Text className="mb-2 text-sm font-medium text-foreground">
             {label}
           </Text>
         )}
-        <View
-          className={`
-            flex-row items-center rounded-lg border bg-background px-3
-            ${error ? 'border-destructive' : 'border-input'}
-            ${props.editable === false ? 'bg-muted opacity-50' : ''}
-          `}
-        >
-          {leftIcon && <View className="mr-2">{leftIcon}</View>}
-          <TextInput
-            ref={ref}
-            className={`
-              flex-1 py-3 text-base text-foreground
-              ${className || ''}
-            `}
-            placeholderTextColor={COLORS.mutedForeground}
-            {...props}
-          />
-          {rightIcon && <View className="ml-2">{rightIcon}</View>}
-        </View>
+        {variant === 'glass' ? renderGlassInput() : renderDefaultInput()}
         {error && (
-          <Text className="mt-1 text-sm text-destructive">{error}</Text>
+          <Text className="mt-1.5 text-sm text-destructive">{error}</Text>
         )}
       </View>
     );
@@ -55,6 +122,7 @@ interface CurrencyInputProps extends Omit<InputProps, 'keyboardType'> {
 export function CurrencyInput({
   value,
   onChangeValue,
+  variant = 'default',
   ...props
 }: CurrencyInputProps) {
   const handleChange = (text: string) => {
@@ -77,6 +145,7 @@ export function CurrencyInput({
       value={value}
       onChangeText={handleChange}
       keyboardType="decimal-pad"
+      variant={variant}
       leftIcon={<Text className="text-lg text-muted-foreground">₱</Text>}
       {...props}
     />

@@ -26,6 +26,8 @@ import { EditLedgerScreen } from '../../features/settings/screens/EditLedgerScre
 import { AddPersonScreen } from '../../features/settings/screens/AddPersonScreen';
 import { EditPersonScreen } from '../../features/settings/screens/EditPersonScreen';
 import { ExportScreen } from '../../features/settings/screens/ExportScreen';
+import { ChartsScreen } from '../../features/charts/screens/ChartsScreen';
+import { PersonsScreen } from '../../features/settings/screens/PersonsScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -109,6 +111,16 @@ export function RootNavigator() {
 
       {/* Export Screen */}
       <Stack.Screen name="Export" component={ExportScreen} />
+
+      {/* Charts Screen (Modal) */}
+      <Stack.Screen
+        name="Charts"
+        component={ChartsScreen}
+        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+      />
+
+      {/* Persons Screen */}
+      <Stack.Screen name="Persons" component={PersonsScreen} />
     </Stack.Navigator>
   );
 }

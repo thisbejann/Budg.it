@@ -1,21 +1,25 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { VictoryPie, VictoryBar, VictoryChart, VictoryAxis, VictoryTheme } from 'victory-native';
+import { X } from 'lucide-react-native';
 import type { CategorySpending } from '../../../types/database';
-import { Screen, SimpleHeader } from '../../../shared/components/layout';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../shared/components/ui';
+import { Screen } from '../../../shared/components/layout';
+import { Card, CardHeader, CardTitle, CardContent, GlassCard } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository } from '../../../database/repositories';
 import { formatPHP, formatPHPCompact } from '../../../shared/utils/currency';
 import { getMonthStart, getMonthEnd, getToday, formatMonthKey } from '../../../shared/utils/date';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 const screenWidth = Dimensions.get('window').width;
 
 type ChartPeriod = 'week' | 'month' | '3months' | '6months';
 
 export function ChartsScreen() {
+  const navigation = useNavigation();
   const { activeLedgerId } = useLedgerStore();
+  const { colors } = useTheme();
 
   const [period, setPeriod] = useState<ChartPeriod>('month');
   const [categoryData, setCategoryData] = useState<CategorySpending[]>([]);
@@ -67,7 +71,16 @@ export function ChartsScreen() {
 
   return (
     <Screen>
-      <SimpleHeader title="Charts & Insights" />
+      {/* Modal Header */}
+      <View className="flex-row items-center justify-between px-4 py-4 border-b border-border">
+        <Text className="text-xl font-bold text-foreground">Charts & Insights</Text>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="h-10 w-10 items-center justify-center rounded-full bg-secondary"
+        >
+          <X size={20} color={colors.foreground} />
+        </TouchableOpacity>
+      </View>
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Period Selector */}
@@ -76,7 +89,7 @@ export function ChartsScreen() {
             <TouchableOpacity
               key={p}
               onPress={() => setPeriod(p)}
-              className={`rounded-lg px-3 py-1.5 ${
+              className={`rounded-xl px-3 py-1.5 ${
                 period === p ? 'bg-primary' : 'bg-secondary'
               }`}
             >
@@ -93,18 +106,14 @@ export function ChartsScreen() {
 
         {/* Summary Cards */}
         <View className="mb-4 flex-row gap-3">
-          <Card className="flex-1">
-            <CardContent>
-              <Text className="text-xs text-muted-foreground">Total Expense</Text>
-              <Text className="text-lg font-bold text-red-600">{formatPHP(totalExpense)}</Text>
-            </CardContent>
-          </Card>
-          <Card className="flex-1">
-            <CardContent>
-              <Text className="text-xs text-muted-foreground">Total Income</Text>
-              <Text className="text-lg font-bold text-green-600">{formatPHP(totalIncome)}</Text>
-            </CardContent>
-          </Card>
+          <GlassCard className="flex-1">
+            <Text className="text-xs text-muted-foreground">Total Expense</Text>
+            <Text className="text-lg font-bold text-red-600">{formatPHP(totalExpense)}</Text>
+          </GlassCard>
+          <GlassCard className="flex-1">
+            <Text className="text-xs text-muted-foreground">Total Income</Text>
+            <Text className="text-lg font-bold text-green-600">{formatPHP(totalIncome)}</Text>
+          </GlassCard>
         </View>
 
         {/* Pie Chart - Spending by Category */}
@@ -123,7 +132,7 @@ export function ChartsScreen() {
                   innerRadius={60}
                   labelRadius={({ innerRadius }) => (innerRadius as number) + 40}
                   style={{
-                    labels: { fill: COLORS.foreground, fontSize: 10 },
+                    labels: { fill: colors.foreground, fontSize: 10 },
                   }}
                   labels={({ datum }) => `${datum.x}\n${formatPHPCompact(datum.y)}`}
                 />
@@ -164,27 +173,27 @@ export function ChartsScreen() {
                 <VictoryAxis
                   tickFormat={(t) => t}
                   style={{
-                    tickLabels: { fontSize: 10, fill: COLORS.mutedForeground },
+                    tickLabels: { fontSize: 10, fill: colors.mutedForeground },
                   }}
                 />
                 <VictoryAxis
                   dependentAxis
                   tickFormat={(t) => formatPHPCompact(t)}
                   style={{
-                    tickLabels: { fontSize: 10, fill: COLORS.mutedForeground },
+                    tickLabels: { fontSize: 10, fill: colors.mutedForeground },
                   }}
                 />
                 <VictoryBar
                   data={barData}
                   x="month"
                   y="expense"
-                  style={{ data: { fill: COLORS.expense, width: 15 } }}
+                  style={{ data: { fill: colors.expense, width: 15 } }}
                 />
                 <VictoryBar
                   data={barData}
                   x="month"
                   y="income"
-                  style={{ data: { fill: COLORS.income, width: 15 } }}
+                  style={{ data: { fill: colors.income, width: 15 } }}
                 />
               </VictoryChart>
             ) : (

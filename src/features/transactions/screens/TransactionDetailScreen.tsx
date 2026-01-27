@@ -90,17 +90,14 @@ export function TransactionDetailScreen() {
   const isExpense = transaction.type === 'expense';
   const typeColor = isExpense ? COLORS.expense : COLORS.income;
 
-  const CategoryIcon = transaction.category_icon
-    ? (LucideIcons as any)[
-        transaction.category_icon.split('-').map((s, i) => i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)).join('')
-      ]
-    : null;
+  const getIconComponent = (iconName: string | null | undefined, fallback: any) => {
+    if (!iconName) return fallback;
+    const pascalName = iconName.split('-').map((s, i) => i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)).join('');
+    return (LucideIcons as any)[pascalName] || fallback;
+  };
 
-  const AccountIcon = transaction.account_icon
-    ? (LucideIcons as any)[
-        transaction.account_icon.split('-').map((s, i) => i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)).join('')
-      ]
-    : LucideIcons.Wallet;
+  const CategoryIcon = getIconComponent(transaction.category_icon, null);
+  const AccountIcon = getIconComponent(transaction.account_icon, LucideIcons.Wallet);
 
   return (
     <Screen scrollable={false}>
@@ -178,7 +175,7 @@ export function TransactionDetailScreen() {
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-muted-foreground">Account</Text>
-                  <Text className="font-medium text-foreground">{transaction.account_name}</Text>
+                  <Text className="font-medium text-foreground">{transaction.account_name || 'Unknown Account'}</Text>
                 </View>
               </View>
 
