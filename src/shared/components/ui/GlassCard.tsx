@@ -31,14 +31,19 @@ export function GlassCard({
   ...props
 }: GlassCardProps) {
   const { isDark, glass } = useTheme();
-  const blurIntensity = intensity ?? (isDark ? 40 : 60);
+  const blurIntensity = intensity ?? (isDark ? 50 : 80);
   const useFallback = shouldUseFallback();
 
   const containerStyle = {
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden' as const,
-    borderWidth: 1,
-    borderColor: glass.border,
+    borderWidth: 1.5,
+    borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.6)',
+    shadowColor: isDark ? '#000' : '#64748b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: isDark ? 0.3 : 0.1,
+    shadowRadius: 12,
+    elevation: 4,
   };
 
   const padding = noPadding ? '' : 'p-4';
@@ -49,7 +54,7 @@ export function GlassCard({
         className={`${padding} ${className || ''}`}
         style={[
           containerStyle,
-          { backgroundColor: glass.card },
+          { backgroundColor: isDark ? 'rgba(30,41,59,0.85)' : 'rgba(255,255,255,0.85)' },
           style,
         ]}
         {...props}
@@ -65,7 +70,10 @@ export function GlassCard({
         intensity={blurIntensity}
         tint={isDark ? 'dark' : 'light'}
         className={`${padding} ${className || ''}`}
-        style={{ flex: 1 }}
+        style={{
+          flex: 1,
+          backgroundColor: isDark ? 'rgba(30,41,59,0.4)' : 'rgba(255,255,255,0.4)',
+        }}
       >
         {children}
       </BlurView>
@@ -82,14 +90,19 @@ export function GlassCardPressable({
   ...props
 }: GlassCardPressableProps) {
   const { isDark, glass } = useTheme();
-  const blurIntensity = intensity ?? (isDark ? 40 : 60);
+  const blurIntensity = intensity ?? (isDark ? 50 : 80);
   const useFallback = shouldUseFallback();
 
   const containerStyle = {
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden' as const,
-    borderWidth: 1,
-    borderColor: glass.border,
+    borderWidth: 1.5,
+    borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.6)',
+    shadowColor: isDark ? '#000' : '#64748b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: isDark ? 0.3 : 0.1,
+    shadowRadius: 12,
+    elevation: 4,
   };
 
   const padding = noPadding ? '' : 'p-4';
@@ -100,7 +113,7 @@ export function GlassCardPressable({
         className={`${padding} ${className || ''}`}
         style={[
           containerStyle,
-          { backgroundColor: glass.card },
+          { backgroundColor: isDark ? 'rgba(30,41,59,0.85)' : 'rgba(255,255,255,0.85)' },
           style,
         ]}
         activeOpacity={0.7}
@@ -121,7 +134,10 @@ export function GlassCardPressable({
         intensity={blurIntensity}
         tint={isDark ? 'dark' : 'light'}
         className={`${padding} ${className || ''}`}
-        style={{ flex: 1 }}
+        style={{
+          flex: 1,
+          backgroundColor: isDark ? 'rgba(30,41,59,0.4)' : 'rgba(255,255,255,0.4)',
+        }}
       >
         {children}
       </BlurView>

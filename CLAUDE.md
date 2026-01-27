@@ -86,3 +86,10 @@ DatabaseProvider initializes the database and creates default ledger on first ru
 
 - Make the plan extremely concise. Sacrifice grammar for the sake of concision.
 - At the end of each plan, give me a list of unresolved questions to answer, if any.
+- **Safety**: Every plan must explicitly mention how null/undefined states will be handled for the new logic.
+
+## Coding Standards
+
+- **Defensive Programming**: ALWAYS use optional chaining (`?.`) and nullish coalescing (`??`) when accessing properties on objects from the Database, Zustand store, or Props.
+- **Null Checks**: Explicitly check for `undefined` or `null` before mapping arrays or passing data to sub-components to prevent `TypeError: Cannot read property 'X' of undefined`.
+- **TypeScript**: Strictly follow the types defined in `src/types/`. Avoid using `any`. If a repository might return nothing, ensure the return type is `T | null` and handle the null case in the UI.

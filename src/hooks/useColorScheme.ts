@@ -1,11 +1,18 @@
 import { useColorScheme as useRNColorScheme } from 'react-native';
 import { COLORS, COLORS_DARK, GLASS } from '../constants/colors';
+import { useThemeStore } from '../store';
 
 export type ColorScheme = 'light' | 'dark';
 
-export function useColorScheme() {
-  const colorScheme = useRNColorScheme();
-  return colorScheme ?? 'light';
+export function useColorScheme(): ColorScheme {
+  const systemColorScheme = useRNColorScheme();
+  const themeMode = useThemeStore((state) => state.themeMode);
+
+  if (themeMode === 'system') {
+    // systemColorScheme can be 'light', 'dark', 'unspecified', or undefined
+    return systemColorScheme === 'dark' ? 'dark' : 'light';
+  }
+  return themeMode;
 }
 
 export function useColors() {

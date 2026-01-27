@@ -63,10 +63,15 @@ export function TransactionsScreen() {
     loadTransactions();
   }, [loadTransactions]);
 
-  const getIcon = (iconName: string, color: string = '#fff') => {
-    const IconComponent = (LucideIcons as any)[
-      iconName.split('-').map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1))).join('')
-    ] || LucideIcons.Circle;
+  const getIcon = (iconName: string | null | undefined, color: string = '#fff') => {
+    if (!iconName) {
+      return <LucideIcons.Circle size={16} color={color} />;
+    }
+    const pascalName = iconName.split('-').map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1))).join('');
+    const IconComponent = (LucideIcons as any)[pascalName];
+    if (!IconComponent) {
+      return <LucideIcons.Circle size={16} color={color} />;
+    }
     return <IconComponent size={16} color={color} />;
   };
 
@@ -109,7 +114,7 @@ export function TransactionsScreen() {
             {item.category_name || 'Uncategorized'}
           </Text>
           <Text className="text-xs text-muted-foreground">
-            {item.account_name}
+            {item.account_name || 'Unknown Account'}
             {item.notes ? ` • ${item.notes}` : ''}
           </Text>
         </View>

@@ -84,10 +84,15 @@ export function HomeScreen() {
 
   const { colors } = useTheme();
 
-  const getIcon = (iconName: string, color: string = colors.foreground) => {
-    const IconComponent = (LucideIcons as any)[
-      iconName.split('-').map((s, i) => i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)).join('')
-    ] || LucideIcons.Circle;
+  const getIcon = (iconName: string | null | undefined, color: string = colors.foreground) => {
+    if (!iconName) {
+      return <LucideIcons.Circle size={16} color={color} />;
+    }
+    const pascalName = iconName.split('-').map((s, i) => i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)).join('');
+    const IconComponent = (LucideIcons as any)[pascalName];
+    if (!IconComponent) {
+      return <LucideIcons.Circle size={16} color={color} />;
+    }
     return <IconComponent size={16} color={color} />;
   };
 
@@ -95,6 +100,21 @@ export function HomeScreen() {
 
   return (
     <Screen refreshing={refreshing} onRefresh={onRefresh}>
+      {/* Decorative gradient background for glassmorphism effect */}
+      <View className="absolute inset-0 overflow-hidden" pointerEvents="none">
+        <View
+          className="absolute -top-20 -right-20 h-64 w-64 rounded-full opacity-30"
+          style={{ backgroundColor: colors.primary }}
+        />
+        <View
+          className="absolute top-40 -left-32 h-48 w-48 rounded-full opacity-20"
+          style={{ backgroundColor: '#22c55e' }}
+        />
+        <View
+          className="absolute top-96 -right-16 h-40 w-40 rounded-full opacity-20"
+          style={{ backgroundColor: '#8b5cf6' }}
+        />
+      </View>
       <View className="px-4 py-6 pb-24">
         {/* Header with Ledger Name */}
         <Animated.View entering={FadeInDown.delay(0).duration(400)} className="mb-6">
@@ -281,7 +301,7 @@ export function HomeScreen() {
                           {transaction.category_name || 'Uncategorized'}
                         </Text>
                         <Text className="text-xs text-muted-foreground">
-                          {formatDate(transaction.date)} • {transaction.account_name}
+                          {formatDate(transaction.date)} • {transaction.account_name || 'Unknown Account'}
                         </Text>
                       </View>
                     </View>

@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, ScrollView, StatusBar, RefreshControl, useColorScheme } from 'react-native';
+import { View, ScrollView, StatusBar, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS, COLORS_DARK } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -22,9 +22,7 @@ export function Screen({
   className,
   contentClassName,
 }: ScreenProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-  const colors = isDark ? COLORS_DARK : COLORS;
+  const { isDark, colors } = useTheme();
 
   const content = scrollable ? (
     <ScrollView

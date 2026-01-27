@@ -147,13 +147,18 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     { marginBottom: insets.bottom + 8 },
   ];
 
+  const borderColor = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.6)';
+
   if (useFallback) {
     return (
       <View
         style={[
           containerStyle,
           styles.tabBarBackground,
-          { backgroundColor: glass.background },
+          {
+            backgroundColor: isDark ? 'rgba(30,41,59,0.9)' : 'rgba(255,255,255,0.9)',
+            borderColor,
+          },
         ]}
       >
         {renderTabBarContent()}
@@ -164,9 +169,13 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   return (
     <View style={containerStyle}>
       <BlurView
-        intensity={isDark ? 60 : 80}
+        intensity={isDark ? 70 : 90}
         tint={isDark ? 'dark' : 'light'}
-        style={[styles.tabBarBackground, styles.blurView]}
+        style={[
+          styles.tabBarBackground,
+          styles.blurView,
+          { borderColor },
+        ]}
       >
         {renderTabBarContent()}
       </BlurView>
@@ -183,8 +192,7 @@ const styles = StyleSheet.create({
   },
   tabBarBackground: {
     borderRadius: 24,
-    borderWidth: 1,
-    borderColor: GLASS.light.border,
+    borderWidth: 1.5,
     overflow: 'hidden',
   },
   blurView: {

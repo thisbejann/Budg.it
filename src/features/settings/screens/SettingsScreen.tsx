@@ -9,12 +9,15 @@ import {
   Download,
   Info,
   Users,
+  Sun,
+  Moon,
+  Smartphone,
 } from 'lucide-react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import { Screen, SimpleHeader } from '../../../shared/components/layout';
 import { Card, CardHeader, CardTitle, CardContent } from '../../../shared/components/ui';
-import { useLedgerStore } from '../../../store';
+import { useLedgerStore, useThemeStore, ThemeMode } from '../../../store';
 import { useTheme } from '../../../hooks/useColorScheme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -49,9 +52,52 @@ function SettingItem({ icon, title, description, onPress, colors }: SettingItemP
   );
 }
 
+interface ThemeOptionProps {
+  icon: 'system' | 'light' | 'dark';
+  label: string;
+  value: ThemeMode;
+  currentValue: ThemeMode;
+  onSelect: (value: ThemeMode) => void;
+  colors: any;
+}
+
+function ThemeOption({ icon, label, value, currentValue, onSelect, colors }: ThemeOptionProps) {
+  const isSelected = currentValue === value;
+  const iconColor = isSelected ? colors.primaryForeground : colors.foreground;
+
+  const renderIcon = () => {
+    switch (icon) {
+      case 'system':
+        return <Smartphone size={20} color={iconColor} />;
+      case 'light':
+        return <Sun size={20} color={iconColor} />;
+      case 'dark':
+        return <Moon size={20} color={iconColor} />;
+    }
+  };
+
+  return (
+    <TouchableOpacity
+      onPress={() => onSelect(value)}
+      className={`flex-1 items-center rounded-xl py-3 ${isSelected ? 'bg-primary' : 'bg-secondary'}`}
+      activeOpacity={0.7}
+    >
+      <View className="mb-1">
+        {renderIcon()}
+      </View>
+      <Text
+        className={`text-xs font-medium ${isSelected ? 'text-white' : 'text-foreground'}`}
+      >
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
 export function SettingsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { activeLedger } = useLedgerStore();
+  const { themeMode, setThemeMode } = useThemeStore();
   const { colors } = useTheme();
 
   return (
@@ -66,6 +112,41 @@ export function SettingsScreen() {
             <Text className="text-lg font-semibold text-foreground">
               {activeLedger?.name || 'No ledger selected'}
             </Text>
+          </CardContent>
+        </Card>
+
+        {/* Appearance */}
+        <Card className="mb-4">
+          <CardHeader>
+            <CardTitle>Appearance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <View className="flex-row gap-2">
+              <ThemeOption
+                icon="system"
+                label="System"
+                value="system"
+                currentValue={themeMode}
+                onSelect={setThemeMode}
+                colors={colors}
+              />
+              <ThemeOption
+                icon="light"
+                label="Light"
+                value="light"
+                currentValue={themeMode}
+                onSelect={setThemeMode}
+                colors={colors}
+              />
+              <ThemeOption
+                icon="dark"
+                label="Dark"
+                value="dark"
+                currentValue={themeMode}
+                onSelect={setThemeMode}
+                colors={colors}
+              />
+            </View>
           </CardContent>
         </Card>
 
