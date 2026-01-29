@@ -76,7 +76,7 @@ DatabaseProvider initializes the database and creates default ledger on first ru
 
 ## Git
 
-- Create a new branch for each feature/fix
+- Create a new branch for each feature/fix prefixed by "FEATURE:" or "FIX: "
 - Commit often with clear messages
 - Open PRs against `main` for review
 - Always name your branches with prefix 'jannjaspher/' followed by a descriptive name, e.g., 'jannjaspher/add-transaction-form' to indicate that i made the change
