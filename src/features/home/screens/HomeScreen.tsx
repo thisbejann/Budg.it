@@ -1,12 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Plus, ArrowUpRight, ArrowDownLeft, ArrowLeftRight, ChevronRight } from 'lucide-react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { TransactionWithDetails, CategorySpending } from '../../../types/database';
 import { Screen } from '../../../shared/components/layout';
-import { Card, CardHeader, CardTitle, CardContent, Button, IconAvatar } from '../../../shared/components/ui';
+import { Card, CardHeader, CardTitle, CardContent, FAB, IconAvatar } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository, AccountRepository } from '../../../database/repositories';
 import { formatPHP, formatPHPCompact } from '../../../shared/utils/currency';
@@ -64,9 +65,11 @@ export function HomeScreen() {
     }
   }, [activeLedgerId]);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -81,8 +84,9 @@ export function HomeScreen() {
   };
 
   return (
-    <Screen refreshing={refreshing} onRefresh={onRefresh}>
-      <View className="px-4 py-6">
+    <View style={{ flex: 1 }}>
+      <Screen refreshing={refreshing} onRefresh={onRefresh}>
+        <View className="px-4 py-6">
         {/* Header with Ledger Name */}
         <View className="mb-6">
           <Text className="text-2xl font-bold" style={{ color: colors.foreground }}>
@@ -93,22 +97,15 @@ export function HomeScreen() {
           </Text>
         </View>
 
-        {/* Quick Actions */}
-        <View className="mb-6 flex-row gap-3">
-          <TouchableOpacity
-            onPress={() => navigation.navigate('AddTransaction')}
-            className="flex-1 flex-row items-center justify-center gap-2 rounded-lg py-3"
-            style={{ backgroundColor: colors.primary }}
-          >
-            <Plus size={20} color={colors.onPrimary} />
-            <Text className="font-semibold" style={{ color: colors.onPrimary }}>Add Transaction</Text>
-          </TouchableOpacity>
+        {/* Quick Transfer Action */}
+        <View className="mb-6">
           <TouchableOpacity
             onPress={() => navigation.navigate('Transfer')}
             className="flex-row items-center justify-center gap-2 rounded-lg px-4 py-3"
             style={{ backgroundColor: colors.secondaryContainer }}
           >
             <ArrowLeftRight size={20} color={colors.onSecondaryContainer} />
+            <Text className="font-semibold" style={{ color: colors.onSecondaryContainer }}>Transfer</Text>
           </TouchableOpacity>
         </View>
 
@@ -152,11 +149,13 @@ export function HomeScreen() {
 
         {/* Account Balances Card */}
         <Card className="mb-4">
-          <CardHeader className="flex-row items-center justify-between">
-            <CardTitle>Accounts</CardTitle>
-            <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Accounts' })}>
-              <ChevronRight size={20} color={colors.mutedForeground} />
-            </TouchableOpacity>
+          <CardHeader>
+            <View className="flex-row items-center justify-between">
+              <CardTitle>Accounts</CardTitle>
+              <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Accounts' })}>
+                <ChevronRight size={20} color={colors.mutedForeground} />
+              </TouchableOpacity>
+            </View>
           </CardHeader>
           <CardContent>
             <View className="flex-row flex-wrap gap-y-3">
@@ -200,11 +199,13 @@ export function HomeScreen() {
         {/* Top Categories */}
         {categorySpending.length > 0 && (
           <Card className="mb-4">
-            <CardHeader className="flex-row items-center justify-between">
-              <CardTitle>Top Spending</CardTitle>
-              <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Charts' })}>
-                <ChevronRight size={20} color={colors.mutedForeground} />
-              </TouchableOpacity>
+            <CardHeader>
+              <View className="flex-row items-center justify-between">
+                <CardTitle>Top Spending</CardTitle>
+                <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Charts' })}>
+                  <ChevronRight size={20} color={colors.mutedForeground} />
+                </TouchableOpacity>
+              </View>
             </CardHeader>
             <CardContent>
               {categorySpending.map((cat, index) => (
@@ -239,11 +240,13 @@ export function HomeScreen() {
 
         {/* Recent Transactions */}
         <Card>
-          <CardHeader className="flex-row items-center justify-between">
-            <CardTitle>Recent Transactions</CardTitle>
-            <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Transactions' })}>
-              <ChevronRight size={20} color={colors.mutedForeground} />
-            </TouchableOpacity>
+          <CardHeader>
+            <View className="flex-row items-center justify-between">
+              <CardTitle>Recent Transactions</CardTitle>
+              <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Transactions' })}>
+                <ChevronRight size={20} color={colors.mutedForeground} />
+              </TouchableOpacity>
+            </View>
           </CardHeader>
           <CardContent>
             {recentTransactions.length === 0 ? (
@@ -285,7 +288,17 @@ export function HomeScreen() {
             )}
           </CardContent>
         </Card>
-      </View>
-    </Screen>
+        </View>
+      </Screen>
+
+      {/* Floating Action Button */}
+      <SafeAreaView edges={['bottom', 'right']} style={{ position: 'absolute', bottom: 0, right: 0 }}>
+        <View style={{ padding: 24 }}>
+          <FAB onPress={() => navigation.navigate('AddTransaction')}>
+            <Plus size={24} color={colors.onPrimary} />
+          </FAB>
+        </View>
+      </SafeAreaView>
+    </View>
   );
 }

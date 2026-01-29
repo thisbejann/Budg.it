@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Plus, Calendar as CalendarIcon, List } from 'lucide-react-native';
 import { Calendar } from 'react-native-calendars';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -59,9 +59,11 @@ export function TransactionsScreen() {
     }
   }, [activeLedgerId, selectedDate]);
 
-  useEffect(() => {
-    loadTransactions();
-  }, [loadTransactions]);
+  useFocusEffect(
+    useCallback(() => {
+      loadTransactions();
+    }, [loadTransactions])
+  );
 
   const getIcon = (iconName: string, color: string = '#fff') => {
     const IconComponent = (LucideIcons as any)[

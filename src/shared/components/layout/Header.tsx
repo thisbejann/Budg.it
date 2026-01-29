@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeft, X } from 'lucide-react-native';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 interface HeaderProps {
   title: string;
@@ -26,6 +26,7 @@ export function Header({
   rightAction,
 }: HeaderProps) {
   const navigation = useNavigation();
+  const { colors } = useTheme();
 
   const handleBack = () => {
     if (onBack) {
@@ -44,17 +45,20 @@ export function Header({
   };
 
   return (
-    <View className="flex-row items-center justify-between border-b border-border bg-background px-4 py-3">
+    <View
+      className="flex-row items-center justify-between px-4 py-3"
+      style={{ borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.background }}
+    >
       {/* Left section */}
       <View className="w-12">
         {showBack && (
           <TouchableOpacity onPress={handleBack} className="p-1">
-            <ArrowLeft size={24} color={COLORS.foreground} />
+            <ArrowLeft size={24} color={colors.foreground} />
           </TouchableOpacity>
         )}
         {showClose && (
           <TouchableOpacity onPress={handleClose} className="p-1">
-            <X size={24} color={COLORS.foreground} />
+            <X size={24} color={colors.foreground} />
           </TouchableOpacity>
         )}
         {leftAction}
@@ -62,11 +66,11 @@ export function Header({
 
       {/* Center section */}
       <View className="flex-1 items-center">
-        <Text className="text-lg font-semibold text-foreground" numberOfLines={1}>
+        <Text className="text-lg font-semibold" style={{ color: colors.foreground }} numberOfLines={1}>
           {title}
         </Text>
         {subtitle && (
-          <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+          <Text className="text-xs" style={{ color: colors.mutedForeground }} numberOfLines={1}>
             {subtitle}
           </Text>
         )}
@@ -80,9 +84,13 @@ export function Header({
 
 // Simple header with just a title
 export function SimpleHeader({ title }: { title: string }) {
+  const { colors } = useTheme();
   return (
-    <View className="border-b border-border bg-background px-4 py-3">
-      <Text className="text-xl font-bold text-foreground">{title}</Text>
+    <View
+      className="px-4 py-3"
+      style={{ borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.background }}
+    >
+      <Text className="text-xl font-bold" style={{ color: colors.foreground }}>{title}</Text>
     </View>
   );
 }

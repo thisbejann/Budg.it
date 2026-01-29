@@ -31,12 +31,12 @@ export function Card({
     // Enhanced MD3 Elevation 2
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: isDark ? 0.4 : 0.12,
+    shadowOpacity: isDark ? 0.3 : 0.12,
     shadowRadius: 6,
     elevation: 3,
-    // Subtle border for better definition in dark mode
-    borderWidth: isDark ? 1 : 0,
-    borderColor: isDark ? colors.border : 'transparent',
+    // Consistent border in both modes to prevent shift
+    borderWidth: 1,
+    borderColor: isDark ? colors.border : colors.outlineVariant,
   };
 
   return (
@@ -64,12 +64,12 @@ export function CardPressable({
     // Enhanced MD3 Elevation 2
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: isDark ? 0.4 : 0.12,
+    shadowOpacity: isDark ? 0.3 : 0.12,
     shadowRadius: 6,
     elevation: 3,
-    // Subtle border for better definition in dark mode
-    borderWidth: isDark ? 1 : 0,
-    borderColor: isDark ? colors.border : 'transparent',
+    // Consistent border in both modes to prevent shift
+    borderWidth: 1,
+    borderColor: isDark ? colors.border : colors.outlineVariant,
   };
 
   return (
@@ -86,7 +86,7 @@ export function CardPressable({
 
 export function CardHeader({ children, className, ...props }: CardProps) {
   return (
-    <View className={`flex-col space-y-1.5 pb-2 ${className || ''}`} {...props}>
+    <View className={`pb-2 ${className || ''}`} {...props}>
       {children}
     </View>
   );

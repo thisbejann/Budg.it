@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { VictoryPie, VictoryBar, VictoryChart, VictoryAxis, VictoryTheme } from 'victory-native';
 import type { CategorySpending } from '../../../types/database';
 import { Screen, SimpleHeader } from '../../../shared/components/layout';
@@ -50,9 +51,11 @@ export function ChartsScreen() {
     }
   }, [activeLedgerId]);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   const pieData = categoryData.slice(0, 6).map((cat) => ({
     x: cat.category_name,

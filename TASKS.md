@@ -48,4 +48,9 @@
 - [x] Add loading states to TransactionsScreen
 - [x] Add loading states to AccountsScreen
 - [x] Fix inconsistent icon color handling
+- [x] Fix Add Transaction button accessibility (move to FAB)
+- [x] Fix SimpleHeader dark mode text color
+- [x] Fix CardHeader chevron spacing
+- [x] Fix real-time data refresh (useFocusEffect)
+- [x] Fix Card dark mode border shift
 - [ ] Remove/filter console.log statements for production (needs logger utility)
