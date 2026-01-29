@@ -9,7 +9,7 @@ import { Screen, Header } from '../../../shared/components/layout';
 import { Button, Card, CardContent, ExpenseBadge, IncomeBadge } from '../../../shared/components/ui';
 import { TransactionRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 import { Pencil, Trash2, Calendar, Clock, Wallet, Tag, FileText, Receipt } from 'lucide-react-native';
 
@@ -20,6 +20,7 @@ export function TransactionDetailScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<TransactionDetailRouteProp>();
   const transactionId = route.params.transactionId;
+  const { colors } = useTheme();
 
   const [transaction, setTransaction] = useState<TransactionWithDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,7 +71,7 @@ export function TransactionDetailScreen() {
       <Screen>
         <Header title="Transaction Details" showBack />
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </Screen>
     );
@@ -81,14 +82,14 @@ export function TransactionDetailScreen() {
       <Screen>
         <Header title="Transaction Details" showBack />
         <View className="flex-1 items-center justify-center p-4">
-          <Text className="text-muted-foreground">Transaction not found</Text>
+          <Text style={{ color: colors.mutedForeground }}>Transaction not found</Text>
         </View>
       </Screen>
     );
   }
 
   const isExpense = transaction.type === 'expense';
-  const typeColor = isExpense ? COLORS.expense : COLORS.income;
+  const typeColor = isExpense ? colors.expense : colors.income;
 
   const CategoryIcon = transaction.category_icon
     ? (LucideIcons as any)[
@@ -112,7 +113,7 @@ export function TransactionDetailScreen() {
             onPress={() => navigation.navigate('EditTransaction', { transactionId })}
             className="p-2"
           >
-            <Pencil size={20} color={COLORS.foreground} />
+            <Pencil size={20} color={colors.foreground} />
           </TouchableOpacity>
         }
       />
@@ -133,7 +134,7 @@ export function TransactionDetailScreen() {
                 {formatPHP(transaction.amount)}
               </Text>
               {transaction.notes && (
-                <Text className="mt-2 text-center text-muted-foreground">
+                <Text className="mt-2 text-center" style={{ color: colors.mutedForeground }}>
                   {transaction.notes}
                 </Text>
               )}
@@ -143,7 +144,7 @@ export function TransactionDetailScreen() {
 
         {/* Details */}
         <View className="px-4 py-4">
-          <Text className="mb-3 text-sm font-medium text-muted-foreground">DETAILS</Text>
+          <Text className="mb-3 text-sm font-medium" style={{ color: colors.mutedForeground }}>DETAILS</Text>
 
           <Card>
             <CardContent className="p-0">
@@ -151,7 +152,7 @@ export function TransactionDetailScreen() {
               <View className="flex-row items-center gap-3 border-b border-border p-4">
                 <View
                   className="h-10 w-10 items-center justify-center rounded-full"
-                  style={{ backgroundColor: transaction.category_color || COLORS.muted }}
+                  style={{ backgroundColor: transaction.category_color || colors.muted }}
                 >
                   {CategoryIcon ? (
                     <CategoryIcon size={18} color="#ffffff" />
@@ -160,8 +161,8 @@ export function TransactionDetailScreen() {
                   )}
                 </View>
                 <View className="flex-1">
-                  <Text className="text-xs text-muted-foreground">Category</Text>
-                  <Text className="font-medium text-foreground">
+                  <Text className="text-xs" style={{ color: colors.mutedForeground }}>Category</Text>
+                  <Text className="font-medium" style={{ color: colors.foreground }}>
                     {transaction.category_name || 'Uncategorized'}
                     {transaction.subcategory_name && ` › ${transaction.subcategory_name}`}
                   </Text>
@@ -172,36 +173,36 @@ export function TransactionDetailScreen() {
               <View className="flex-row items-center gap-3 border-b border-border p-4">
                 <View
                   className="h-10 w-10 items-center justify-center rounded-full"
-                  style={{ backgroundColor: transaction.account_color || COLORS.primary }}
+                  style={{ backgroundColor: transaction.account_color || colors.primary }}
                 >
                   <AccountIcon size={18} color="#ffffff" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-xs text-muted-foreground">Account</Text>
-                  <Text className="font-medium text-foreground">{transaction.account_name}</Text>
+                  <Text className="text-xs" style={{ color: colors.mutedForeground }}>Account</Text>
+                  <Text className="font-medium" style={{ color: colors.foreground }}>{transaction.account_name}</Text>
                 </View>
               </View>
 
               {/* Date */}
               <View className="flex-row items-center gap-3 border-b border-border p-4">
-                <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary">
-                  <Calendar size={18} color={COLORS.foreground} />
+                <View className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: colors.secondaryContainer }}>
+                  <Calendar size={18} color={colors.foreground} />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-xs text-muted-foreground">Date</Text>
-                  <Text className="font-medium text-foreground">{transaction.date}</Text>
+                  <Text className="text-xs" style={{ color: colors.mutedForeground }}>Date</Text>
+                  <Text className="font-medium" style={{ color: colors.foreground }}>{transaction.date}</Text>
                 </View>
               </View>
 
               {/* Time */}
               {transaction.time && (
                 <View className="flex-row items-center gap-3 border-b border-border p-4">
-                  <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary">
-                    <Clock size={18} color={COLORS.foreground} />
+                  <View className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: colors.secondaryContainer }}>
+                    <Clock size={18} color={colors.foreground} />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-xs text-muted-foreground">Time</Text>
-                    <Text className="font-medium text-foreground">{transaction.time}</Text>
+                    <Text className="text-xs" style={{ color: colors.mutedForeground }}>Time</Text>
+                    <Text className="font-medium" style={{ color: colors.foreground }}>{transaction.time}</Text>
                   </View>
                 </View>
               )}
@@ -209,11 +210,11 @@ export function TransactionDetailScreen() {
               {/* Receipt */}
               {transaction.receipt_image_path && (
                 <View className="flex-row items-center gap-3 p-4">
-                  <View className="h-10 w-10 items-center justify-center rounded-full bg-secondary">
-                    <Receipt size={18} color={COLORS.foreground} />
+                  <View className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: colors.secondaryContainer }}>
+                    <Receipt size={18} color={colors.foreground} />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-xs text-muted-foreground">Receipt</Text>
+                    <Text className="text-xs" style={{ color: colors.mutedForeground }}>Receipt</Text>
                     <Text className="font-medium text-primary">View attachment</Text>
                   </View>
                 </View>
@@ -225,8 +226,8 @@ export function TransactionDetailScreen() {
         {/* Delete Button */}
         <View className="px-4 pb-8">
           <Button variant="destructive" onPress={handleDelete}>
-            <Trash2 size={18} color="#ffffff" />
-            <Text className="ml-2 font-medium text-white">Delete Transaction</Text>
+            <Trash2 size={18} color={colors.destructiveForeground} />
+            <Text className="ml-2 font-medium" style={{ color: colors.destructiveForeground }}>Delete Transaction</Text>
           </Button>
         </View>
       </ScrollView>
