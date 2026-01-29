@@ -10,7 +10,7 @@ import { Card, IconAvatar, EmptyState, AccountTypeBadge } from '../../../shared/
 import { useLedgerStore } from '../../../store';
 import { AccountRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -26,6 +26,7 @@ interface AccountSection {
 export function AccountsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { activeLedgerId } = useLedgerStore();
+  const { colors } = useTheme();
 
   const [sections, setSections] = useState<AccountSection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,28 +54,28 @@ export function AccountsScreen() {
         {
           title: 'Cash & Bank',
           type: 'debit',
-          icon: <Wallet size={20} color={COLORS.accountDebit} />,
+          icon: <Wallet size={20} color={colors.accountDebit} />,
           data: grouped.debit,
           total: grouped.debit.reduce((sum, a) => sum + a.current_balance, 0),
         },
         {
           title: 'Credit Cards',
           type: 'credit',
-          icon: <CreditCard size={20} color={COLORS.accountCredit} />,
+          icon: <CreditCard size={20} color={colors.accountCredit} />,
           data: grouped.credit,
           total: grouped.credit.reduce((sum, a) => sum + a.current_balance, 0),
         },
         {
           title: 'Owed to Me',
           type: 'owed',
-          icon: <HandCoins size={20} color={COLORS.accountOwed} />,
+          icon: <HandCoins size={20} color={colors.accountOwed} />,
           data: grouped.owed,
           total: grouped.owed.reduce((sum, a) => sum + a.current_balance, 0),
         },
         {
           title: 'I Owe',
           type: 'debt',
-          icon: <Users size={20} color={COLORS.accountDebt} />,
+          icon: <Users size={20} color={colors.accountDebt} />,
           data: grouped.debt,
           total: grouped.debt.reduce((sum, a) => sum + a.current_balance, 0),
         },
@@ -94,7 +95,7 @@ export function AccountsScreen() {
     }, [loadAccounts])
   );
 
-  const getIcon = (iconName: string, color: string = COLORS.primaryForeground) => {
+  const getIcon = (iconName: string, color: string = colors.onPrimary) => {
     const IconComponent = (LucideIcons as any)[
       iconName.split('-').map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1))).join('')
     ] || LucideIcons.Circle;
@@ -104,7 +105,8 @@ export function AccountsScreen() {
   const renderAccount = ({ item }: { item: AccountWithPerson }) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('AccountDetail', { accountId: item.id })}
-      className="flex-row items-center justify-between border-b border-border px-4 py-3"
+      className="flex-row items-center justify-between px-4 py-3"
+      style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}
     >
       <View className="flex-row items-center gap-3">
         <IconAvatar
@@ -113,22 +115,21 @@ export function AccountsScreen() {
           backgroundColor={item.color}
         />
         <View>
-          <Text className="text-base font-medium text-foreground">{item.name}</Text>
+          <Text className="text-base font-medium" style={{ color: colors.foreground }}>{item.name}</Text>
           {item.person_name && (
-            <Text className="text-xs text-muted-foreground">{item.person_name}</Text>
+            <Text className="text-xs" style={{ color: colors.mutedForeground }}>{item.person_name}</Text>
           )}
         </View>
       </View>
       <View className="items-end">
         <Text
-          className={`text-base font-semibold ${
-            item.current_balance >= 0 ? 'text-foreground' : 'text-red-600'
-          }`}
+          className="text-base font-semibold"
+          style={{ color: item.current_balance >= 0 ? colors.foreground : colors.expense }}
         >
           {formatPHP(item.current_balance)}
         </Text>
         {item.account_type === 'credit' && item.credit_limit && (
-          <Text className="text-xs text-muted-foreground">
+          <Text className="text-xs" style={{ color: colors.mutedForeground }}>
             of {formatPHP(item.credit_limit)}
           </Text>
         )}
@@ -137,12 +138,15 @@ export function AccountsScreen() {
   );
 
   const renderSectionHeader = ({ section }: { section: AccountSection }) => (
-    <View className="flex-row items-center justify-between bg-secondary px-4 py-2">
+    <View
+      className="flex-row items-center justify-between px-4 py-2"
+      style={{ backgroundColor: colors.surfaceVariant }}
+    >
       <View className="flex-row items-center gap-2">
         {section.icon}
-        <Text className="text-sm font-semibold text-foreground">{section.title}</Text>
+        <Text className="text-sm font-semibold" style={{ color: colors.foreground }}>{section.title}</Text>
       </View>
-      <Text className="text-sm font-semibold text-foreground">{formatPHP(section.total)}</Text>
+      <Text className="text-sm font-semibold" style={{ color: colors.foreground }}>{formatPHP(section.total)}</Text>
     </View>
   );
 
@@ -151,23 +155,27 @@ export function AccountsScreen() {
       <SimpleHeader title="Accounts" />
 
       {/* Add Account Button */}
-      <View className="flex-row justify-end border-b border-border px-4 py-2">
+      <View
+        className="flex-row justify-end px-4 py-2"
+        style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}
+      >
         <TouchableOpacity
           onPress={() => navigation.navigate('AddAccount')}
-          className="flex-row items-center gap-1 rounded-lg bg-primary px-3 py-1.5"
+          className="flex-row items-center gap-1 rounded-lg px-3 py-1.5"
+          style={{ backgroundColor: colors.primary }}
         >
-          <Plus size={16} color={COLORS.primaryForeground} />
-          <Text className="text-sm font-medium text-white">Add Account</Text>
+          <Plus size={16} color={colors.onPrimary} />
+          <Text className="text-sm font-medium" style={{ color: colors.onPrimary }}>Add Account</Text>
         </TouchableOpacity>
       </View>
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : sections.length === 0 ? (
         <EmptyState
-          icon={<Wallet size={48} color={COLORS.mutedForeground} />}
+          icon={<Wallet size={48} color={colors.mutedForeground} />}
           title="No accounts yet"
           description="Add your bank accounts, credit cards, and track who owes you"
           actionLabel="Add Account"

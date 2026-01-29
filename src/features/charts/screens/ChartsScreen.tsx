@@ -8,7 +8,7 @@ import { useLedgerStore } from '../../../store';
 import { TransactionRepository } from '../../../database/repositories';
 import { formatPHP, formatPHPCompact } from '../../../shared/utils/currency';
 import { getMonthStart, getMonthEnd, getToday, formatMonthKey } from '../../../shared/utils/date';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -16,6 +16,7 @@ type ChartPeriod = 'week' | 'month' | '3months' | '6months';
 
 export function ChartsScreen() {
   const { activeLedgerId } = useLedgerStore();
+  const { colors } = useTheme();
 
   const [period, setPeriod] = useState<ChartPeriod>('month');
   const [categoryData, setCategoryData] = useState<CategorySpending[]>([]);
@@ -76,14 +77,12 @@ export function ChartsScreen() {
             <TouchableOpacity
               key={p}
               onPress={() => setPeriod(p)}
-              className={`rounded-lg px-3 py-1.5 ${
-                period === p ? 'bg-primary' : 'bg-secondary'
-              }`}
+              className="rounded-lg px-3 py-1.5"
+              style={{ backgroundColor: period === p ? colors.primary : colors.secondaryContainer }}
             >
               <Text
-                className={`text-sm font-medium ${
-                  period === p ? 'text-white' : 'text-foreground'
-                }`}
+                className="text-sm font-medium"
+                style={{ color: period === p ? colors.onPrimary : colors.onSecondaryContainer }}
               >
                 {p === 'month' ? 'This Month' : p === '3months' ? '3 Months' : '6 Months'}
               </Text>
@@ -95,14 +94,14 @@ export function ChartsScreen() {
         <View className="mb-4 flex-row gap-3">
           <Card className="flex-1">
             <CardContent>
-              <Text className="text-xs text-muted-foreground">Total Expense</Text>
-              <Text className="text-lg font-bold text-red-600">{formatPHP(totalExpense)}</Text>
+              <Text className="text-xs" style={{ color: colors.mutedForeground }}>Total Expense</Text>
+              <Text className="text-lg font-bold" style={{ color: colors.expense }}>{formatPHP(totalExpense)}</Text>
             </CardContent>
           </Card>
           <Card className="flex-1">
             <CardContent>
-              <Text className="text-xs text-muted-foreground">Total Income</Text>
-              <Text className="text-lg font-bold text-green-600">{formatPHP(totalIncome)}</Text>
+              <Text className="text-xs" style={{ color: colors.mutedForeground }}>Total Income</Text>
+              <Text className="text-lg font-bold" style={{ color: colors.income }}>{formatPHP(totalIncome)}</Text>
             </CardContent>
           </Card>
         </View>
@@ -123,7 +122,7 @@ export function ChartsScreen() {
                   innerRadius={60}
                   labelRadius={({ innerRadius }) => (innerRadius as number) + 40}
                   style={{
-                    labels: { fill: COLORS.foreground, fontSize: 10 },
+                    labels: { fill: colors.foreground, fontSize: 10 },
                   }}
                   labels={({ datum }) => `${datum.x}\n${formatPHPCompact(datum.y)}`}
                 />
@@ -135,13 +134,13 @@ export function ChartsScreen() {
                         className="h-3 w-3 rounded-full"
                         style={{ backgroundColor: item.color }}
                       />
-                      <Text className="text-xs text-muted-foreground">{item.x}</Text>
+                      <Text className="text-xs" style={{ color: colors.mutedForeground }}>{item.x}</Text>
                     </View>
                   ))}
                 </View>
               </View>
             ) : (
-              <Text className="py-8 text-center text-sm text-muted-foreground">
+              <Text className="py-8 text-center text-sm" style={{ color: colors.mutedForeground }}>
                 No spending data for this period
               </Text>
             )}
@@ -164,42 +163,42 @@ export function ChartsScreen() {
                 <VictoryAxis
                   tickFormat={(t) => t}
                   style={{
-                    tickLabels: { fontSize: 10, fill: COLORS.mutedForeground },
+                    tickLabels: { fontSize: 10, fill: colors.mutedForeground },
                   }}
                 />
                 <VictoryAxis
                   dependentAxis
                   tickFormat={(t) => formatPHPCompact(t)}
                   style={{
-                    tickLabels: { fontSize: 10, fill: COLORS.mutedForeground },
+                    tickLabels: { fontSize: 10, fill: colors.mutedForeground },
                   }}
                 />
                 <VictoryBar
                   data={barData}
                   x="month"
                   y="expense"
-                  style={{ data: { fill: COLORS.expense, width: 15 } }}
+                  style={{ data: { fill: colors.expense, width: 15 } }}
                 />
                 <VictoryBar
                   data={barData}
                   x="month"
                   y="income"
-                  style={{ data: { fill: COLORS.income, width: 15 } }}
+                  style={{ data: { fill: colors.income, width: 15 } }}
                 />
               </VictoryChart>
             ) : (
-              <Text className="py-8 text-center text-sm text-muted-foreground">
+              <Text className="py-8 text-center text-sm" style={{ color: colors.mutedForeground }}>
                 No data available
               </Text>
             )}
             <View className="mt-2 flex-row justify-center gap-4">
               <View className="flex-row items-center gap-1">
-                <View className="h-3 w-3 rounded-full bg-red-500" />
-                <Text className="text-xs text-muted-foreground">Expense</Text>
+                <View className="h-3 w-3 rounded-full" style={{ backgroundColor: colors.expense }} />
+                <Text className="text-xs" style={{ color: colors.mutedForeground }}>Expense</Text>
               </View>
               <View className="flex-row items-center gap-1">
-                <View className="h-3 w-3 rounded-full bg-green-500" />
-                <Text className="text-xs text-muted-foreground">Income</Text>
+                <View className="h-3 w-3 rounded-full" style={{ backgroundColor: colors.income }} />
+                <Text className="text-xs" style={{ color: colors.mutedForeground }}>Income</Text>
               </View>
             </View>
           </CardContent>
@@ -214,29 +213,28 @@ export function ChartsScreen() {
             {categoryData.map((cat, index) => (
               <View
                 key={cat.category_id}
-                className={`flex-row items-center justify-between py-2 ${
-                  index < categoryData.length - 1 ? 'border-b border-border' : ''
-                }`}
+                className="flex-row items-center justify-between py-2"
+                style={index < categoryData.length - 1 ? { borderBottomWidth: 1, borderBottomColor: colors.border } : undefined}
               >
                 <View className="flex-row items-center gap-2">
                   <View
                     className="h-3 w-3 rounded-full"
                     style={{ backgroundColor: cat.category_color }}
                   />
-                  <Text className="text-sm text-foreground">{cat.category_name}</Text>
+                  <Text className="text-sm" style={{ color: colors.foreground }}>{cat.category_name}</Text>
                 </View>
                 <View className="flex-row items-center gap-2">
-                  <Text className="text-sm font-medium text-foreground">
+                  <Text className="text-sm font-medium" style={{ color: colors.foreground }}>
                     {formatPHP(cat.total_amount)}
                   </Text>
-                  <Text className="text-xs text-muted-foreground">
+                  <Text className="text-xs" style={{ color: colors.mutedForeground }}>
                     ({cat.percentage.toFixed(1)}%)
                   </Text>
                 </View>
               </View>
             ))}
             {categoryData.length === 0 && (
-              <Text className="py-4 text-center text-sm text-muted-foreground">
+              <Text className="py-4 text-center text-sm" style={{ color: colors.mutedForeground }}>
                 No categories with spending
               </Text>
             )}

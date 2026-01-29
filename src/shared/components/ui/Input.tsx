@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { TextInput, TextInputProps, View, Text } from 'react-native';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -10,35 +10,47 @@ interface InputProps extends TextInputProps {
 }
 
 export const Input = forwardRef<TextInput, InputProps>(
-  ({ label, error, leftIcon, rightIcon, className, ...props }, ref) => {
+  ({ label, error, leftIcon, rightIcon, className, style, ...props }, ref) => {
+    const { colors } = useTheme();
+
+    const containerStyle = {
+      backgroundColor: colors.surfaceVariant,
+      borderColor: error ? colors.destructive : colors.outline,
+      borderWidth: 1,
+      borderRadius: 12,
+    };
+
     return (
       <View className="w-full">
         {label && (
-          <Text className="mb-1.5 text-sm font-medium text-foreground">
+          <Text
+            className="mb-1.5 text-sm font-medium"
+            style={{ color: colors.foreground }}
+          >
             {label}
           </Text>
         )}
         <View
-          className={`
-            flex-row items-center rounded-lg border bg-background px-3
-            ${error ? 'border-destructive' : 'border-input'}
-            ${props.editable === false ? 'bg-muted opacity-50' : ''}
-          `}
+          className={`flex-row items-center px-3 ${props.editable === false ? 'opacity-50' : ''}`}
+          style={containerStyle}
         >
           {leftIcon && <View className="mr-2">{leftIcon}</View>}
           <TextInput
             ref={ref}
-            className={`
-              flex-1 py-3 text-base text-foreground
-              ${className || ''}
-            `}
-            placeholderTextColor={COLORS.mutedForeground}
+            className={`flex-1 py-3 text-base ${className || ''}`}
+            style={[{ color: colors.foreground }, style]}
+            placeholderTextColor={colors.mutedForeground}
             {...props}
           />
           {rightIcon && <View className="ml-2">{rightIcon}</View>}
         </View>
         {error && (
-          <Text className="mt-1 text-sm text-destructive">{error}</Text>
+          <Text
+            className="mt-1 text-sm"
+            style={{ color: colors.destructive }}
+          >
+            {error}
+          </Text>
         )}
       </View>
     );
@@ -57,6 +69,8 @@ export function CurrencyInput({
   onChangeValue,
   ...props
 }: CurrencyInputProps) {
+  const { colors } = useTheme();
+
   const handleChange = (text: string) => {
     // Remove non-numeric characters except decimal point
     const cleaned = text.replace(/[^0-9.]/g, '');
@@ -77,7 +91,7 @@ export function CurrencyInput({
       value={value}
       onChangeText={handleChange}
       keyboardType="decimal-pad"
-      leftIcon={<Text className="text-lg text-muted-foreground">₱</Text>}
+      leftIcon={<Text className="text-lg" style={{ color: colors.mutedForeground }}>₱</Text>}
       {...props}
     />
   );

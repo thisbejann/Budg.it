@@ -11,7 +11,7 @@ import { useLedgerStore } from '../../../store';
 import { TransactionRepository, AccountRepository } from '../../../database/repositories';
 import { formatPHP, formatPHPCompact } from '../../../shared/utils/currency';
 import { getMonthStart, getMonthEnd, formatDate, formatMonthYear, getToday } from '../../../shared/utils/date';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -19,6 +19,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { activeLedger, activeLedgerId } = useLedgerStore();
+  const { colors } = useTheme();
 
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -72,7 +73,7 @@ export function HomeScreen() {
     loadData();
   };
 
-  const getIcon = (iconName: string, color: string = COLORS.foreground) => {
+  const getIcon = (iconName: string, color: string = colors.foreground) => {
     const IconComponent = (LucideIcons as any)[
       iconName.split('-').map((s, i) => i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)).join('')
     ] || LucideIcons.Circle;
@@ -84,10 +85,10 @@ export function HomeScreen() {
       <View className="px-4 py-6">
         {/* Header with Ledger Name */}
         <View className="mb-6">
-          <Text className="text-2xl font-bold text-foreground">
+          <Text className="text-2xl font-bold" style={{ color: colors.foreground }}>
             {activeLedger?.name || 'Budget Tracker'}
           </Text>
-          <Text className="text-sm text-muted-foreground">
+          <Text className="text-sm" style={{ color: colors.mutedForeground }}>
             {formatMonthYear(getToday())}
           </Text>
         </View>
@@ -96,16 +97,18 @@ export function HomeScreen() {
         <View className="mb-6 flex-row gap-3">
           <TouchableOpacity
             onPress={() => navigation.navigate('AddTransaction')}
-            className="flex-1 flex-row items-center justify-center gap-2 rounded-lg bg-primary py-3"
+            className="flex-1 flex-row items-center justify-center gap-2 rounded-lg py-3"
+            style={{ backgroundColor: colors.primary }}
           >
-            <Plus size={20} color="#fff" />
-            <Text className="font-semibold text-white">Add Transaction</Text>
+            <Plus size={20} color={colors.onPrimary} />
+            <Text className="font-semibold" style={{ color: colors.onPrimary }}>Add Transaction</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => navigation.navigate('Transfer')}
-            className="flex-row items-center justify-center gap-2 rounded-lg bg-secondary px-4 py-3"
+            className="flex-row items-center justify-center gap-2 rounded-lg px-4 py-3"
+            style={{ backgroundColor: colors.secondaryContainer }}
           >
-            <ArrowLeftRight size={20} color={COLORS.foreground} />
+            <ArrowLeftRight size={20} color={colors.onSecondaryContainer} />
           </TouchableOpacity>
         </View>
 
@@ -118,28 +121,27 @@ export function HomeScreen() {
             <View className="flex-row justify-between">
               <View className="flex-1">
                 <View className="flex-row items-center gap-1">
-                  <ArrowDownLeft size={16} color={COLORS.income} />
-                  <Text className="text-sm text-muted-foreground">Income</Text>
+                  <ArrowDownLeft size={16} color={colors.income} />
+                  <Text className="text-sm" style={{ color: colors.mutedForeground }}>Income</Text>
                 </View>
-                <Text className="text-lg font-semibold text-green-600">
+                <Text className="text-lg font-semibold" style={{ color: colors.income }}>
                   {formatPHP(monthlyIncome)}
                 </Text>
               </View>
               <View className="flex-1">
                 <View className="flex-row items-center gap-1">
-                  <ArrowUpRight size={16} color={COLORS.expense} />
-                  <Text className="text-sm text-muted-foreground">Expense</Text>
+                  <ArrowUpRight size={16} color={colors.expense} />
+                  <Text className="text-sm" style={{ color: colors.mutedForeground }}>Expense</Text>
                 </View>
-                <Text className="text-lg font-semibold text-red-600">
+                <Text className="text-lg font-semibold" style={{ color: colors.expense }}>
                   {formatPHP(monthlySpending)}
                 </Text>
               </View>
               <View className="flex-1">
-                <Text className="text-sm text-muted-foreground">Net</Text>
+                <Text className="text-sm" style={{ color: colors.mutedForeground }}>Net</Text>
                 <Text
-                  className={`text-lg font-semibold ${
-                    monthlyIncome - monthlySpending >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}
+                  className="text-lg font-semibold"
+                  style={{ color: monthlyIncome - monthlySpending >= 0 ? colors.income : colors.expense }}
                 >
                   {formatPHP(monthlyIncome - monthlySpending, true)}
                 </Text>
@@ -153,42 +155,41 @@ export function HomeScreen() {
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle>Accounts</CardTitle>
             <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Accounts' })}>
-              <ChevronRight size={20} color={COLORS.mutedForeground} />
+              <ChevronRight size={20} color={colors.mutedForeground} />
             </TouchableOpacity>
           </CardHeader>
           <CardContent>
             <View className="flex-row flex-wrap gap-y-3">
               <View className="w-1/2 pr-2">
-                <Text className="text-xs text-muted-foreground">Cash & Bank</Text>
-                <Text className="text-base font-semibold text-green-600">
+                <Text className="text-xs" style={{ color: colors.mutedForeground }}>Cash & Bank</Text>
+                <Text className="text-base font-semibold" style={{ color: colors.accountDebit }}>
                   {formatPHPCompact(balanceSummary.debit)}
                 </Text>
               </View>
               <View className="w-1/2 pl-2">
-                <Text className="text-xs text-muted-foreground">Credit Cards</Text>
-                <Text className="text-base font-semibold text-orange-600">
+                <Text className="text-xs" style={{ color: colors.mutedForeground }}>Credit Cards</Text>
+                <Text className="text-base font-semibold" style={{ color: colors.accountCredit }}>
                   {formatPHPCompact(balanceSummary.credit)}
                 </Text>
               </View>
               <View className="w-1/2 pr-2">
-                <Text className="text-xs text-muted-foreground">Owed to Me</Text>
-                <Text className="text-base font-semibold text-blue-600">
+                <Text className="text-xs" style={{ color: colors.mutedForeground }}>Owed to Me</Text>
+                <Text className="text-base font-semibold" style={{ color: colors.accountOwed }}>
                   {formatPHPCompact(balanceSummary.owed)}
                 </Text>
               </View>
               <View className="w-1/2 pl-2">
-                <Text className="text-xs text-muted-foreground">I Owe</Text>
-                <Text className="text-base font-semibold text-red-600">
+                <Text className="text-xs" style={{ color: colors.mutedForeground }}>I Owe</Text>
+                <Text className="text-base font-semibold" style={{ color: colors.accountDebt }}>
                   {formatPHPCompact(balanceSummary.debt)}
                 </Text>
               </View>
             </View>
-            <View className="mt-3 border-t border-border pt-3">
-              <Text className="text-xs text-muted-foreground">Net Worth</Text>
+            <View className="mt-3 pt-3" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
+              <Text className="text-xs" style={{ color: colors.mutedForeground }}>Net Worth</Text>
               <Text
-                className={`text-xl font-bold ${
-                  balanceSummary.netWorth >= 0 ? 'text-green-600' : 'text-red-600'
-                }`}
+                className="text-xl font-bold"
+                style={{ color: balanceSummary.netWorth >= 0 ? colors.income : colors.expense }}
               >
                 {formatPHP(balanceSummary.netWorth)}
               </Text>
@@ -202,16 +203,15 @@ export function HomeScreen() {
             <CardHeader className="flex-row items-center justify-between">
               <CardTitle>Top Spending</CardTitle>
               <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Charts' })}>
-                <ChevronRight size={20} color={COLORS.mutedForeground} />
+                <ChevronRight size={20} color={colors.mutedForeground} />
               </TouchableOpacity>
             </CardHeader>
             <CardContent>
               {categorySpending.map((cat, index) => (
                 <View
                   key={cat.category_id}
-                  className={`flex-row items-center justify-between py-2 ${
-                    index < categorySpending.length - 1 ? 'border-b border-border' : ''
-                  }`}
+                  className="flex-row items-center justify-between py-2"
+                  style={index < categorySpending.length - 1 ? { borderBottomWidth: 1, borderBottomColor: colors.border } : undefined}
                 >
                   <View className="flex-row items-center gap-3">
                     <IconAvatar
@@ -219,15 +219,15 @@ export function HomeScreen() {
                       icon={getIcon(cat.category_icon, '#fff')}
                       backgroundColor={cat.category_color}
                     />
-                    <Text className="text-sm font-medium text-foreground">
+                    <Text className="text-sm font-medium" style={{ color: colors.foreground }}>
                       {cat.category_name}
                     </Text>
                   </View>
                   <View className="items-end">
-                    <Text className="text-sm font-semibold text-foreground">
+                    <Text className="text-sm font-semibold" style={{ color: colors.foreground }}>
                       {formatPHP(cat.total_amount)}
                     </Text>
-                    <Text className="text-xs text-muted-foreground">
+                    <Text className="text-xs" style={{ color: colors.mutedForeground }}>
                       {cat.percentage.toFixed(1)}%
                     </Text>
                   </View>
@@ -242,12 +242,12 @@ export function HomeScreen() {
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle>Recent Transactions</CardTitle>
             <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Transactions' })}>
-              <ChevronRight size={20} color={COLORS.mutedForeground} />
+              <ChevronRight size={20} color={colors.mutedForeground} />
             </TouchableOpacity>
           </CardHeader>
           <CardContent>
             {recentTransactions.length === 0 ? (
-              <Text className="py-4 text-center text-sm text-muted-foreground">
+              <Text className="py-4 text-center text-sm" style={{ color: colors.mutedForeground }}>
                 No transactions yet
               </Text>
             ) : (
@@ -255,29 +255,27 @@ export function HomeScreen() {
                 <TouchableOpacity
                   key={transaction.id}
                   onPress={() => navigation.navigate('TransactionDetail', { transactionId: transaction.id })}
-                  className={`flex-row items-center justify-between py-3 ${
-                    index < recentTransactions.length - 1 ? 'border-b border-border' : ''
-                  }`}
+                  className="flex-row items-center justify-between py-3"
+                  style={index < recentTransactions.length - 1 ? { borderBottomWidth: 1, borderBottomColor: colors.border } : undefined}
                 >
                   <View className="flex-row items-center gap-3">
                     <IconAvatar
                       size="sm"
                       icon={getIcon(transaction.category_icon || 'circle', '#fff')}
-                      backgroundColor={transaction.category_color || COLORS.mutedForeground}
+                      backgroundColor={transaction.category_color || colors.mutedForeground}
                     />
                     <View>
-                      <Text className="text-sm font-medium text-foreground">
+                      <Text className="text-sm font-medium" style={{ color: colors.foreground }}>
                         {transaction.category_name || 'Uncategorized'}
                       </Text>
-                      <Text className="text-xs text-muted-foreground">
+                      <Text className="text-xs" style={{ color: colors.mutedForeground }}>
                         {formatDate(transaction.date)} • {transaction.account_name}
                       </Text>
                     </View>
                   </View>
                   <Text
-                    className={`text-sm font-semibold ${
-                      transaction.type === 'expense' ? 'text-red-600' : 'text-green-600'
-                    }`}
+                    className="text-sm font-semibold"
+                    style={{ color: transaction.type === 'expense' ? colors.expense : colors.income }}
                   >
                     {transaction.type === 'expense' ? '-' : '+'}
                     {formatPHP(transaction.amount)}

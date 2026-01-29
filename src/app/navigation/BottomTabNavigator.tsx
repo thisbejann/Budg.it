@@ -8,7 +8,7 @@ import {
   Settings,
 } from 'lucide-react-native';
 import type { MainTabParamList } from '../../types/navigation';
-import { COLORS } from '../../constants/colors';
+import { useTheme } from '../../hooks/useColorScheme';
 
 // Import screens (will create these next)
 import { HomeScreen } from '../../features/home/screens/HomeScreen';
@@ -20,15 +20,17 @@ import { SettingsScreen } from '../../features/settings/screens/SettingsScreen';
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export function BottomTabNavigator() {
+  const { colors } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.mutedForeground,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.mutedForeground,
         tabBarStyle: {
-          backgroundColor: COLORS.background,
-          borderTopColor: COLORS.border,
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
           paddingBottom: 8,
           paddingTop: 8,
           height: 60,
