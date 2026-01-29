@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Plus, ArrowUpRight, ArrowDownLeft, ArrowLeftRight, ChevronRight } from 'lucide-react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -291,11 +292,13 @@ export function HomeScreen() {
       </Screen>
 
       {/* Floating Action Button */}
-      <View style={{ position: 'absolute', bottom: 24, right: 24 }}>
-        <FAB onPress={() => navigation.navigate('AddTransaction')}>
-          <Plus size={24} color={colors.onPrimary} />
-        </FAB>
-      </View>
+      <SafeAreaView edges={['bottom', 'right']} style={{ position: 'absolute', bottom: 0, right: 0 }}>
+        <View style={{ padding: 24 }}>
+          <FAB onPress={() => navigation.navigate('AddTransaction')}>
+            <Plus size={24} color={colors.onPrimary} />
+          </FAB>
+        </View>
+      </SafeAreaView>
     </View>
   );
 }
