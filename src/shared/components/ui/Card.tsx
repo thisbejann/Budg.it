@@ -1,5 +1,13 @@
 import React from 'react';
-import { View, Text, ViewProps, TextProps, TouchableOpacity, TouchableOpacityProps } from 'react-native';
+import {
+  View,
+  Text,
+  ViewProps,
+  TextProps,
+  TouchableOpacity,
+  TouchableOpacityProps,
+} from 'react-native';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 interface CardProps extends ViewProps {
   children: React.ReactNode;
@@ -9,10 +17,32 @@ interface CardPressableProps extends TouchableOpacityProps {
   children: React.ReactNode;
 }
 
-export function Card({ children, className, ...props }: CardProps) {
+export function Card({
+  children,
+  className,
+  style,
+  ...props
+}: CardProps) {
+  const { colors, isDark } = useTheme();
+
+  const containerStyle = {
+    borderRadius: 16,
+    backgroundColor: colors.card,
+    // Enhanced MD3 Elevation 2
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: isDark ? 0.4 : 0.12,
+    shadowRadius: 6,
+    elevation: 3,
+    // Subtle border for better definition in dark mode
+    borderWidth: isDark ? 1 : 0,
+    borderColor: isDark ? colors.border : 'transparent',
+  };
+
   return (
     <View
-      className={`rounded-xl border border-border bg-card p-4 shadow-sm ${className || ''}`}
+      className={`p-4 ${className || ''}`}
+      style={[containerStyle, style]}
       {...props}
     >
       {children}
@@ -20,10 +50,32 @@ export function Card({ children, className, ...props }: CardProps) {
   );
 }
 
-export function CardPressable({ children, className, ...props }: CardPressableProps) {
+export function CardPressable({
+  children,
+  className,
+  style,
+  ...props
+}: CardPressableProps) {
+  const { colors, isDark } = useTheme();
+
+  const containerStyle = {
+    borderRadius: 16,
+    backgroundColor: colors.card,
+    // Enhanced MD3 Elevation 2
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: isDark ? 0.4 : 0.12,
+    shadowRadius: 6,
+    elevation: 3,
+    // Subtle border for better definition in dark mode
+    borderWidth: isDark ? 1 : 0,
+    borderColor: isDark ? colors.border : 'transparent',
+  };
+
   return (
     <TouchableOpacity
-      className={`rounded-xl border border-border bg-card p-4 shadow-sm ${className || ''}`}
+      className={`p-4 ${className || ''}`}
+      style={[containerStyle, style]}
       activeOpacity={0.7}
       {...props}
     >
@@ -40,10 +92,19 @@ export function CardHeader({ children, className, ...props }: CardProps) {
   );
 }
 
-export function CardTitle({ children, className, ...props }: TextProps & { children: React.ReactNode }) {
+export function CardTitle({
+  children,
+  className,
+  style,
+  ...props
+}: TextProps & { children: React.ReactNode }) {
+  const { colors } = useTheme();
   return (
     <Text
-      className={`text-lg font-semibold leading-none tracking-tight text-card-foreground ${className || ''}`}
+      className={`text-lg font-semibold leading-none tracking-tight ${
+        className || ''
+      }`}
+      style={[{ color: colors.foreground }, style]}
       {...props}
     >
       {children}
@@ -51,9 +112,19 @@ export function CardTitle({ children, className, ...props }: TextProps & { child
   );
 }
 
-export function CardDescription({ children, className, ...props }: TextProps & { children: React.ReactNode }) {
+export function CardDescription({
+  children,
+  className,
+  style,
+  ...props
+}: TextProps & { children: React.ReactNode }) {
+  const { colors } = useTheme();
   return (
-    <Text className={`text-sm text-muted-foreground ${className || ''}`} {...props}>
+    <Text
+      className={`text-sm ${className || ''}`}
+      style={[{ color: colors.mutedForeground }, style]}
+      {...props}
+    >
       {children}
     </Text>
   );
@@ -69,7 +140,10 @@ export function CardContent({ children, className, ...props }: CardProps) {
 
 export function CardFooter({ children, className, ...props }: CardProps) {
   return (
-    <View className={`flex-row items-center pt-4 ${className || ''}`} {...props}>
+    <View
+      className={`flex-row items-center pt-4 ${className || ''}`}
+      {...props}
+    >
       {children}
     </View>
   );

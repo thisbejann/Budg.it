@@ -12,7 +12,7 @@ import { useLedgerStore } from '../../../store';
 import { TransactionRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
 import { formatDate, getMonthStart, getMonthEnd, getToday } from '../../../shared/utils/date';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -20,6 +20,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export function TransactionsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { activeLedgerId } = useLedgerStore();
+  const { colors } = useTheme();
 
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('list');
   const [selectedDate, setSelectedDate] = useState(getToday());
@@ -72,9 +73,9 @@ export function TransactionsScreen() {
   const markedDates = Object.entries(dailyTotals).reduce((acc, [date, total]) => {
     acc[date] = {
       marked: true,
-      dotColor: total.expense > total.income ? COLORS.expense : COLORS.income,
+      dotColor: total.expense > total.income ? colors.expense : colors.income,
       selected: date === selectedDate,
-      selectedColor: COLORS.primary,
+      selectedColor: colors.primary,
     };
     return acc;
   }, {} as Record<string, any>);
@@ -83,7 +84,7 @@ export function TransactionsScreen() {
   if (!markedDates[selectedDate]) {
     markedDates[selectedDate] = {
       selected: true,
-      selectedColor: COLORS.primary,
+      selectedColor: colors.primary,
     };
   }
 
@@ -95,19 +96,20 @@ export function TransactionsScreen() {
   const renderTransaction = ({ item }: { item: TransactionWithDetails }) => (
     <TouchableOpacity
       onPress={() => navigation.navigate('TransactionDetail', { transactionId: item.id })}
-      className="flex-row items-center justify-between border-b border-border px-4 py-3"
+      className="flex-row items-center justify-between px-4 py-3"
+      style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}
     >
       <View className="flex-row items-center gap-3">
         <IconAvatar
           size="sm"
           icon={getIcon(item.category_icon || 'circle')}
-          backgroundColor={item.category_color || COLORS.mutedForeground}
+          backgroundColor={item.category_color || colors.mutedForeground}
         />
         <View>
-          <Text className="text-sm font-medium text-foreground">
+          <Text className="text-sm font-medium" style={{ color: colors.foreground }}>
             {item.category_name || 'Uncategorized'}
           </Text>
-          <Text className="text-xs text-muted-foreground">
+          <Text className="text-xs" style={{ color: colors.mutedForeground }}>
             {item.account_name}
             {item.notes ? ` • ${item.notes}` : ''}
           </Text>
@@ -115,15 +117,14 @@ export function TransactionsScreen() {
       </View>
       <View className="items-end">
         <Text
-          className={`text-sm font-semibold ${
-            item.type === 'expense' ? 'text-red-600' : 'text-green-600'
-          }`}
+          className="text-sm font-semibold"
+          style={{ color: item.type === 'expense' ? colors.expense : colors.income }}
         >
           {item.type === 'expense' ? '-' : '+'}
           {formatPHP(item.amount)}
         </Text>
         {viewMode === 'list' && (
-          <Text className="text-xs text-muted-foreground">{formatDate(item.date)}</Text>
+          <Text className="text-xs" style={{ color: colors.mutedForeground }}>{formatDate(item.date)}</Text>
         )}
       </View>
     </TouchableOpacity>
@@ -134,37 +135,36 @@ export function TransactionsScreen() {
       <SimpleHeader title="Transactions" />
 
       {/* View Toggle */}
-      <View className="flex-row items-center justify-between border-b border-border px-4 py-2">
+      <View
+        className="flex-row items-center justify-between px-4 py-2"
+        style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}
+      >
         <View className="flex-row gap-2">
           <TouchableOpacity
             onPress={() => setViewMode('list')}
-            className={`flex-row items-center gap-1 rounded-lg px-3 py-1.5 ${
-              viewMode === 'list' ? 'bg-primary' : 'bg-secondary'
-            }`}
+            className="flex-row items-center gap-1 rounded-lg px-3 py-1.5"
+            style={{ backgroundColor: viewMode === 'list' ? colors.primary : colors.secondaryContainer }}
           >
-            <List size={16} color={viewMode === 'list' ? COLORS.primaryForeground : COLORS.foreground} />
+            <List size={16} color={viewMode === 'list' ? colors.onPrimary : colors.onSecondaryContainer} />
             <Text
-              className={`text-sm font-medium ${
-                viewMode === 'list' ? 'text-white' : 'text-foreground'
-              }`}
+              className="text-sm font-medium"
+              style={{ color: viewMode === 'list' ? colors.onPrimary : colors.onSecondaryContainer }}
             >
               List
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setViewMode('calendar')}
-            className={`flex-row items-center gap-1 rounded-lg px-3 py-1.5 ${
-              viewMode === 'calendar' ? 'bg-primary' : 'bg-secondary'
-            }`}
+            className="flex-row items-center gap-1 rounded-lg px-3 py-1.5"
+            style={{ backgroundColor: viewMode === 'calendar' ? colors.primary : colors.secondaryContainer }}
           >
             <CalendarIcon
               size={16}
-              color={viewMode === 'calendar' ? COLORS.primaryForeground : COLORS.foreground}
+              color={viewMode === 'calendar' ? colors.onPrimary : colors.onSecondaryContainer}
             />
             <Text
-              className={`text-sm font-medium ${
-                viewMode === 'calendar' ? 'text-white' : 'text-foreground'
-              }`}
+              className="text-sm font-medium"
+              style={{ color: viewMode === 'calendar' ? colors.onPrimary : colors.onSecondaryContainer }}
             >
               Calendar
             </Text>
@@ -172,9 +172,10 @@ export function TransactionsScreen() {
         </View>
         <TouchableOpacity
           onPress={() => navigation.navigate('AddTransaction')}
-          className="rounded-full bg-primary p-2"
+          className="rounded-full p-2"
+          style={{ backgroundColor: colors.primary }}
         >
-          <Plus size={20} color={COLORS.primaryForeground} />
+          <Plus size={20} color={colors.onPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -185,32 +186,35 @@ export function TransactionsScreen() {
           onDayPress={(day) => setSelectedDate(day.dateString)}
           markedDates={markedDates}
           theme={{
-            backgroundColor: COLORS.background,
-            calendarBackground: COLORS.background,
-            textSectionTitleColor: COLORS.mutedForeground,
-            selectedDayBackgroundColor: COLORS.primary,
-            selectedDayTextColor: COLORS.primaryForeground,
-            todayTextColor: COLORS.primary,
-            dayTextColor: COLORS.foreground,
-            textDisabledColor: COLORS.mutedForeground,
-            monthTextColor: COLORS.foreground,
-            arrowColor: COLORS.primary,
+            backgroundColor: colors.background,
+            calendarBackground: colors.background,
+            textSectionTitleColor: colors.mutedForeground,
+            selectedDayBackgroundColor: colors.primary,
+            selectedDayTextColor: colors.onPrimary,
+            todayTextColor: colors.primary,
+            dayTextColor: colors.foreground,
+            textDisabledColor: colors.mutedForeground,
+            monthTextColor: colors.foreground,
+            arrowColor: colors.primary,
           }}
         />
       )}
 
       {/* Daily Summary for Calendar View */}
       {viewMode === 'calendar' && dailyTotals[selectedDate] && (
-        <View className="flex-row justify-around border-b border-border py-2">
+        <View
+          className="flex-row justify-around py-2"
+          style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}
+        >
           <View className="items-center">
-            <Text className="text-xs text-muted-foreground">Income</Text>
-            <Text className="text-sm font-semibold text-green-600">
+            <Text className="text-xs" style={{ color: colors.mutedForeground }}>Income</Text>
+            <Text className="text-sm font-semibold" style={{ color: colors.income }}>
               {formatPHP(dailyTotals[selectedDate].income)}
             </Text>
           </View>
           <View className="items-center">
-            <Text className="text-xs text-muted-foreground">Expense</Text>
-            <Text className="text-sm font-semibold text-red-600">
+            <Text className="text-xs" style={{ color: colors.mutedForeground }}>Expense</Text>
+            <Text className="text-sm font-semibold" style={{ color: colors.expense }}>
               {formatPHP(dailyTotals[selectedDate].expense)}
             </Text>
           </View>
@@ -220,7 +224,7 @@ export function TransactionsScreen() {
       {/* Transaction List */}
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <FlatList
@@ -229,7 +233,7 @@ export function TransactionsScreen() {
           keyExtractor={(item) => item.id.toString()}
           ListEmptyComponent={
             <EmptyState
-              icon={<LucideIcons.Receipt size={48} color={COLORS.mutedForeground} />}
+              icon={<LucideIcons.Receipt size={48} color={colors.mutedForeground} />}
               title="No transactions"
               description={
                 viewMode === 'calendar'

@@ -1,46 +1,37 @@
 import React from 'react';
 import {
-  TouchableOpacity,
   Text,
   ActivityIndicator,
   TouchableOpacityProps,
-  View,
 } from 'react-native';
-import { COLORS } from '../../../constants/colors';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  runOnJS,
+} from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { useTheme } from '../../../hooks/useColorScheme';
 
-type ButtonVariant = 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-type ButtonSize = 'default' | 'sm' | 'lg' | 'icon';
+// MD3 variants + destructive for delete actions
+type ButtonVariant = 'filled' | 'outlined' | 'tonal' | 'text' | 'destructive';
+type ButtonSize = 'default' | 'sm' | 'lg' | 'icon' | 'fab';
 
-interface ButtonProps extends TouchableOpacityProps {
+interface ButtonProps extends Omit<TouchableOpacityProps, 'onPress'> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
   children: React.ReactNode;
+  fullRounded?: boolean;
+  onPress?: () => void;
 }
 
-const variantStyles: Record<ButtonVariant, string> = {
-  default: 'bg-primary',
-  destructive: 'bg-destructive',
-  outline: 'border border-input bg-background',
-  secondary: 'bg-secondary',
-  ghost: 'bg-transparent',
-  link: 'bg-transparent',
-};
-
-const variantTextStyles: Record<ButtonVariant, string> = {
-  default: 'text-white',
-  destructive: 'text-white',
-  outline: 'text-foreground',
-  secondary: 'text-foreground',
-  ghost: 'text-foreground',
-  link: 'text-primary underline',
-};
-
 const sizeStyles: Record<ButtonSize, string> = {
-  default: 'h-12 px-4 py-3',
-  sm: 'h-9 px-3 py-2',
+  default: 'h-12 px-6 py-3',
+  sm: 'h-9 px-4 py-2',
   lg: 'h-14 px-8 py-4',
   icon: 'h-10 w-10',
+  fab: 'h-14 w-14',
 };
 
 const sizeTextStyles: Record<ButtonSize, string> = {
@@ -48,58 +39,147 @@ const sizeTextStyles: Record<ButtonSize, string> = {
   sm: 'text-sm',
   lg: 'text-lg',
   icon: 'text-base',
+  fab: 'text-xl',
 };
 
 export function Button({
-  variant = 'default',
+  variant = 'filled',
   size = 'default',
   loading = false,
   disabled,
   children,
   className,
+  fullRounded = false,
+  onPress,
+  style,
   ...props
 }: ButtonProps) {
   const isDisabled = disabled || loading;
+  const scale = useSharedValue(1);
+  const { colors } = useTheme();
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const gesture = Gesture.Tap()
+    .enabled(!isDisabled)
+    .onBegin(() => {
+      scale.value = withSpring(0.96, { damping: 15, stiffness: 400 });
+    })
+    .onFinalize(() => {
+      scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+    })
+    .onEnd(() => {
+      if (onPress) {
+        runOnJS(onPress)();
+      }
+    });
+
+  // MD3 uses 20dp full radius for buttons
+  const roundedClass = fullRounded || size === 'fab' ? 'rounded-full' : 'rounded-[20px]';
+
+  // Get variant-specific styles
+  const getVariantStyles = () => {
+    switch (variant) {
+      case 'filled':
+        return {
+          backgroundColor: colors.primary,
+          borderWidth: 0,
+        };
+      case 'outlined':
+        return {
+          backgroundColor: 'transparent',
+          borderWidth: 1,
+          borderColor: colors.outline,
+        };
+      case 'tonal':
+        return {
+          backgroundColor: colors.primaryContainer,
+          borderWidth: 0,
+        };
+      case 'text':
+        return {
+          backgroundColor: 'transparent',
+          borderWidth: 0,
+        };
+      case 'destructive':
+        return {
+          backgroundColor: colors.destructive,
+          borderWidth: 0,
+        };
+      default:
+        return {
+          backgroundColor: colors.primary,
+          borderWidth: 0,
+        };
+    }
+  };
+
+  const getTextColor = () => {
+    switch (variant) {
+      case 'filled':
+        return colors.onPrimary;
+      case 'outlined':
+        return colors.primary;
+      case 'tonal':
+        return colors.onPrimaryContainer;
+      case 'text':
+        return colors.primary;
+      case 'destructive':
+        return colors.destructiveForeground;
+      default:
+        return colors.onPrimary;
+    }
+  };
+
+  const variantStyles = getVariantStyles();
+  const textColor = getTextColor();
 
   return (
-    <TouchableOpacity
-      className={`
-        flex-row items-center justify-center rounded-lg
-        ${variantStyles[variant]}
-        ${sizeStyles[size]}
-        ${isDisabled ? 'opacity-50' : ''}
-        ${className || ''}
-      `}
-      disabled={isDisabled}
-      activeOpacity={0.7}
-      {...props}
-    >
-      {loading ? (
-        <ActivityIndicator
-          color={variant === 'default' || variant === 'destructive' ? COLORS.primaryForeground : COLORS.primary}
-          size="small"
-        />
-      ) : typeof children === 'string' ? (
-        <Text
-          className={`
-            font-semibold
-            ${variantTextStyles[variant]}
-            ${sizeTextStyles[size]}
-          `}
-        >
-          {children}
-        </Text>
-      ) : (
-        children
-      )}
-    </TouchableOpacity>
+    <GestureDetector gesture={gesture}>
+      <Animated.View
+        className={`
+          flex-row items-center justify-center
+          ${roundedClass}
+          ${sizeStyles[size]}
+          ${isDisabled ? 'opacity-50' : ''}
+          ${className || ''}
+        `}
+        style={[animatedStyle, variantStyles, style]}
+        {...props}
+      >
+        {loading ? (
+          <ActivityIndicator
+            color={textColor}
+            size="small"
+          />
+        ) : typeof children === 'string' ? (
+          <Text
+            className={`font-semibold ${sizeTextStyles[size]}`}
+            style={{ color: textColor }}
+          >
+            {children}
+          </Text>
+        ) : (
+          children
+        )}
+      </Animated.View>
+    </GestureDetector>
   );
 }
 
 export function IconButton({
-  variant = 'ghost',
+  variant = 'text',
   size = 'icon',
   ...props
 }: Omit<ButtonProps, 'size'> & { size?: ButtonSize }) {
   return <Button variant={variant} size={size} {...props} />;
+}
+
+export function FAB({
+  variant = 'filled',
+  ...props
+}: Omit<ButtonProps, 'size' | 'fullRounded'>) {
+  return <Button variant={variant} size="fab" fullRounded {...props} />;
 }
