@@ -93,13 +93,13 @@ export function TransactionDetailScreen() {
   const CategoryIcon = transaction.category_icon
     ? (LucideIcons as any)[
         transaction.category_icon.split('-').map((s, i) => i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)).join('')
-      ]
-    : null;
+      ] || LucideIcons.Tag
+    : LucideIcons.Tag;
 
   const AccountIcon = transaction.account_icon
     ? (LucideIcons as any)[
         transaction.account_icon.split('-').map((s, i) => i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)).join('')
-      ]
+      ] || LucideIcons.Wallet
     : LucideIcons.Wallet;
 
   return (
