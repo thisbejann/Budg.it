@@ -1,3 +1,158 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import 'uniwind';
+
+@import 'heroui-native/styles';
+
+/* Path to heroui-native lib for source scanning */
+@source './node_modules/heroui-native/lib';
+
+/*
+ * Static fallbacks for HeroUI Native's color-mix() variables
+ * color-mix() is not supported in React Native
+ * These values approximate: color-mix(in oklab, base 90%, foreground 10%)
+ */
+@theme inline static {
+  /* Light mode hover colors */
+  --color-accent-hover: oklch(0.66 0.18 253.83);
+  --color-default-hover: oklch(0.92 0.001 286.375);
+  --color-success-hover: oklch(0.70 0.17 150.81);
+  --color-warning-hover: oklch(0.75 0.14 72.33);
+  --color-danger-hover: oklch(0.62 0.21 25.74);
+
+  /* Background shades */
+  --color-background-secondary: oklch(0.95 0 0);
+  --color-background-tertiary: oklch(0.92 0 0);
+  --color-background-quaternary: oklch(0.88 0 0);
+
+  /* Field colors */
+  --color-field-hover: oklch(0.98 0 0);
+  --color-field-border-hover: oklch(0.90 0 0);
+  --color-field-border-focus: oklch(0.85 0 0);
+
+  /* Soft colors (15-20% opacity approximations) */
+  --color-accent-soft: oklch(0.92 0.03 253.83);
+  --color-accent-soft-hover: oklch(0.89 0.04 253.83);
+  --color-danger-soft: oklch(0.92 0.03 25.74);
+  --color-danger-soft-hover: oklch(0.89 0.05 25.74);
+  --color-warning-soft: oklch(0.94 0.03 72.33);
+  --color-warning-soft-hover: oklch(0.92 0.04 72.33);
+  --color-success-soft: oklch(0.94 0.03 150.81);
+  --color-success-soft-hover: oklch(0.92 0.04 150.81);
+
+  /* Surface levels */
+  --color-surface-secondary: oklch(0.96 0 0);
+  --color-surface-tertiary: oklch(0.94 0 0);
+  --color-surface-quaternary: oklch(0.90 0 0);
+
+  /* On surface colors */
+  --color-on-surface: oklch(0.95 0 0);
+  --color-on-surface-hover: oklch(0.93 0 0);
+}
+
+/* Theme-specific variable overrides */
+@layer theme {
+  :root {
+    @variant light {
+      /* Light mode hover colors */
+      --color-accent-hover: oklch(0.66 0.18 253.83);
+      --color-default-hover: oklch(0.92 0.001 286.375);
+      --color-success-hover: oklch(0.70 0.17 150.81);
+      --color-warning-hover: oklch(0.75 0.14 72.33);
+      --color-danger-hover: oklch(0.62 0.21 25.74);
+
+      /* Background shades */
+      --color-background-secondary: oklch(0.95 0 0);
+      --color-background-tertiary: oklch(0.92 0 0);
+      --color-background-quaternary: oklch(0.88 0 0);
+
+      /* Field colors */
+      --color-field-hover: oklch(0.98 0 0);
+      --color-field-border-hover: oklch(0.90 0 0);
+      --color-field-border-focus: oklch(0.85 0 0);
+
+      /* Soft colors (15-20% opacity approximations) */
+      --color-accent-soft: oklch(0.92 0.03 253.83);
+      --color-accent-soft-hover: oklch(0.89 0.04 253.83);
+      --color-danger-soft: oklch(0.92 0.03 25.74);
+      --color-danger-soft-hover: oklch(0.89 0.05 25.74);
+      --color-warning-soft: oklch(0.94 0.03 72.33);
+      --color-warning-soft-hover: oklch(0.92 0.04 72.33);
+      --color-success-soft: oklch(0.94 0.03 150.81);
+      --color-success-soft-hover: oklch(0.92 0.04 150.81);
+
+      /* Surface levels */
+      --color-surface-secondary: oklch(0.96 0 0);
+      --color-surface-tertiary: oklch(0.94 0 0);
+      --color-surface-quaternary: oklch(0.90 0 0);
+
+      /* On surface colors */
+      --color-on-surface: oklch(0.95 0 0);
+      --color-on-surface-hover: oklch(0.93 0 0);
+    }
+
+    @variant dark {
+      /* Dark mode hover colors */
+      --color-accent-hover: oklch(0.58 0.17 253.83);
+      --color-default-hover: oklch(0.30 0.006 286.033);
+      --color-success-hover: oklch(0.70 0.17 150.81);
+      --color-warning-hover: oklch(0.79 0.12 76.34);
+      --color-danger-hover: oklch(0.56 0.18 24.63);
+
+      /* Background shades */
+      --color-background-secondary: oklch(0.08 0 0);
+      --color-background-tertiary: oklch(0.12 0 0);
+      --color-background-quaternary: oklch(0.18 0 0);
+
+      /* Field colors */
+      --color-field-hover: oklch(0.30 0.006 286.033);
+      --color-field-border-hover: oklch(0.35 0 0);
+      --color-field-border-focus: oklch(0.40 0 0);
+
+      /* Soft colors */
+      --color-accent-soft: oklch(0.25 0.04 253.83);
+      --color-accent-soft-hover: oklch(0.28 0.05 253.83);
+      --color-danger-soft: oklch(0.25 0.04 24.63);
+      --color-danger-soft-hover: oklch(0.28 0.05 24.63);
+      --color-warning-soft: oklch(0.28 0.03 76.34);
+      --color-warning-soft-hover: oklch(0.30 0.04 76.34);
+      --color-success-soft: oklch(0.28 0.04 150.81);
+      --color-success-soft-hover: oklch(0.30 0.05 150.81);
+
+      /* Surface levels */
+      --color-surface-secondary: oklch(0.24 0.006 285.89);
+      --color-surface-tertiary: oklch(0.26 0.006 285.89);
+      --color-surface-quaternary: oklch(0.30 0.006 285.89);
+
+      /* On surface colors */
+      --color-on-surface: oklch(0.24 0.006 285.89);
+      --color-on-surface-hover: oklch(0.26 0.006 285.89);
+    }
+  }
+}
+
+/* Custom theme extensions */
+@theme {
+  /* Category colors for charts */
+  --color-expense-food: #ef4444;
+  --color-expense-transport: #f97316;
+  --color-expense-bills: #eab308;
+  --color-expense-shopping: #22c55e;
+  --color-expense-entertainment: #14b8a6;
+  --color-expense-health: #06b6d4;
+  --color-expense-education: #3b82f6;
+  --color-expense-personal: #8b5cf6;
+  --color-expense-travel: #ec4899;
+  --color-expense-other: #6b7280;
+
+  --color-income-salary: #22c55e;
+  --color-income-business: #3b82f6;
+  --color-income-investments: #8b5cf6;
+  --color-income-freelance: #f97316;
+  --color-income-other: #6b7280;
+
+  /* Account type colors */
+  --color-account-debit: #22c55e;
+  --color-account-credit: #f97316;
+  --color-account-owed: #3b82f6;
+  --color-account-debt: #ef4444;
+}
