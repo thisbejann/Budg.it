@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TouchableOpacityProps,
 } from 'react-native';
+import { Card as HeroCard, Surface } from 'heroui-native';
 import { useTheme } from '../../../hooks/useColorScheme';
 
 interface CardProps extends ViewProps {
@@ -23,30 +24,16 @@ export function Card({
   style,
   ...props
 }: CardProps) {
-  const { colors, isDark } = useTheme();
-
-  const containerStyle = {
-    borderRadius: 16,
-    backgroundColor: colors.card,
-    // Enhanced MD3 Elevation 2
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: isDark ? 0.3 : 0.12,
-    shadowRadius: 6,
-    elevation: 3,
-    // Consistent border in both modes to prevent shift
-    borderWidth: 1,
-    borderColor: isDark ? colors.border : colors.outlineVariant,
-  };
-
   return (
-    <View
-      className={`p-4 ${className || ''}`}
-      style={[containerStyle, style]}
+    <HeroCard
+      className={`p-4 border border-divider ${className || ''}`}
+      style={style}
       {...props}
     >
-      {children}
-    </View>
+      <HeroCard.Body>
+        {children}
+      </HeroCard.Body>
+    </HeroCard>
   );
 }
 
@@ -54,6 +41,7 @@ export function CardPressable({
   children,
   className,
   style,
+  onPress,
   ...props
 }: CardPressableProps) {
   const { colors, isDark } = useTheme();
@@ -61,13 +49,11 @@ export function CardPressable({
   const containerStyle = {
     borderRadius: 16,
     backgroundColor: colors.card,
-    // Enhanced MD3 Elevation 2
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: isDark ? 0.3 : 0.12,
     shadowRadius: 6,
     elevation: 3,
-    // Consistent border in both modes to prevent shift
     borderWidth: 1,
     borderColor: isDark ? colors.border : colors.outlineVariant,
   };
@@ -77,6 +63,7 @@ export function CardPressable({
       className={`p-4 ${className || ''}`}
       style={[containerStyle, style]}
       activeOpacity={0.7}
+      onPress={onPress}
       {...props}
     >
       {children}
@@ -86,9 +73,9 @@ export function CardPressable({
 
 export function CardHeader({ children, className, ...props }: CardProps) {
   return (
-    <View className={`pb-2 ${className || ''}`} {...props}>
+    <HeroCard.Header className={className} {...props}>
       {children}
-    </View>
+    </HeroCard.Header>
   );
 }
 
@@ -98,17 +85,10 @@ export function CardTitle({
   style,
   ...props
 }: TextProps & { children: React.ReactNode }) {
-  const { colors } = useTheme();
   return (
-    <Text
-      className={`text-lg font-semibold leading-none tracking-tight ${
-        className || ''
-      }`}
-      style={[{ color: colors.foreground }, style]}
-      {...props}
-    >
+    <HeroCard.Title className={className} style={style} {...props}>
       {children}
-    </Text>
+    </HeroCard.Title>
   );
 }
 
@@ -118,33 +98,25 @@ export function CardDescription({
   style,
   ...props
 }: TextProps & { children: React.ReactNode }) {
-  const { colors } = useTheme();
   return (
-    <Text
-      className={`text-sm ${className || ''}`}
-      style={[{ color: colors.mutedForeground }, style]}
-      {...props}
-    >
+    <HeroCard.Description className={className} style={style} {...props}>
       {children}
-    </Text>
+    </HeroCard.Description>
   );
 }
 
 export function CardContent({ children, className, ...props }: CardProps) {
   return (
-    <View className={`${className || ''}`} {...props}>
+    <HeroCard.Body className={className} {...props}>
       {children}
-    </View>
+    </HeroCard.Body>
   );
 }
 
 export function CardFooter({ children, className, ...props }: CardProps) {
   return (
-    <View
-      className={`flex-row items-center pt-4 ${className || ''}`}
-      {...props}
-    >
+    <HeroCard.Footer className={`flex-row items-center ${className || ''}`} {...props}>
       {children}
-    </View>
+    </HeroCard.Footer>
   );
 }
