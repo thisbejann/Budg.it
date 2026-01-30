@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   TouchableOpacityProps,
 } from 'react-native';
-import { Card as HeroCard, Surface } from 'heroui-native';
+import { Card as HeroCard } from 'heroui-native';
 import { useTheme } from '../../../hooks/useColorScheme';
 
 interface CardProps extends ViewProps {
@@ -30,9 +30,7 @@ export function Card({
       style={style}
       {...props}
     >
-      <HeroCard.Body>
-        {children}
-      </HeroCard.Body>
+      {children}
     </HeroCard>
   );
 }

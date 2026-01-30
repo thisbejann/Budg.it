@@ -16,7 +16,23 @@ npm test           # Run Jest tests
 
 ## Architecture
 
-**Stack:** React Native + Expo SDK 54, TypeScript, NativeWind (Tailwind), Zustand, expo-sqlite
+**Stack:** React Native + Expo SDK 54, TypeScript, NativeWind (Tailwind), Zustand, expo-sqlite, HeroUI Native
+
+## HeroUI Native Reference
+
+Use HeroUI Native documentation from https://v3.heroui.com/native/llms.txt
+
+Available documentation files:
+- https://v3.heroui.com/native/llms.txt - Quick reference index
+- https://v3.heroui.com/native/llms-full.txt - Complete documentation
+- https://v3.heroui.com/native/llms-components.txt - Component docs only
+- https://v3.heroui.com/native/llms-patterns.txt - Common patterns and recipes
+
+HeroUI Native is a React Native component library using:
+- Compound components pattern (e.g., `Button.StartContent`, `Button.LabelContent`)
+- React Native Reanimated for animations
+- Uniwind (Tailwind CSS for React Native) for styling
+- Semantic color system with theme variables
 
 ### Data Flow
 
@@ -66,6 +82,7 @@ DatabaseProvider initializes the database and creates default ledger on first ru
 - **Form validation** - react-hook-form + zod schemas in `src/types/forms.ts`
 - **Styling** - NativeWind classes; colors defined in `tailwind.config.js`
 - **Entity types** - Defined in `src/types/database.ts` (Ledger, Account, Transaction, Category, etc.)
+- **UI Components** - Use HeroUI Native components with compound pattern (prefer over custom implementations)
 
 ## Account Types
 

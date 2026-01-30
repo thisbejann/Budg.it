@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useColorScheme as useRNColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -14,19 +14,24 @@ interface AppProvidersProps {
 
 function ThemeSyncer({ children }: { children: React.ReactNode }) {
   const themeMode = useThemeStore((state) => state.themeMode);
+  const [hydrated, setHydrated] = useState(useThemeStore.persist.hasHydrated());
   const systemColorScheme = useRNColorScheme();
 
   useEffect(() => {
-    let effectiveTheme: 'light' | 'dark';
+    const unsub = useThemeStore.persist.onFinishHydration(() => setHydrated(true));
+    return unsub;
+  }, []);
 
-    if (themeMode === 'system') {
-      effectiveTheme = systemColorScheme === 'dark' ? 'dark' : 'light';
-    } else {
-      effectiveTheme = themeMode;
-    }
+  useEffect(() => {
+    if (!hydrated) return;
+
+    const effectiveTheme =
+      themeMode === 'system'
+        ? systemColorScheme === 'dark' ? 'dark' : 'light'
+        : themeMode;
 
     Uniwind.setTheme(effectiveTheme);
-  }, [themeMode, systemColorScheme]);
+  }, [themeMode, systemColorScheme, hydrated]);
 
   return <>{children}</>;
 }
