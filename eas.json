@@ -7,12 +7,24 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "env": {
+        "APP_VARIANT": "development"
+      },
       "android": {
         "buildType": "apk"
       }
     },
     "preview": {
       "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "beta": {
+      "distribution": "internal",
+      "env": {
+        "APP_VARIANT": "beta"
+      },
       "android": {
         "buildType": "apk"
       }

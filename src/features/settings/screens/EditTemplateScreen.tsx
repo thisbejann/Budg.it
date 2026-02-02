@@ -14,6 +14,7 @@ import { useLedgerStore } from '../../../store';
 import { TemplateRepository, AccountRepository, CategoryRepository } from '../../../database/repositories';
 import { COLORS, CATEGORY_COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -38,6 +39,7 @@ export function EditTemplateScreen() {
   const route = useRoute<EditTemplateRouteProp>();
   const templateId = route.params.templateId;
   const { activeLedgerId } = useLedgerStore();
+  const { colors } = useTheme();
 
   const [template, setTemplate] = useState<TransactionTemplateWithDetails | null>(null);
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
@@ -321,7 +323,7 @@ export function EditTemplateScreen() {
                   >
                     <IconComp
                       size={20}
-                      color={selectedIcon === iconName ? '#ffffff' : COLORS.foreground}
+                      color={selectedIcon === iconName ? '#ffffff' : colors.foreground}
                     />
                   </TouchableOpacity>
                 );

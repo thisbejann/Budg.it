@@ -12,6 +12,7 @@ import { Button, Input } from '../../../shared/components/ui';
 import { CategoryRepository } from '../../../database/repositories';
 import { COLORS, CATEGORY_COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -29,6 +30,7 @@ export function AddCategoryScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<AddCategoryRouteProp>();
   const categoryType = route.params.type;
+  const { colors } = useTheme();
 
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
@@ -151,7 +153,7 @@ export function AddCategoryScreen() {
                   >
                     <IconComp
                       size={20}
-                      color={selectedIcon === iconName ? '#ffffff' : COLORS.foreground}
+                      color={selectedIcon === iconName ? '#ffffff' : colors.foreground}
                     />
                   </TouchableOpacity>
                 );

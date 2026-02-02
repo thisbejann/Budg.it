@@ -13,6 +13,7 @@ import { Button, CurrencyInput, Input, Select, SelectOption } from '../../../sha
 import { AccountRepository, PersonRepository } from '../../../database/repositories';
 import { COLORS, ACCOUNT_COLORS } from '../../../constants/colors';
 import { ACCOUNT_ICONS } from '../../../constants/icons';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -41,6 +42,7 @@ export function EditAccountScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<EditAccountRouteProp>();
   const accountId = route.params.accountId;
+  const { colors } = useTheme();
 
   const [account, setAccount] = useState<AccountWithPerson | null>(null);
   const [persons, setPersons] = useState<Person[]>([]);
@@ -309,7 +311,7 @@ export function EditAccountScreen() {
                   >
                     <IconComp
                       size={20}
-                      color={selectedIcon === iconName ? '#ffffff' : COLORS.foreground}
+                      color={selectedIcon === iconName ? '#ffffff' : colors.foreground}
                     />
                   </TouchableOpacity>
                 );

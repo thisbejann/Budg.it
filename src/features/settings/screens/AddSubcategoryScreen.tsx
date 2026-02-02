@@ -13,6 +13,7 @@ import { Button, Input } from '../../../shared/components/ui';
 import { CategoryRepository } from '../../../database/repositories';
 import { COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -29,6 +30,7 @@ export function AddSubcategoryScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<AddSubcategoryRouteProp>();
   const categoryId = route.params.categoryId;
+  const { colors } = useTheme();
 
   const [category, setCategory] = useState<Category | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -172,7 +174,7 @@ export function AddSubcategoryScreen() {
               </View>
             ) : (
               <View className="h-10 w-10 items-center justify-center rounded-lg bg-secondary">
-                <LucideIcons.Plus size={20} color={COLORS.mutedForeground} />
+                <LucideIcons.Plus size={20} color={colors.mutedForeground} />
               </View>
             )}
             <Text className="flex-1 text-foreground">
@@ -183,7 +185,7 @@ export function AddSubcategoryScreen() {
                 onPress={() => setValue('icon', '')}
                 className="p-1"
               >
-                <LucideIcons.X size={18} color={COLORS.mutedForeground} />
+                <LucideIcons.X size={18} color={colors.mutedForeground} />
               </TouchableOpacity>
             )}
           </TouchableOpacity>
@@ -212,7 +214,7 @@ export function AddSubcategoryScreen() {
                   >
                     <IconComp
                       size={20}
-                      color={selectedIcon === iconName ? '#ffffff' : COLORS.foreground}
+                      color={selectedIcon === iconName ? '#ffffff' : colors.foreground}
                     />
                   </TouchableOpacity>
                 );
