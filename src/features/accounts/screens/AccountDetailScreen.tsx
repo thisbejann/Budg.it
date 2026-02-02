@@ -167,7 +167,7 @@ export function AccountDetailScreen() {
       <Screen>
         <Header title="Account Details" showBack />
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </Screen>
     );
