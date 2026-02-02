@@ -10,29 +10,56 @@ npm run android    # Run on Android (requires dev build)
 npm run ios        # Run on iOS simulator
 npm run lint       # Run ESLint
 npm test           # Run Jest tests
+npm run build:dev  # Build dev APK (EAS Cloud)
+npm run build:beta # Build beta APK (EAS Cloud)
 ```
 
-**Note:** This is an Expo managed project using expo-sqlite, so you need a development build (not Expo Go) to run the app. Use `eas build --profile development --platform android` for cloud builds.
+**Note:** This is an Expo managed project using expo-sqlite, so you need a development build (not Expo Go) to run the app.
 
 ## Architecture
 
-**Stack:** React Native + Expo SDK 54, TypeScript, NativeWind (Tailwind), Zustand, expo-sqlite, HeroUI Native
+**Stack:** React Native 0.81 + Expo SDK 54, TypeScript, Uniwind (Tailwind CSS v4), Zustand, expo-sqlite, HeroUI Native
 
-## HeroUI Native Reference
+### Styling Stack
 
-Use HeroUI Native documentation from https://v3.heroui.com/native/llms.txt
+```
+global.css → Tailwind CSS v4 + Uniwind + HeroUI Native styles
+           ↓
+metro.config.js → withUniwindConfig() processes CSS
+           ↓
+Components → Use Tailwind classes via className prop
+```
 
-Available documentation files:
-- https://v3.heroui.com/native/llms.txt - Quick reference index
-- https://v3.heroui.com/native/llms-full.txt - Complete documentation
-- https://v3.heroui.com/native/llms-components.txt - Component docs only
-- https://v3.heroui.com/native/llms-patterns.txt - Common patterns and recipes
+- **Uniwind**: Tailwind CSS for React Native (replaces NativeWind)
+- **Tailwind CSS v4**: Modern CSS-first config via `global.css`
+- **HeroUI Native**: Component library built on Uniwind + Reanimated
+- **Theme colors**: Defined in `global.css` using CSS variables with OKLCH color space
+
+### Theme System
+
+- **Light/Dark/System modes**: Managed by `useThemeStore` (Zustand + AsyncStorage)
+- **Dynamic colors**: Use `useTheme()` hook from `src/hooks/useColorScheme.ts`
+- **Color palette**: MD3-inspired with Fnatic Orange (#FF5900) as primary
+- **Color constants**: `src/constants/colors.ts` (COLORS for light, COLORS_DARK for dark)
+
+```tsx
+// For dynamic theme colors in components:
+const { colors, isDark } = useTheme();
+<Icon color={colors.foreground} />
+
+// For static Tailwind classes:
+<Text className="text-foreground bg-background" />
+```
+
+## HeroUI Native
 
 HeroUI Native is a React Native component library using:
 - Compound components pattern (e.g., `Button.StartContent`, `Button.LabelContent`)
 - React Native Reanimated for animations
-- Uniwind (Tailwind CSS for React Native) for styling
-- Semantic color system with theme variables
+- Uniwind (Tailwind CSS v4) for styling
+- Semantic color system with CSS variables
+
+**MCP Server available**: Use the heroui-native MCP tools for component docs.
 
 ### Data Flow
 
@@ -80,9 +107,20 @@ DatabaseProvider initializes the database and creates default ledger on first ru
 
 - **Repository pattern** - Never access DB directly; use repositories
 - **Form validation** - react-hook-form + zod schemas in `src/types/forms.ts`
-- **Styling** - NativeWind classes; colors defined in `tailwind.config.js`
+- **Styling** - Uniwind/Tailwind classes via `className`; theme colors in `global.css`
+- **Dynamic colors** - Use `useTheme()` hook for icon colors and inline styles
 - **Entity types** - Defined in `src/types/database.ts` (Ledger, Account, Transaction, Category, etc.)
 - **UI Components** - Use HeroUI Native components with compound pattern (prefer over custom implementations)
+
+## Build Variants
+
+App uses dynamic config (`app.config.js`) with APP_VARIANT env:
+
+| Variant | Package Name | App Name |
+|---------|--------------|----------|
+| development | com.budgettracker.dev | BudgetTracker (Dev) |
+| beta | com.budgettracker.beta | BudgetTracker (Beta) |
+| production | com.budgettracker | BudgetTracker |
 
 ## Account Types
 
@@ -93,11 +131,9 @@ DatabaseProvider initializes the database and creates default ledger on first ru
 
 ## Git
 
-- Create a new branch for each feature/fix prefixed by "FEATURE:" or "FIX: "
+- Branch naming: `jannjaspher/<descriptive-name>` (e.g., `jannjaspher/add-transaction-form`)
+- Open PRs against `master`
 - Commit often with clear messages
-- Open PRs against `main` for review
-- Always name your branches with prefix 'jannjaspher/' followed by a descriptive name, e.g., 'jannjaspher/add-transaction-form' to indicate that i made the change
-- When pushing to remote, always create a pull request for code review before merging
 
 ## Plan Mode
 
