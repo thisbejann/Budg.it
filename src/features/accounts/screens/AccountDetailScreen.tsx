@@ -32,7 +32,6 @@ import {
 } from '../../../database/repositories';
 import { useLedgerStore } from '../../../store';
 import { formatPHP } from '../../../shared/utils/currency';
-import { COLORS } from '../../../constants/colors';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 import {
@@ -130,7 +129,7 @@ export function AccountDetailScreen() {
         <View className="flex-row items-center gap-3">
           <View
             className="h-10 w-10 items-center justify-center rounded-full"
-            style={{ backgroundColor: item.category_color || COLORS.muted }}
+            style={{ backgroundColor: item.category_color || colors.muted }}
           >
             {CategoryIcon ? (
               <CategoryIcon size={18} color="#ffffff" />
