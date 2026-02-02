@@ -86,15 +86,15 @@ export function AccountDetailScreen() {
   const getAccountTypeColor = (type: string) => {
     switch (type) {
       case 'debit':
-        return COLORS.accountDebit;
+        return colors.accountDebit;
       case 'credit':
-        return COLORS.accountCredit;
+        return colors.accountCredit;
       case 'owed':
-        return COLORS.accountOwed;
+        return colors.accountOwed;
       case 'debt':
-        return COLORS.accountDebt;
+        return colors.accountDebt;
       default:
-        return COLORS.primary;
+        return colors.primary;
     }
   };
 
