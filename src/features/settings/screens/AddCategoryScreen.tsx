@@ -10,7 +10,7 @@ import type { RootStackParamList } from '../../../types/navigation';
 import { Screen, Header } from '../../../shared/components/layout';
 import { Button, Input } from '../../../shared/components/ui';
 import { CategoryRepository } from '../../../database/repositories';
-import { COLORS, CATEGORY_COLORS } from '../../../constants/colors';
+import { CATEGORY_COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
@@ -46,7 +46,7 @@ export function AddCategoryScreen() {
     defaultValues: {
       name: '',
       icon: 'tag',
-      color: categoryType === 'expense' ? COLORS.expense : COLORS.income,
+      color: categoryType === 'expense' ? colors.expense : colors.income,
     },
   });
 
