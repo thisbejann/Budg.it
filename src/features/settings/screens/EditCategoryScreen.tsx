@@ -11,7 +11,7 @@ import type { Category } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
 import { Button, Input } from '../../../shared/components/ui';
 import { CategoryRepository } from '../../../database/repositories';
-import { COLORS, CATEGORY_COLORS } from '../../../constants/colors';
+import { CATEGORY_COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
@@ -160,12 +160,12 @@ export function EditCategoryScreen() {
               className="rounded-full px-3 py-1"
               style={{
                 backgroundColor:
-                  category.type === 'expense' ? COLORS.expense + '20' : COLORS.income + '20',
+                  category.type === 'expense' ? colors.expense + '20' : colors.income + '20',
               }}
             >
               <Text
                 style={{
-                  color: category.type === 'expense' ? COLORS.expense : COLORS.income,
+                  color: category.type === 'expense' ? colors.expense : colors.income,
                 }}
                 className="text-sm font-medium"
               >
