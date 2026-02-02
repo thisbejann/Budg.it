@@ -9,8 +9,9 @@ import type { RootStackParamList } from '../../../types/navigation';
 import { Screen, Header } from '../../../shared/components/layout';
 import { Button, Input } from '../../../shared/components/ui';
 import { LedgerRepository } from '../../../database/repositories';
-import { COLORS, CATEGORY_COLORS } from '../../../constants/colors';
+import { CATEGORY_COLORS } from '../../../constants/colors';
 import { LEDGER_ICONS } from '../../../constants/icons';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -26,6 +27,7 @@ type LedgerFormSchema = z.infer<typeof ledgerSchema>;
 
 export function AddLedgerScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
 
@@ -163,7 +165,7 @@ export function AddLedgerScreen() {
                   >
                     <IconComp
                       size={20}
-                      color={selectedIcon === iconName ? '#ffffff' : COLORS.foreground}
+                      color={selectedIcon === iconName ? '#ffffff' : colors.foreground}
                     />
                   </TouchableOpacity>
                 );

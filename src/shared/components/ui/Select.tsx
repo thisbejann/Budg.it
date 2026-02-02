@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { ChevronDown, Check, X } from 'lucide-react-native';
 import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 export interface SelectOption {
   label: string;
@@ -37,6 +38,7 @@ export function Select({
   disabled,
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { colors } = useTheme();
 
   const selectedOption = options.find((opt) => opt.value === value);
 
@@ -73,7 +75,7 @@ export function Select({
             {selectedOption?.label || placeholder}
           </Text>
         </View>
-        <ChevronDown size={20} color={COLORS.mutedForeground} />
+        <ChevronDown size={20} color={colors.mutedForeground} />
       </TouchableOpacity>
       {error && (
         <Text className="mt-1 text-sm text-destructive">{error}</Text>
@@ -92,7 +94,7 @@ export function Select({
                 {label || 'Select'}
               </Text>
               <TouchableOpacity onPress={() => setIsOpen(false)}>
-                <X size={24} color={COLORS.foreground} />
+                <X size={24} color={colors.foreground} />
               </TouchableOpacity>
             </View>
             <FlatList

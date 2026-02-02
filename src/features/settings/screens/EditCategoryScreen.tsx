@@ -11,8 +11,9 @@ import type { Category } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
 import { Button, Input } from '../../../shared/components/ui';
 import { CategoryRepository } from '../../../database/repositories';
-import { COLORS, CATEGORY_COLORS } from '../../../constants/colors';
+import { CATEGORY_COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -30,6 +31,7 @@ export function EditCategoryScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<EditCategoryRouteProp>();
   const categoryId = route.params.categoryId;
+  const { colors } = useTheme();
 
   const [category, setCategory] = useState<Category | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -140,7 +142,7 @@ export function EditCategoryScreen() {
       <Screen>
         <Header title="Edit Category" showBack />
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </Screen>
     );
@@ -158,12 +160,12 @@ export function EditCategoryScreen() {
               className="rounded-full px-3 py-1"
               style={{
                 backgroundColor:
-                  category.type === 'expense' ? COLORS.expense + '20' : COLORS.income + '20',
+                  category.type === 'expense' ? colors.expense + '20' : colors.income + '20',
               }}
             >
               <Text
                 style={{
-                  color: category.type === 'expense' ? COLORS.expense : COLORS.income,
+                  color: category.type === 'expense' ? colors.expense : colors.income,
                 }}
                 className="text-sm font-medium"
               >
@@ -244,7 +246,7 @@ export function EditCategoryScreen() {
                   >
                     <IconComp
                       size={20}
-                      color={selectedIcon === iconName ? '#ffffff' : COLORS.foreground}
+                      color={selectedIcon === iconName ? '#ffffff' : colors.foreground}
                     />
                   </TouchableOpacity>
                 );

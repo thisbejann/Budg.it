@@ -11,8 +11,9 @@ import { Screen, Header } from '../../../shared/components/layout';
 import { Button, CurrencyInput, Input, Select, SelectOption } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TemplateRepository, AccountRepository, CategoryRepository } from '../../../database/repositories';
-import { COLORS, CATEGORY_COLORS } from '../../../constants/colors';
+import { CATEGORY_COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -34,6 +35,7 @@ type TemplateFormSchema = z.infer<typeof templateSchema>;
 export function AddTemplateScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { activeLedgerId } = useLedgerStore();
+  const { colors } = useTheme();
 
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
@@ -247,7 +249,7 @@ export function AddTemplateScreen() {
                   >
                     <IconComp
                       size={20}
-                      color={selectedIcon === iconName ? '#ffffff' : COLORS.foreground}
+                      color={selectedIcon === iconName ? '#ffffff' : colors.foreground}
                     />
                   </TouchableOpacity>
                 );

@@ -14,6 +14,7 @@ import { LedgerRepository } from '../../../database/repositories';
 import { useLedgerStore } from '../../../store';
 import { COLORS, CATEGORY_COLORS } from '../../../constants/colors';
 import { LEDGER_ICONS } from '../../../constants/icons';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -33,6 +34,7 @@ export function EditLedgerScreen() {
   const route = useRoute<EditLedgerRouteProp>();
   const ledgerId = route.params.ledgerId;
   const { activeLedgerId } = useLedgerStore();
+  const { colors } = useTheme();
 
   const [ledger, setLedger] = useState<Ledger | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -268,7 +270,7 @@ export function EditLedgerScreen() {
                   >
                     <IconComp
                       size={20}
-                      color={selectedIcon === iconName ? '#ffffff' : COLORS.foreground}
+                      color={selectedIcon === iconName ? '#ffffff' : colors.foreground}
                     />
                   </TouchableOpacity>
                 );
