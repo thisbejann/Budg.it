@@ -31,13 +31,20 @@ export function BottomTabNavigator() {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
-          paddingBottom: 8,
-          paddingTop: 8,
           height: 60,
         },
+        tabBarItemStyle: {
+          paddingVertical: 6,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        tabBarIconStyle: {
+          marginBottom: 2,
+        },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: '500',
+          marginTop: 0,
         },
       }}
     >

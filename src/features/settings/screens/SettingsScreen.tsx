@@ -15,7 +15,12 @@ import {
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import { Screen, SimpleHeader } from '../../../shared/components/layout';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../shared/components/ui';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from '../../../shared/components/ui';
 import { useLedgerStore, useThemeStore, ThemeMode } from '../../../store';
 import { useTheme } from '../../../hooks/useColorScheme';
 
@@ -29,7 +34,13 @@ interface SettingItemProps {
   colors: ReturnType<typeof useTheme>['colors'];
 }
 
-function SettingItem({ icon, title, description, onPress, colors }: SettingItemProps) {
+function SettingItem({
+  icon,
+  title,
+  description,
+  onPress,
+  colors,
+}: SettingItemProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -44,9 +55,16 @@ function SettingItem({ icon, title, description, onPress, colors }: SettingItemP
           {icon}
         </View>
         <View>
-          <Text className="text-base font-medium" style={{ color: colors.foreground }}>{title}</Text>
+          <Text
+            className="text-base font-medium"
+            style={{ color: colors.foreground }}
+          >
+            {title}
+          </Text>
           {description && (
-            <Text className="text-xs" style={{ color: colors.mutedForeground }}>{description}</Text>
+            <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+              {description}
+            </Text>
           )}
         </View>
       </View>
@@ -75,8 +93,13 @@ export function SettingsScreen() {
         {/* Current Ledger Info */}
         <Card className="mb-4">
           <CardContent>
-            <Text className="text-xs" style={{ color: colors.mutedForeground }}>Current Ledger</Text>
-            <Text className="text-lg font-semibold" style={{ color: colors.foreground }}>
+            <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+              Current Ledger
+            </Text>
+            <Text
+              className="text-lg font-semibold"
+              style={{ color: colors.foreground }}
+            >
               {activeLedger?.name || 'No ledger selected'}
             </Text>
           </CardContent>
@@ -88,20 +111,33 @@ export function SettingsScreen() {
             <CardTitle>Appearance</CardTitle>
           </CardHeader>
           <CardContent>
-            <View className="flex-row gap-2">
+            <View className="flex-row gap-2 py-3">
               {themeModes.map(({ mode, label, icon: Icon }) => (
                 <TouchableOpacity
                   key={mode}
                   onPress={() => setThemeMode(mode)}
                   className="flex-1 items-center rounded-lg py-3"
                   style={{
-                    backgroundColor: themeMode === mode ? colors.primary : colors.surfaceVariant,
+                    backgroundColor:
+                      themeMode === mode
+                        ? colors.primary
+                        : colors.surfaceVariant,
                   }}
                 >
-                  <Icon size={20} color={themeMode === mode ? colors.onPrimary : colors.foreground} />
+                  <Icon
+                    size={20}
+                    color={
+                      themeMode === mode ? colors.onPrimary : colors.foreground
+                    }
+                  />
                   <Text
                     className="mt-1 text-sm font-medium"
-                    style={{ color: themeMode === mode ? colors.onPrimary : colors.foreground }}
+                    style={{
+                      color:
+                        themeMode === mode
+                          ? colors.onPrimary
+                          : colors.foreground,
+                    }}
                   >
                     {label}
                   </Text>
@@ -173,10 +209,18 @@ export function SettingsScreen() {
                 <Info size={20} color={colors.primary} />
               </View>
               <View>
-                <Text className="text-base font-medium" style={{ color: colors.foreground }}>
+                <Text
+                  className="text-base font-medium"
+                  style={{ color: colors.foreground }}
+                >
                   Budget Tracker
                 </Text>
-                <Text className="text-xs" style={{ color: colors.mutedForeground }}>Version 1.0.0</Text>
+                <Text
+                  className="text-xs"
+                  style={{ color: colors.mutedForeground }}
+                >
+                  Version 1.0.0
+                </Text>
               </View>
             </View>
           </CardContent>

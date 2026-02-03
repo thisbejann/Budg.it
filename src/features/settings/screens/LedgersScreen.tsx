@@ -72,13 +72,13 @@ export function LedgersScreen() {
           </View>
           <View className="flex-1">
             <View className="flex-row items-center gap-2">
-              <Text className="font-medium text-foreground">{item.name}</Text>
+              <Text className="font-medium" style={{ color: colors.foreground }}>{item.name}</Text>
               {item.is_default && (
                 <Badge variant="secondary">Default</Badge>
               )}
             </View>
             {item.description && (
-              <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+              <Text className="text-xs" style={{ color: colors.mutedForeground }} numberOfLines={1}>
                 {item.description}
               </Text>
             )}
@@ -132,8 +132,8 @@ export function LedgersScreen() {
         </View>
       ) : (
         <>
-          <View className="bg-secondary/50 px-4 py-2">
-            <Text className="text-xs text-muted-foreground">
+          <View className="px-4 py-2" style={{ backgroundColor: colors.muted }}>
+            <Text className="text-xs" style={{ color: colors.mutedForeground }}>
               Tap a ledger to switch to it. Tap the arrow to edit.
             </Text>
           </View>

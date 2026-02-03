@@ -9,41 +9,63 @@ interface BadgeProps extends ViewProps {
   children: React.ReactNode;
 }
 
-const variantStyles: Record<BadgeVariant, string> = {
-  default: 'bg-primary',
-  secondary: 'bg-secondary',
-  destructive: 'bg-destructive',
-  outline: 'border border-input bg-transparent',
-  success: '',
-  warning: '',
-};
-
-const variantTextStyles: Record<BadgeVariant, string> = {
-  default: 'text-white',
-  secondary: 'text-secondary-foreground',
-  destructive: 'text-white',
-  outline: 'text-foreground',
-  success: 'text-white',
-  warning: 'text-white',
-};
-
 export function Badge({ variant = 'default', children, className, style, ...props }: BadgeProps) {
   const { colors } = useTheme();
 
-  const bgColor = variant === 'success' ? colors.income : variant === 'warning' ? '#eab308' : undefined;
+  const getBackgroundColor = () => {
+    switch (variant) {
+      case 'default':
+        return colors.primary;
+      case 'secondary':
+        return colors.secondary;
+      case 'destructive':
+        return colors.destructive;
+      case 'outline':
+        return 'transparent';
+      case 'success':
+        return colors.income;
+      case 'warning':
+        return '#eab308';
+      default:
+        return colors.primary;
+    }
+  };
+
+  const getTextColor = () => {
+    switch (variant) {
+      case 'default':
+        return colors.primaryForeground;
+      case 'secondary':
+        return colors.secondaryForeground;
+      case 'destructive':
+        return colors.destructiveForeground;
+      case 'outline':
+        return colors.foreground;
+      case 'success':
+        return '#ffffff';
+      case 'warning':
+        return '#ffffff';
+      default:
+        return colors.primaryForeground;
+    }
+  };
 
   return (
     <View
       className={`
         inline-flex items-center rounded-full px-2.5 py-0.5
-        ${variantStyles[variant]}
+        ${variant === 'outline' ? 'border' : ''}
         ${className || ''}
       `}
-      style={[bgColor ? { backgroundColor: bgColor } : undefined, style]}
+      style={[
+        { backgroundColor: getBackgroundColor() },
+        variant === 'outline' && { borderColor: colors.border },
+        style,
+      ]}
       {...props}
     >
       {typeof children === 'string' ? (
-        <Text className={`text-xs font-semibold ${variantTextStyles[variant]}`}>
+        <Text className="text-xs font-semibold" style={{ color: getTextColor() }}>
           {children}
         </Text>
       ) : (
@@ -87,7 +109,7 @@ export function AccountTypeBadge({ type }: AccountTypeBadgeProps) {
       className="inline-flex items-center rounded-full px-2.5 py-0.5"
       style={{ backgroundColor: bgColor }}
     >
-      <Text className="text-xs font-semibold text-white">
+      <Text className="text-xs font-semibold" style={{ color: '#ffffff' }}>
         {accountTypeLabels[type]}
       </Text>
     </View>
