@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, useColorScheme } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { openDatabase } from '../../database';
 import { useLedgerStore } from '../../store';
-import { COLORS, COLORS_DARK } from '../../constants/colors';
+import { useTheme } from '../../hooks/useColorScheme';
 
 interface DatabaseContextType {
   isReady: boolean;
@@ -22,8 +22,7 @@ export function DatabaseProvider({ children }: DatabaseProviderProps) {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { initialize } = useLedgerStore();
-  const systemColorScheme = useColorScheme();
-  const colors = systemColorScheme === 'dark' ? COLORS_DARK : COLORS;
+  const { colors } = useTheme();
 
   useEffect(() => {
     async function initDatabase() {
