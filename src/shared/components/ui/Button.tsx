@@ -30,8 +30,17 @@ const sizeStyles: Record<ButtonSize, string> = {
   default: 'h-12 px-6 py-3',
   sm: 'h-9 px-4 py-2',
   lg: 'h-14 px-8 py-4',
-  icon: 'h-10 w-10',
-  fab: 'h-14 w-14',
+  icon: '',
+  fab: '',
+};
+
+// Inline styles for sizes that need exact dimensions (squares)
+const sizeInlineStyles: Record<ButtonSize, object> = {
+  default: {},
+  sm: {},
+  lg: {},
+  icon: { width: 40, height: 40 },
+  fab: { width: 56, height: 56 },
 };
 
 const sizeTextStyles: Record<ButtonSize, string> = {
@@ -75,9 +84,6 @@ export function Button({
         runOnJS(onPress)();
       }
     });
-
-  // MD3 uses 20dp full radius for buttons
-  const roundedClass = fullRounded || size === 'fab' ? 'rounded-full' : 'rounded-[20px]';
 
   // Get variant-specific styles
   const getVariantStyles = () => {
@@ -136,17 +142,28 @@ export function Button({
   const variantStyles = getVariantStyles();
   const textColor = getTextColor();
 
+  // Use inline styles for reliable circular buttons and exact dimensions
+  const isCircular = fullRounded || size === 'fab';
+  const isIconButton = size === 'fab' || size === 'icon';
+
+  const baseStyle = {
+    borderRadius: isCircular ? 9999 : 20,
+    ...sizeInlineStyles[size],
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    flexDirection: isIconButton ? ('column' as const) : ('row' as const),
+  };
+
   return (
     <GestureDetector gesture={gesture}>
       <Animated.View
         className={`
-          flex-row items-center justify-center
-          ${roundedClass}
+          ${isIconButton ? '' : 'flex-row items-center justify-center'}
           ${sizeStyles[size]}
           ${isDisabled ? 'opacity-50' : ''}
           ${className || ''}
         `}
-        style={[animatedStyle, variantStyles, style]}
+        style={[animatedStyle, variantStyles, baseStyle, style]}
         {...props}
       >
         {loading ? (

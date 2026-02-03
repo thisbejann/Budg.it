@@ -13,7 +13,7 @@ import { useLedgerStore } from '../../../store';
 import { TransferRepository, AccountRepository } from '../../../database/repositories';
 import { getToday, getCurrentTime } from '../../../shared/utils/date';
 import { ArrowDown } from 'lucide-react-native';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -34,6 +34,7 @@ type TransferFormData = z.infer<typeof transferSchema>;
 
 export function TransferScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
   const { activeLedgerId } = useLedgerStore();
 
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
@@ -150,7 +151,7 @@ export function TransferScreen() {
         {/* Arrow Icon */}
         <View className="mb-4 items-center">
           <View className="rounded-full bg-secondary p-2">
-            <ArrowDown size={20} color={COLORS.mutedForeground} />
+            <ArrowDown size={20} color={colors.mutedForeground} />
           </View>
         </View>
 

@@ -8,7 +8,6 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { ChevronDown, Check, X } from 'lucide-react-native';
-import { COLORS } from '../../../constants/colors';
 import { useTheme } from '../../../hooks/useColorScheme';
 
 export interface SelectOption {
@@ -116,7 +115,7 @@ export function Select({
                     </Text>
                   </View>
                   {item.value === value && (
-                    <Check size={20} color={COLORS.primary} />
+                    <Check size={20} color={colors.primary} />
                   )}
                 </TouchableOpacity>
               )}

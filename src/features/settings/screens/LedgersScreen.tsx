@@ -8,7 +8,7 @@ import { Screen, Header } from '../../../shared/components/layout';
 import { EmptyState, Badge } from '../../../shared/components/ui';
 import { LedgerRepository } from '../../../database/repositories';
 import { useLedgerStore } from '../../../store';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 import { Plus, Book, Check, ChevronRight } from 'lucide-react-native';
 
@@ -16,6 +16,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export function LedgersScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
   const { activeLedgerId, setActiveLedger } = useLedgerStore();
   const [ledgers, setLedgers] = useState<Ledger[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,7 +94,7 @@ export function LedgersScreen() {
             onPress={() => navigation.navigate('EditLedger', { ledgerId: item.id })}
             className="p-2"
           >
-            <ChevronRight size={20} color={COLORS.mutedForeground} />
+            <ChevronRight size={20} color={colors.mutedForeground} />
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
@@ -110,19 +111,19 @@ export function LedgersScreen() {
             onPress={() => navigation.navigate('AddLedger')}
             className="p-2"
           >
-            <Plus size={24} color={COLORS.primary} />
+            <Plus size={24} color={colors.primary} />
           </TouchableOpacity>
         }
       />
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : ledgers.length === 0 ? (
         <View className="flex-1 items-center justify-center p-4">
           <EmptyState
-            icon={<Book size={48} color={COLORS.mutedForeground} />}
+            icon={<Book size={48} color={colors.mutedForeground} />}
             title="No ledgers"
             description="Create your first ledger to start tracking"
             actionLabel="Add Ledger"

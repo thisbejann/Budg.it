@@ -1,7 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../types/navigation';
-import { COLORS } from '../../constants/colors';
+import { useTheme } from '../../hooks/useColorScheme';
 import { BottomTabNavigator } from './BottomTabNavigator';
 
 // Import modal/form screens
@@ -30,11 +30,13 @@ import { ExportScreen } from '../../features/settings/screens/ExportScreen';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
+  const { colors } = useTheme();
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: COLORS.background },
+        contentStyle: { backgroundColor: colors.background },
         animation: 'slide_from_right',
       }}
     >

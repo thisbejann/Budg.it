@@ -11,7 +11,7 @@ import type { Person } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
 import { Button, Input } from '../../../shared/components/ui';
 import { PersonRepository } from '../../../database/repositories';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type EditPersonRouteProp = RouteProp<RootStackParamList, 'EditPerson'>;
@@ -29,6 +29,7 @@ export function EditPersonScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<EditPersonRouteProp>();
   const personId = route.params.personId;
+  const { colors } = useTheme();
 
   const [person, setPerson] = useState<Person | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -127,7 +128,7 @@ export function EditPersonScreen() {
       <Screen>
         <Header title="Edit Person" showBack />
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </Screen>
     );

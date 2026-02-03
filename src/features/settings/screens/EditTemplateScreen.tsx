@@ -12,7 +12,7 @@ import { Screen, Header } from '../../../shared/components/layout';
 import { Button, CurrencyInput, Input, Select, SelectOption } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TemplateRepository, AccountRepository, CategoryRepository } from '../../../database/repositories';
-import { COLORS, CATEGORY_COLORS } from '../../../constants/colors';
+import { CATEGORY_COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
@@ -191,7 +191,7 @@ export function EditTemplateScreen() {
       <Screen>
         <Header title="Edit Template" showBack />
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </Screen>
     );

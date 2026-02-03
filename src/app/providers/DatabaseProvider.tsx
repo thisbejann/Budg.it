@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, useColorScheme } from 'react-native';
 import { openDatabase } from '../../database';
 import { useLedgerStore } from '../../store';
-import { COLORS } from '../../constants/colors';
+import { COLORS, COLORS_DARK } from '../../constants/colors';
 
 interface DatabaseContextType {
   isReady: boolean;
@@ -22,6 +22,8 @@ export function DatabaseProvider({ children }: DatabaseProviderProps) {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { initialize } = useLedgerStore();
+  const systemColorScheme = useColorScheme();
+  const colors = systemColorScheme === 'dark' ? COLORS_DARK : COLORS;
 
   useEffect(() => {
     async function initDatabase() {
@@ -54,7 +56,7 @@ export function DatabaseProvider({ children }: DatabaseProviderProps) {
   if (!isReady) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text className="mt-4 text-sm text-muted-foreground">Loading...</Text>
       </View>
     );
