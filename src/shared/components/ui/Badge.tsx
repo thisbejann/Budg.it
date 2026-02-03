@@ -30,12 +30,7 @@ const variantTextStyles: Record<BadgeVariant, string> = {
 export function Badge({ variant = 'default', children, className, style, ...props }: BadgeProps) {
   const { colors } = useTheme();
 
-  const variantColors: Partial<Record<BadgeVariant, string>> = {
-    success: colors.income,
-    warning: '#eab308',
-  };
-
-  const bgColor = variantColors[variant];
+  const bgColor = variant === 'success' ? colors.income : variant === 'warning' ? '#eab308' : undefined;
 
   return (
     <View
@@ -82,17 +77,15 @@ const accountTypeLabels: Record<string, string> = {
 export function AccountTypeBadge({ type }: AccountTypeBadgeProps) {
   const { colors } = useTheme();
 
-  const accountTypeColors: Record<string, string> = {
-    debit: colors.accountDebit,
-    credit: colors.accountCredit,
-    owed: colors.accountOwed,
-    debt: colors.accountDebt,
-  };
+  const bgColor =
+    type === 'debit' ? colors.accountDebit :
+    type === 'credit' ? colors.accountCredit :
+    type === 'owed' ? colors.accountOwed : colors.accountDebt;
 
   return (
     <View
       className="inline-flex items-center rounded-full px-2.5 py-0.5"
-      style={{ backgroundColor: accountTypeColors[type] }}
+      style={{ backgroundColor: bgColor }}
     >
       <Text className="text-xs font-semibold text-white">
         {accountTypeLabels[type]}
