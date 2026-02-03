@@ -151,7 +151,7 @@ export function Button({
     ...sizeInlineStyles[size],
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-    flexDirection: isIconButton ? ('column' as const) : ('row' as const),
+    flexDirection: 'row' as const,
   };
 
   return (
