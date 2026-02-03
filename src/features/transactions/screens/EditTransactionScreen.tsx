@@ -12,7 +12,7 @@ import { Screen, Header } from '../../../shared/components/layout';
 import { Button, CurrencyInput, Input, Select, SelectOption } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository, AccountRepository, CategoryRepository } from '../../../database/repositories';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type EditTransactionRouteProp = RouteProp<RootStackParamList, 'EditTransaction'>;
@@ -35,6 +35,7 @@ export function EditTransactionScreen() {
   const route = useRoute<EditTransactionRouteProp>();
   const transactionId = route.params.transactionId;
   const { activeLedgerId } = useLedgerStore();
+  const { colors } = useTheme();
 
   const [transaction, setTransaction] = useState<TransactionWithDetails | null>(null);
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
@@ -152,7 +153,7 @@ export function EditTransactionScreen() {
       <Screen>
         <Header title="Edit Transaction" showBack />
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </Screen>
     );

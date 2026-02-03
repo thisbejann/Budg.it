@@ -11,7 +11,7 @@ import type { Person, AccountWithPerson } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
 import { Button, CurrencyInput, Input, Select, SelectOption } from '../../../shared/components/ui';
 import { AccountRepository, PersonRepository } from '../../../database/repositories';
-import { COLORS, ACCOUNT_COLORS } from '../../../constants/colors';
+import { ACCOUNT_COLORS } from '../../../constants/colors';
 import { ACCOUNT_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
@@ -171,7 +171,7 @@ export function EditAccountScreen() {
       <Screen>
         <Header title="Edit Account" showBack />
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </Screen>
     );

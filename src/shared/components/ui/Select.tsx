@@ -8,7 +8,6 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { ChevronDown, Check, X } from 'lucide-react-native';
-import { COLORS } from '../../../constants/colors';
 import { useTheme } from '../../../hooks/useColorScheme';
 
 export interface SelectOption {
@@ -50,7 +49,7 @@ export function Select({
   return (
     <View className="w-full">
       {label && (
-        <Text className="mb-1.5 text-sm font-medium text-foreground">
+        <Text className="mb-1.5 text-sm font-medium" style={{ color: colors.foreground }}>
           {label}
         </Text>
       )}
@@ -68,9 +67,8 @@ export function Select({
             <View className="mr-2">{selectedOption.icon}</View>
           )}
           <Text
-            className={`text-base ${
-              selectedOption ? 'text-foreground' : 'text-muted-foreground'
-            }`}
+            className="text-base"
+            style={{ color: selectedOption ? colors.foreground : colors.mutedForeground }}
           >
             {selectedOption?.label || placeholder}
           </Text>
@@ -78,7 +76,7 @@ export function Select({
         <ChevronDown size={20} color={colors.mutedForeground} />
       </TouchableOpacity>
       {error && (
-        <Text className="mt-1 text-sm text-destructive">{error}</Text>
+        <Text className="mt-1 text-sm" style={{ color: colors.destructive }}>{error}</Text>
       )}
 
       <Modal
@@ -90,7 +88,7 @@ export function Select({
         <SafeAreaView className="flex-1 bg-black/50">
           <View className="mt-auto max-h-[70%] rounded-t-3xl bg-background">
             <View className="flex-row items-center justify-between border-b border-border px-4 py-3">
-              <Text className="text-lg font-semibold text-foreground">
+              <Text className="text-lg font-semibold" style={{ color: colors.foreground }}>
                 {label || 'Select'}
               </Text>
               <TouchableOpacity onPress={() => setIsOpen(false)}>
@@ -111,12 +109,12 @@ export function Select({
                 >
                   <View className="flex-1 flex-row items-center">
                     {item.icon && <View className="mr-3">{item.icon}</View>}
-                    <Text className="text-base text-foreground">
+                    <Text className="text-base" style={{ color: colors.foreground }}>
                       {item.label}
                     </Text>
                   </View>
                   {item.value === value && (
-                    <Check size={20} color={COLORS.primary} />
+                    <Check size={20} color={colors.primary} />
                   )}
                 </TouchableOpacity>
               )}

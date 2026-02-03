@@ -7,13 +7,14 @@ import { Button, Input } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository, AccountRepository, TransferRepository } from '../../../database/repositories';
 import { getToday } from '../../../shared/utils/date';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 import { FileText, Table, ArrowLeftRight, Download, Check } from 'lucide-react-native';
 
 type ExportType = 'transactions' | 'accounts' | 'transfers';
 
 export function ExportScreen() {
   const { activeLedgerId } = useLedgerStore();
+  const { colors } = useTheme();
 
   const [selectedType, setSelectedType] = useState<ExportType>('transactions');
   const [startDate, setStartDate] = useState('');
@@ -208,7 +209,7 @@ export function ExportScreen() {
                 >
                   <IconComponent
                     size={20}
-                    color={isSelected ? '#ffffff' : COLORS.mutedForeground}
+                    color={isSelected ? '#ffffff' : colors.mutedForeground}
                   />
                 </View>
                 <View className="flex-1">

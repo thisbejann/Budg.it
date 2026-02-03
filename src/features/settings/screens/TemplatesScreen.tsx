@@ -9,7 +9,7 @@ import { EmptyState, ExpenseBadge, IncomeBadge } from '../../../shared/component
 import { TemplateRepository } from '../../../database/repositories';
 import { useLedgerStore } from '../../../store';
 import { formatPHP } from '../../../shared/utils/currency';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 import { Plus, FileText, ChevronRight } from 'lucide-react-native';
 
@@ -17,6 +17,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export function TemplatesScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
   const { activeLedgerId } = useLedgerStore();
   const [templates, setTemplates] = useState<TransactionTemplateWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,7 +80,7 @@ export function TemplatesScreen() {
           {item.amount ? (
             <Text
               className="font-semibold"
-              style={{ color: isExpense ? COLORS.expense : COLORS.income }}
+              style={{ color: isExpense ? colors.expense : colors.income }}
             >
               {formatPHP(item.amount)}
             </Text>
@@ -104,19 +105,19 @@ export function TemplatesScreen() {
             onPress={() => navigation.navigate('AddTemplate')}
             className="p-2"
           >
-            <Plus size={24} color={COLORS.primary} />
+            <Plus size={24} color={colors.primary} />
           </TouchableOpacity>
         }
       />
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : templates.length === 0 ? (
         <View className="flex-1 items-center justify-center p-4">
           <EmptyState
-            icon={<FileText size={48} color={COLORS.mutedForeground} />}
+            icon={<FileText size={48} color={colors.mutedForeground} />}
             title="No templates"
             description="Create templates for transactions you make often"
             actionLabel="Add Template"

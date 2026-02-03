@@ -12,8 +12,6 @@ import { Button, CurrencyInput, Input, Select, SelectOption } from '../../../sha
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository, AccountRepository, CategoryRepository, TemplateRepository } from '../../../database/repositories';
 import { getToday, getCurrentTime } from '../../../shared/utils/date';
-import { COLORS } from '../../../constants/colors';
-import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 

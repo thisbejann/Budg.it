@@ -11,7 +11,6 @@ import type { Category } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
 import { Button, Input } from '../../../shared/components/ui';
 import { CategoryRepository } from '../../../database/repositories';
-import { COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
@@ -107,7 +106,7 @@ export function AddSubcategoryScreen() {
       <Screen>
         <Header title="Add Subcategory" showClose />
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       </Screen>
     );
@@ -168,7 +167,7 @@ export function AddSubcategoryScreen() {
             {IconComponent ? (
               <View
                 className="h-10 w-10 items-center justify-center rounded-lg"
-                style={{ backgroundColor: category?.color || COLORS.primary }}
+                style={{ backgroundColor: category?.color || colors.primary }}
               >
                 <IconComponent size={20} color="#ffffff" />
               </View>

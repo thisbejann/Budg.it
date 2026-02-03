@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ViewProps } from 'react-native';
-import { COLORS } from '../../../constants/colors';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning';
 
@@ -18,11 +18,6 @@ const variantStyles: Record<BadgeVariant, string> = {
   warning: '',
 };
 
-const variantColors: Partial<Record<BadgeVariant, string>> = {
-  success: COLORS.income,
-  warning: '#eab308',
-};
-
 const variantTextStyles: Record<BadgeVariant, string> = {
   default: 'text-white',
   secondary: 'text-secondary-foreground',
@@ -33,7 +28,9 @@ const variantTextStyles: Record<BadgeVariant, string> = {
 };
 
 export function Badge({ variant = 'default', children, className, style, ...props }: BadgeProps) {
-  const bgColor = variantColors[variant];
+  const { colors } = useTheme();
+
+  const bgColor = variant === 'success' ? colors.income : variant === 'warning' ? '#eab308' : undefined;
 
   return (
     <View
@@ -70,13 +67,6 @@ interface AccountTypeBadgeProps {
   type: 'debit' | 'credit' | 'owed' | 'debt';
 }
 
-const accountTypeColors: Record<string, string> = {
-  debit: COLORS.accountDebit,
-  credit: COLORS.accountCredit,
-  owed: COLORS.accountOwed,
-  debt: COLORS.accountDebt,
-};
-
 const accountTypeLabels: Record<string, string> = {
   debit: 'Debit',
   credit: 'Credit',
@@ -85,10 +75,17 @@ const accountTypeLabels: Record<string, string> = {
 };
 
 export function AccountTypeBadge({ type }: AccountTypeBadgeProps) {
+  const { colors } = useTheme();
+
+  const bgColor =
+    type === 'debit' ? colors.accountDebit :
+    type === 'credit' ? colors.accountCredit :
+    type === 'owed' ? colors.accountOwed : colors.accountDebt;
+
   return (
     <View
       className="inline-flex items-center rounded-full px-2.5 py-0.5"
-      style={{ backgroundColor: accountTypeColors[type] }}
+      style={{ backgroundColor: bgColor }}
     >
       <Text className="text-xs font-semibold text-white">
         {accountTypeLabels[type]}

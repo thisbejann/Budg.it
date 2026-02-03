@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useColorScheme as useRNColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
@@ -15,23 +14,20 @@ interface AppProvidersProps {
 function ThemeSyncer({ children }: { children: React.ReactNode }) {
   const themeMode = useThemeStore((state) => state.themeMode);
   const [hydrated, setHydrated] = useState(useThemeStore.persist.hasHydrated());
-  const systemColorScheme = useRNColorScheme();
 
   useEffect(() => {
     const unsub = useThemeStore.persist.onFinishHydration(() => setHydrated(true));
     return unsub;
   }, []);
 
+  // Sync theme mode with Uniwind
   useEffect(() => {
     if (!hydrated) return;
 
-    const effectiveTheme =
-      themeMode === 'system'
-        ? systemColorScheme === 'dark' ? 'dark' : 'light'
-        : themeMode;
-
-    Uniwind.setTheme(effectiveTheme);
-  }, [themeMode, systemColorScheme, hydrated]);
+    // Pass themeMode directly to Uniwind - it handles 'system' mode internally
+    // When 'system' is passed, Uniwind enables adaptive theming automatically
+    Uniwind.setTheme(themeMode);
+  }, [themeMode, hydrated]);
 
   return <>{children}</>;
 }
