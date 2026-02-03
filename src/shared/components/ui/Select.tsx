@@ -1,13 +1,7 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  FlatList,
-  SafeAreaView,
-} from 'react-native';
-import { ChevronDown, Check, X } from 'lucide-react-native';
+import React from 'react';
+import { View, Text, ScrollView } from 'react-native';
+import { Select as HeroSelect } from 'heroui-native';
+import { ChevronDown } from 'lucide-react-native';
 import { useTheme } from '../../../hooks/useColorScheme';
 
 export interface SelectOption {
@@ -36,14 +30,18 @@ export function Select({
   error,
   disabled,
 }: SelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const { colors } = useTheme();
 
   const selectedOption = options.find((opt) => opt.value === value);
 
-  const handleSelect = (option: SelectOption) => {
-    onValueChange(option.value);
-    setIsOpen(false);
+  const handleValueChange = (selected: { value: string; label: string } | undefined) => {
+    if (selected) {
+      // Convert back to original type (number if it was a number)
+      const originalOption = options.find((opt) => String(opt.value) === selected.value);
+      if (originalOption) {
+        onValueChange(originalOption.value);
+      }
+    }
   };
 
   return (
@@ -53,78 +51,78 @@ export function Select({
           {label}
         </Text>
       )}
-      <TouchableOpacity
-        onPress={() => !disabled && setIsOpen(true)}
-        className={`
-          flex-row items-center justify-between rounded-lg border bg-background px-3 py-3
-          ${error ? 'border-destructive' : 'border-input'}
-          ${disabled ? 'opacity-50' : ''}
-        `}
-        activeOpacity={0.7}
+
+      <HeroSelect
+        value={selectedOption ? { value: String(selectedOption.value), label: selectedOption.label } : undefined}
+        onValueChange={handleValueChange}
+        isDisabled={disabled}
       >
-        <View className="flex-1 flex-row items-center">
-          {selectedOption?.icon && (
-            <View className="mr-2">{selectedOption.icon}</View>
-          )}
-          <Text
-            className="text-base"
-            style={{ color: selectedOption ? colors.foreground : colors.mutedForeground }}
+        <HeroSelect.Trigger
+          className={`
+            flex-row items-center justify-between rounded-xl border bg-background px-4 py-3.5
+            ${error ? 'border-destructive' : 'border-input'}
+            ${disabled ? 'opacity-50' : ''}
+          `}
+        >
+          <View className="flex-1 flex-row items-center">
+            {selectedOption?.icon && (
+              <View className="mr-2">{selectedOption.icon}</View>
+            )}
+            <HeroSelect.Value
+              placeholder={placeholder}
+              className="text-base"
+              style={{ color: selectedOption ? colors.foreground : colors.mutedForeground }}
+            />
+          </View>
+          <ChevronDown size={20} color={colors.mutedForeground} />
+        </HeroSelect.Trigger>
+
+        <HeroSelect.Portal>
+          <HeroSelect.Overlay className="bg-black/50" />
+          <HeroSelect.Content
+            presentation="bottom-sheet"
+            snapPoints={['50%', '75%']}
+            enableDynamicSizing={false}
+            backgroundClassName="rounded-t-3xl"
+            handleIndicatorClassName="bg-muted-foreground/30 w-10"
+            contentContainerClassName="pb-8"
           >
-            {selectedOption?.label || placeholder}
-          </Text>
-        </View>
-        <ChevronDown size={20} color={colors.mutedForeground} />
-      </TouchableOpacity>
+            {label && (
+              <HeroSelect.ListLabel className="px-4 pt-2 pb-3 text-lg font-semibold text-foreground">
+                {label}
+              </HeroSelect.ListLabel>
+            )}
+            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+              {options.map((option) => (
+                <HeroSelect.Item
+                  key={String(option.value)}
+                  value={String(option.value)}
+                  label={option.label}
+                  className="mx-3 rounded-xl px-4 py-4"
+                >
+                  {({ isSelected }) => (
+                    <>
+                      <View className="flex-1 flex-row items-center">
+                        {option.icon && <View className="mr-3">{option.icon}</View>}
+                        <HeroSelect.ItemLabel
+                          className={`text-base ${isSelected ? 'font-semibold text-primary' : 'text-foreground'}`}
+                        />
+                      </View>
+                      <HeroSelect.ItemIndicator
+                        iconProps={{ size: 20, color: colors.primary }}
+                      />
+                    </>
+                  )}
+                </HeroSelect.Item>
+              ))}
+            </ScrollView>
+          </HeroSelect.Content>
+        </HeroSelect.Portal>
+      </HeroSelect>
+
       {error && (
         <Text className="mt-1 text-sm" style={{ color: colors.destructive }}>{error}</Text>
       )}
-
-      <Modal
-        visible={isOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setIsOpen(false)}
-      >
-        <SafeAreaView className="flex-1 bg-black/50">
-          <View className="mt-auto max-h-[70%] rounded-t-3xl bg-background">
-            <View className="flex-row items-center justify-between border-b border-border px-4 py-3">
-              <Text className="text-lg font-semibold" style={{ color: colors.foreground }}>
-                {label || 'Select'}
-              </Text>
-              <TouchableOpacity onPress={() => setIsOpen(false)}>
-                <X size={24} color={colors.foreground} />
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={options}
-              keyExtractor={(item) => String(item.value)}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  onPress={() => handleSelect(item)}
-                  className={`
-                    flex-row items-center justify-between px-4 py-3
-                    ${item.value === value ? 'bg-secondary' : ''}
-                  `}
-                  activeOpacity={0.7}
-                >
-                  <View className="flex-1 flex-row items-center">
-                    {item.icon && <View className="mr-3">{item.icon}</View>}
-                    <Text className="text-base" style={{ color: colors.foreground }}>
-                      {item.label}
-                    </Text>
-                  </View>
-                  {item.value === value && (
-                    <Check size={20} color={colors.primary} />
-                  )}
-                </TouchableOpacity>
-              )}
-              ItemSeparatorComponent={() => (
-                <View className="h-px bg-border" />
-              )}
-            />
-          </View>
-        </SafeAreaView>
-      </Modal>
     </View>
   );
 }
