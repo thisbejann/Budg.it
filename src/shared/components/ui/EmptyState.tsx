@@ -38,7 +38,7 @@ export function EmptyState({
         </Text>
       )}
       {actionLabel && onAction && (
-        <Button onPress={onAction} style={{ marginTop: 24 }}>
+        <Button onPress={onAction} className="mt-6">
           {actionLabel}
         </Button>
       )}
