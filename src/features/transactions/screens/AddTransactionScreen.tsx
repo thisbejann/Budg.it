@@ -6,11 +6,25 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
-import type { AccountWithPerson, CategoryWithSubcategories } from '../../../types/database';
+import type {
+  AccountWithPerson,
+  CategoryWithSubcategories,
+} from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
-import { Button, CurrencyInput, Input, Select, SelectOption } from '../../../shared/components/ui';
+import {
+  Button,
+  CurrencyInput,
+  Input,
+  Select,
+  SelectOption,
+} from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
-import { TransactionRepository, AccountRepository, CategoryRepository, TemplateRepository } from '../../../database/repositories';
+import {
+  TransactionRepository,
+  AccountRepository,
+  CategoryRepository,
+  TemplateRepository,
+} from '../../../database/repositories';
 import { getToday, getCurrentTime } from '../../../shared/utils/date';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -80,8 +94,10 @@ export function AddTransactionScreen() {
         if (template) {
           if (template.amount) setValue('amount', template.amount.toString());
           if (template.account_id) setValue('account_id', template.account_id);
-          if (template.category_id) setValue('category_id', template.category_id);
-          if (template.subcategory_id) setValue('subcategory_id', template.subcategory_id);
+          if (template.category_id)
+            setValue('category_id', template.category_id);
+          if (template.subcategory_id)
+            setValue('subcategory_id', template.subcategory_id);
           setValue('type', template.type);
           if (template.notes) setValue('notes', template.notes);
 
@@ -120,20 +136,24 @@ export function AddTransactionScreen() {
     }
   };
 
-  const accountOptions: SelectOption[] = accounts.map((acc) => ({
+  const accountOptions: SelectOption[] = accounts.map(acc => ({
     label: acc.name,
     value: acc.id,
   }));
 
-  const filteredCategories = categories.filter((cat) => cat.type === selectedType);
-  const categoryOptions: SelectOption[] = filteredCategories.map((cat) => ({
+  const filteredCategories = categories.filter(
+    cat => cat.type === selectedType,
+  );
+  const categoryOptions: SelectOption[] = filteredCategories.map(cat => ({
     label: cat.name,
     value: cat.id,
   }));
 
-  const selectedCategory = filteredCategories.find((c) => c.id === selectedCategoryId);
+  const selectedCategory = filteredCategories.find(
+    c => c.id === selectedCategoryId,
+  );
   const subcategoryOptions: SelectOption[] =
-    selectedCategory?.subcategories.map((sub) => ({
+    selectedCategory?.subcategories.map(sub => ({
       label: sub.name,
       value: sub.id,
     })) || [];
@@ -221,7 +241,7 @@ export function AddTransactionScreen() {
                 placeholder="Select category"
                 value={value}
                 options={categoryOptions}
-                onValueChange={(v) => {
+                onValueChange={v => {
                   onChange(v);
                   setValue('subcategory_id', undefined);
                 }}
