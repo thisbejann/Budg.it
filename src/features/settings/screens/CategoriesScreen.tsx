@@ -74,11 +74,6 @@ export function CategoriesScreen() {
             </View>
           </View>
           <View className="flex-row items-center gap-2">
-            {item.is_system && (
-              <View className="rounded px-2 py-0.5" style={{ backgroundColor: colors.secondary }}>
-                <Text className="text-xs" style={{ color: colors.mutedForeground }}>System</Text>
-              </View>
-            )}
             <ChevronRight size={20} color={colors.mutedForeground} />
           </View>
         </TouchableOpacity>

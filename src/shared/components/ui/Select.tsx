@@ -72,7 +72,7 @@ export function Select({
             )}
             <HeroSelect.Value
               placeholder={placeholder}
-              className="text-base"
+              className="text-base text-foreground"
               style={{ color: selectedOption ? colors.foreground : colors.mutedForeground }}
             />
           </View>

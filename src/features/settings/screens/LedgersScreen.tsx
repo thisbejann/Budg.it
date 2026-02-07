@@ -63,14 +63,14 @@ export function LedgersScreen() {
           isActive ? 'bg-primary/5' : ''
         }`}
       >
-        <View className="flex-row items-center gap-3">
+        <View className="flex-1 flex-row items-center gap-3">
           <View
             className="h-12 w-12 items-center justify-center rounded-xl"
             style={{ backgroundColor: item.color }}
           >
             <IconComponent size={22} color="#ffffff" />
           </View>
-          <View className="flex-1">
+          <View className="shrink">
             <View className="flex-row items-center gap-2">
               <Text className="font-medium" style={{ color: colors.foreground }}>{item.name}</Text>
               {item.is_default && (
