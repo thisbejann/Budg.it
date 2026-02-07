@@ -54,6 +54,7 @@ const { colors, isDark } = useTheme();
 ## HeroUI Native
 
 HeroUI Native is a React Native component library using:
+
 - Compound components pattern (e.g., `Button.StartContent`, `Button.LabelContent`)
 - React Native Reanimated for animations
 - Uniwind (Tailwind CSS v4) for styling
@@ -116,11 +117,11 @@ DatabaseProvider initializes the database and creates default ledger on first ru
 
 App uses dynamic config (`app.config.js`) with APP_VARIANT env:
 
-| Variant | Package Name | App Name |
-|---------|--------------|----------|
-| development | com.budgettracker.dev | BudgetTracker (Dev) |
-| beta | com.budgettracker.beta | BudgetTracker (Beta) |
-| production | com.budgettracker | BudgetTracker |
+| Variant     | Package Name           | App Name             |
+| ----------- | ---------------------- | -------------------- |
+| development | com.budgettracker.dev  | BudgetTracker (Dev)  |
+| beta        | com.budgettracker.beta | BudgetTracker (Beta) |
+| production  | com.budgettracker      | BudgetTracker        |
 
 ## Account Types
 
@@ -131,6 +132,7 @@ App uses dynamic config (`app.config.js`) with APP_VARIANT env:
 
 ## Git
 
+- create a new branch named [`jannjaspher/branch-name`] for each feature or bugfix
 - Branch naming: `jannjaspher/<descriptive-name>` (e.g., `jannjaspher/add-transaction-form`)
 - Open PRs against `master`
 - Commit often with clear messages
