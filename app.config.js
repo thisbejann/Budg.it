@@ -30,6 +30,7 @@ module.exports = {
         backgroundColor: '#ffffff',
       },
       package: getPackageName(),
+      softwareKeyboardLayoutMode: 'pan',
     },
     plugins: ['expo-sqlite'],
     extra: {

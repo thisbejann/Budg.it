@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -162,7 +163,12 @@ export function AddTransactionScreen() {
     <Screen scrollable={false}>
       <Header title="Add Transaction" showClose />
 
-      <ScrollView className="flex-1 px-4 py-4">
+      <KeyboardAwareScrollView
+        className="flex-1 px-4 py-4"
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={20}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
         {/* Type Toggle */}
         <View className="mb-4 flex-row gap-2">
           <TouchableOpacity
@@ -307,7 +313,7 @@ export function AddTransactionScreen() {
         <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
           Add Transaction
         </Button>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </Screen>
   );
 }
