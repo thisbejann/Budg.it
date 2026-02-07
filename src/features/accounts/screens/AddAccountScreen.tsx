@@ -303,9 +303,11 @@ export function AddAccountScreen() {
         </View>
 
         {/* Submit Button */}
-        <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
-          Create Account
-        </Button>
+        <View className="mt-2">
+          <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
+            Create Account
+          </Button>
+        </View>
 
         <View className="h-8" />
       </ScrollView>

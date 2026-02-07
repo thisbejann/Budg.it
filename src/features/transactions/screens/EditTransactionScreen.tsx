@@ -9,7 +9,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { AccountWithPerson, CategoryWithSubcategories, TransactionWithDetails } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
-import { Button, CurrencyInput, Input, Select, SelectOption } from '../../../shared/components/ui';
+import { Button, CurrencyInput, Input, DateInput, TimeInput, Select, SelectOption } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository, AccountRepository, CategoryRepository } from '../../../database/repositories';
 import { useTheme } from '../../../hooks/useColorScheme';
@@ -284,11 +284,10 @@ export function EditTransactionScreen() {
             control={control}
             name="date"
             render={({ field: { onChange, value } }) => (
-              <Input
+              <DateInput
                 label="Date"
                 value={value}
-                onChangeText={onChange}
-                placeholder="YYYY-MM-DD"
+                onChangeValue={onChange}
               />
             )}
           />
@@ -300,11 +299,10 @@ export function EditTransactionScreen() {
             control={control}
             name="time"
             render={({ field: { onChange, value } }) => (
-              <Input
+              <TimeInput
                 label="Time (optional)"
                 value={value}
-                onChangeText={onChange}
-                placeholder="HH:MM"
+                onChangeValue={onChange}
               />
             )}
           />
@@ -329,9 +327,11 @@ export function EditTransactionScreen() {
         </View>
 
         {/* Submit Button */}
-        <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
-          Save Changes
-        </Button>
+        <View className="mt-2">
+          <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
+            Save Changes
+          </Button>
+        </View>
 
         <View className="h-8" />
       </ScrollView>

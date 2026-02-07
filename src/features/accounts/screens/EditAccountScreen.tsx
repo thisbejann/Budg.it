@@ -339,9 +339,11 @@ export function EditAccountScreen() {
         </View>
 
         {/* Submit Button */}
-        <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
-          Save Changes
-        </Button>
+        <View className="mt-2">
+          <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
+            Save Changes
+          </Button>
+        </View>
 
         {/* Delete Button */}
         <View className="mt-4">

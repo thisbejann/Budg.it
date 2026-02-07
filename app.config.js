@@ -32,7 +32,7 @@ module.exports = {
       package: getPackageName(),
       softwareKeyboardLayoutMode: 'pan',
     },
-    plugins: ['expo-sqlite'],
+    plugins: ['expo-sqlite', '@react-native-community/datetimepicker'],
     extra: {
       eas: {
         projectId: 'aef9cadd-8e48-4e3e-9a50-d11c415ffdb4',

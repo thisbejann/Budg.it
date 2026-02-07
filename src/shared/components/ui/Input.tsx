@@ -73,7 +73,7 @@ export function CurrencyInput({
 
   const handleChange = (text: string) => {
     // Remove non-numeric characters except decimal point
-    const cleaned = text.replace(/[^0-9.]/g, '');
+    let cleaned = text.replace(/[^0-9.]/g, '');
     // Ensure only one decimal point
     const parts = cleaned.split('.');
     if (parts.length > 2) {
@@ -82,6 +82,11 @@ export function CurrencyInput({
     // Limit decimal places to 2
     if (parts[1] && parts[1].length > 2) {
       return;
+    }
+    // Strip leading zeros (keep "0" and "0.xx")
+    if (parts[0].length > 1) {
+      parts[0] = parts[0].replace(/^0+/, '') || '0';
+      cleaned = parts.join('.');
     }
     onChangeValue(cleaned);
   };

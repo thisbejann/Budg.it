@@ -16,6 +16,8 @@ import {
   Button,
   CurrencyInput,
   Input,
+  DateInput,
+  TimeInput,
   Select,
   SelectOption,
 } from '../../../shared/components/ui';
@@ -281,11 +283,25 @@ export function AddTransactionScreen() {
             control={control}
             name="date"
             render={({ field: { onChange, value } }) => (
-              <Input
+              <DateInput
                 label="Date"
                 value={value}
-                onChangeText={onChange}
-                placeholder="YYYY-MM-DD"
+                onChangeValue={onChange}
+              />
+            )}
+          />
+        </View>
+
+        {/* Time */}
+        <View className="mb-4">
+          <Controller
+            control={control}
+            name="time"
+            render={({ field: { onChange, value } }) => (
+              <TimeInput
+                label="Time"
+                value={value}
+                onChangeValue={onChange}
               />
             )}
           />
@@ -310,9 +326,11 @@ export function AddTransactionScreen() {
         </View>
 
         {/* Submit Button */}
-        <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
-          Add Transaction
-        </Button>
+        <View className="mt-2">
+          <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
+            Add Transaction
+          </Button>
+        </View>
       </KeyboardAwareScrollView>
     </Screen>
   );
