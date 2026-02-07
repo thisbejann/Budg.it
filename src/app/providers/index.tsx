@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { HeroUINativeProvider } from 'heroui-native';
 import { Uniwind } from 'uniwind';
 import { DatabaseProvider } from './DatabaseProvider';
@@ -35,15 +36,17 @@ function ThemeSyncer({ children }: { children: React.ReactNode }) {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <HeroUINativeProvider>
-          <ThemeSyncer>
-            <NavigationContainer>
-              <DatabaseProvider>{children}</DatabaseProvider>
-            </NavigationContainer>
-          </ThemeSyncer>
-        </HeroUINativeProvider>
-      </SafeAreaProvider>
+      <KeyboardProvider>
+        <SafeAreaProvider>
+          <HeroUINativeProvider>
+            <ThemeSyncer>
+              <NavigationContainer>
+                <DatabaseProvider>{children}</DatabaseProvider>
+              </NavigationContainer>
+            </ThemeSyncer>
+          </HeroUINativeProvider>
+        </SafeAreaProvider>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }
