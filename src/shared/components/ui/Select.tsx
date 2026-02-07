@@ -58,13 +58,15 @@ export function Select({
         isDisabled={disabled}
       >
         <HeroSelect.Trigger
-          className={`
-            flex-row items-center justify-between rounded-xl border bg-background px-4 py-3.5
-            ${error ? 'border-destructive' : 'border-input'}
-            ${disabled ? 'opacity-50' : ''}
-          `}
+          className={`flex-row items-center justify-between px-3 ${disabled ? 'opacity-50' : ''}`}
+          style={{
+            backgroundColor: colors.surfaceVariant,
+            borderColor: error ? colors.destructive : colors.outline,
+            borderWidth: 1,
+            borderRadius: 12,
+          }}
         >
-          <View className="flex-1 flex-row items-center">
+          <View className="flex-1 flex-row items-center py-3">
             {selectedOption?.icon && (
               <View className="mr-2">{selectedOption.icon}</View>
             )}
