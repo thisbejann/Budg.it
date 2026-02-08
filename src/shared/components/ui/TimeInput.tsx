@@ -34,7 +34,7 @@ export function TimeInput({ label, value, onChangeValue, error }: TimeInputProps
     if (Platform.OS === 'android') {
       setShowPicker(false);
     }
-    if (selectedDate) {
+    if (selectedDate && _event.type !== 'dismissed') {
       onChangeValue(format(selectedDate, 'HH:mm'));
     }
   };
