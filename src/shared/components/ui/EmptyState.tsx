@@ -38,9 +38,9 @@ export function EmptyState({
         </Text>
       )}
       {actionLabel && onAction && (
-        <Button onPress={onAction} className="mt-6">
-          {actionLabel}
-        </Button>
+        <View className="mt-4 w-full">
+          <Button onPress={onAction}>{actionLabel}</Button>
+        </View>
       )}
     </View>
   );

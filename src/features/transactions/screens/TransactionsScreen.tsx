@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Plus, Calendar as CalendarIcon, List } from 'lucide-react-native';
@@ -71,6 +71,80 @@ export function TransactionsScreen() {
     ] || LucideIcons.Circle;
     return <IconComponent size={16} color={color} />;
   };
+
+  const formatCompact = (amount: number): string => {
+    if (amount >= 1000000) return `${(amount / 1000000).toFixed(1)}M`;
+    if (amount >= 1000) return `${(amount / 1000).toFixed(1)}K`;
+    return amount.toFixed(0);
+  };
+
+  const renderDayComponent = useMemo(() => {
+    return ({ date, state }: { date?: { dateString: string; day: number }; state?: string }) => {
+      if (!date) return null;
+      const isSelected = date.dateString === selectedDate;
+      const isToday = date.dateString === getToday();
+      const dayData = dailyTotals[date.dateString];
+      const isDisabled = state === 'disabled';
+
+      return (
+        <TouchableOpacity
+          onPress={() => setSelectedDate(date.dateString)}
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 44,
+            height: 50,
+            borderRadius: 8,
+            ...(isSelected ? { backgroundColor: colors.primary } : {}),
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: isToday ? '700' : '400',
+              color: isSelected
+                ? colors.onPrimary
+                : isDisabled
+                  ? colors.mutedForeground
+                  : isToday
+                    ? colors.primary
+                    : colors.foreground,
+            }}
+          >
+            {date.day}
+          </Text>
+          {dayData && !isDisabled && (
+            <View style={{ alignItems: 'center', marginTop: 1 }}>
+              {dayData.expense > 0 && (
+                <Text
+                  style={{
+                    fontSize: 7,
+                    color: isSelected ? colors.onPrimary : colors.expense,
+                    lineHeight: 9,
+                  }}
+                  numberOfLines={1}
+                >
+                  {formatCompact(dayData.expense)}
+                </Text>
+              )}
+              {dayData.income > 0 && (
+                <Text
+                  style={{
+                    fontSize: 7,
+                    color: isSelected ? colors.onPrimary : colors.income,
+                    lineHeight: 9,
+                  }}
+                  numberOfLines={1}
+                >
+                  {formatCompact(dayData.income)}
+                </Text>
+              )}
+            </View>
+          )}
+        </TouchableOpacity>
+      );
+    };
+  }, [selectedDate, dailyTotals, colors]);
 
   const markedDates = Object.entries(dailyTotals).reduce((acc, [date, total]) => {
     acc[date] = {
@@ -187,6 +261,7 @@ export function TransactionsScreen() {
           current={selectedDate}
           onDayPress={(day) => setSelectedDate(day.dateString)}
           markedDates={markedDates}
+          dayComponent={renderDayComponent}
           theme={{
             backgroundColor: colors.background,
             calendarBackground: colors.background,

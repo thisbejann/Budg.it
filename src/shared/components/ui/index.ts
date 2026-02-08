@@ -9,6 +9,8 @@ export {
   CardFooter,
 } from './Card';
 export { Input, CurrencyInput } from './Input';
+export { DateInput } from './DateInput';
+export { TimeInput } from './TimeInput';
 export { Select, type SelectOption } from './Select';
 export {
   Badge,
