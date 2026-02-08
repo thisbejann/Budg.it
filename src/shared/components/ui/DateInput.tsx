@@ -25,7 +25,7 @@ export function DateInput({ label, value, onChangeValue, error }: DateInputProps
     if (Platform.OS === 'android') {
       setShowPicker(false);
     }
-    if (selectedDate) {
+    if (selectedDate && _event.type !== 'dismissed') {
       onChangeValue(format(selectedDate, 'yyyy-MM-dd'));
     }
   };
