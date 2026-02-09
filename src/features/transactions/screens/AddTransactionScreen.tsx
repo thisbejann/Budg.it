@@ -31,6 +31,7 @@ import {
 } from '../../../database/repositories';
 import { getToday, getCurrentTime } from '../../../shared/utils/date';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { Chip } from 'heroui-native';
 import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -206,19 +207,20 @@ export function AddTransactionScreen() {
                 (LucideIcons as any)[iconName] || LucideIcons.Bookmark;
 
               return (
-                <TouchableOpacity
+                <Chip
                   key={template.id}
+                  variant="secondary"
+                  size="md"
                   onPress={() => applyTemplate(template)}
-                  className="flex-row items-center gap-2 rounded-full border border-border px-3 py-2"
                 >
                   <View
-                    className="h-6 w-6 items-center justify-center rounded-full"
+                    className="h-5 w-5 items-center justify-center rounded-full"
                     style={{ backgroundColor: template.color }}
                   >
-                    <IconComponent size={14} color="#ffffff" />
+                    <IconComponent size={12} color="#ffffff" />
                   </View>
-                  <Text className="text-sm text-foreground">{template.name}</Text>
-                </TouchableOpacity>
+                  <Chip.Label>{template.name}</Chip.Label>
+                </Chip>
               );
             })}
           </ScrollView>
