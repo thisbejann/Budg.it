@@ -2,16 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, Pressable, Modal, FlatList, Platform } from 'react-native';
 import { Calendar } from 'lucide-react-native';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { getOrdinalSuffix } from '../../../shared/utils/date';
 
 const ITEM_HEIGHT = 44;
 const VISIBLE_ITEMS = 5;
 const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
-
-function getOrdinalSuffix(n: number): string {
-  const s = ['th', 'st', 'nd', 'rd'];
-  const v = n % 100;
-  return s[(v - 20) % 10] || s[v] || s[0];
-}
 
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
