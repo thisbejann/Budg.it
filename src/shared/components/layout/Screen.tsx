@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, StatusBar, RefreshControl } from 'react-native';
+import { View, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../../hooks/useColorScheme';
 
@@ -22,7 +22,7 @@ export function Screen({
   className,
   contentClassName,
 }: ScreenProps) {
-  const { isDark, colors } = useTheme();
+  const { colors } = useTheme();
 
   const content = scrollable ? (
     <ScrollView
@@ -43,10 +43,6 @@ export function Screen({
 
   return (
     <>
-      <StatusBar
-        barStyle={isDark ? 'light-content' : 'dark-content'}
-        backgroundColor={colors.background}
-      />
       {safeArea ? (
         <SafeAreaView
           style={{ flex: 1, backgroundColor: colors.background }}

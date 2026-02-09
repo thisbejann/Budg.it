@@ -30,7 +30,7 @@ import { ExportScreen } from '../../features/settings/screens/ExportScreen';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
-  const { colors } = useTheme();
+  const { isDark, colors } = useTheme();
 
   return (
     <Stack.Navigator
@@ -38,6 +38,9 @@ export function RootNavigator() {
         headerShown: false,
         contentStyle: { backgroundColor: colors.background },
         animation: 'slide_from_right',
+        statusBarStyle: isDark ? 'light' : 'dark',
+        statusBarColor: colors.background,
+        statusBarTranslucent: false,
       }}
     >
       {/* Main Tab Navigator */}
