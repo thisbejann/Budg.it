@@ -150,9 +150,8 @@ export function AccountDetailScreen() {
           </View>
         </View>
         <Text
-          className={`font-semibold ${
-            isExpense ? 'text-red-500' : 'text-green-500'
-          }`}
+          className="font-semibold"
+          style={{ color: isExpense ? colors.expense : colors.income }}
         >
           {isExpense ? '-' : '+'}
           {formatPHP(item.amount)}

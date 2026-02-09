@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, ImageSourcePropType } from 'react-native';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -22,9 +23,11 @@ export function Avatar({
   size = 'md',
   source,
   fallback,
-  backgroundColor = '#6366f1',
+  backgroundColor,
   className,
 }: AvatarProps) {
+  const { colors } = useTheme();
+  const bgColor = backgroundColor || colors.primary;
   const { container, text } = sizeStyles[size];
 
   if (source) {
@@ -50,7 +53,7 @@ export function Avatar({
   return (
     <View
       className={`items-center justify-center rounded-full ${container} ${className || ''}`}
-      style={{ backgroundColor }}
+      style={{ backgroundColor: bgColor }}
     >
       <Text className={`font-semibold text-white ${text}`}>{initials}</Text>
     </View>
@@ -68,15 +71,17 @@ interface IconAvatarProps {
 export function IconAvatar({
   size = 'md',
   icon,
-  backgroundColor = '#6366f1',
+  backgroundColor,
   className,
 }: IconAvatarProps) {
+  const { colors } = useTheme();
+  const bgColor = backgroundColor || colors.primary;
   const { container } = sizeStyles[size];
 
   return (
     <View
       className={`items-center justify-center rounded-full ${container} ${className || ''}`}
-      style={{ backgroundColor }}
+      style={{ backgroundColor: bgColor }}
     >
       {icon}
     </View>

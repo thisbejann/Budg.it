@@ -43,6 +43,9 @@ export const COLORS = {
   income: '#22c55e',
   expense: '#ef4444',
 
+  // Status colors
+  warning: '#eab308',
+
   // Chart colors palette
   chartColors: [
     '#ef4444', // red
@@ -108,6 +111,9 @@ export const COLORS_DARK = {
   // Transaction type colors (brighter for dark mode)
   income: '#4ade80',
   expense: '#f87171',
+
+  // Status colors (brighter for dark mode)
+  warning: '#facc15',
 
   // Chart colors palette (same as light)
   chartColors: [
