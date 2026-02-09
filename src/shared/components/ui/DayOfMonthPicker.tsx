@@ -36,18 +36,6 @@ export function DayOfMonthPicker({
     }
   }, [showPicker, value]);
 
-  useEffect(() => {
-    if (showPicker && flatListRef.current) {
-      const index = (tempValue || 1) - 1;
-      setTimeout(() => {
-        flatListRef.current?.scrollToOffset({
-          offset: index * ITEM_HEIGHT,
-          animated: false,
-        });
-      }, 100);
-    }
-  }, [showPicker]);
-
   const handleConfirm = () => {
     onValueChange(tempValue);
     setShowPicker(false);
@@ -236,6 +224,7 @@ export function DayOfMonthPicker({
                 showsVerticalScrollIndicator={false}
                 snapToInterval={ITEM_HEIGHT}
                 decelerationRate="fast"
+                initialScrollIndex={(tempValue || 1) - 1}
                 contentContainerStyle={{
                   paddingTop: ITEM_HEIGHT * Math.floor(VISIBLE_ITEMS / 2),
                   paddingBottom: ITEM_HEIGHT * Math.floor(VISIBLE_ITEMS / 2),
