@@ -240,8 +240,9 @@ export function EditTemplateScreen() {
                 setValue('subcategory_id', undefined);
               }}
               className={`flex-1 items-center rounded-lg py-3 ${
-                selectedType === 'expense' ? 'bg-red-500' : 'bg-secondary'
+                selectedType === 'expense' ? '' : 'bg-secondary'
               }`}
+              style={selectedType === 'expense' ? { backgroundColor: colors.expense } : undefined}
             >
               <Text
                 className={`font-semibold ${
@@ -258,8 +259,9 @@ export function EditTemplateScreen() {
                 setValue('subcategory_id', undefined);
               }}
               className={`flex-1 items-center rounded-lg py-3 ${
-                selectedType === 'income' ? 'bg-green-500' : 'bg-secondary'
+                selectedType === 'income' ? '' : 'bg-secondary'
               }`}
+              style={selectedType === 'income' ? { backgroundColor: colors.income } : undefined}
             >
               <Text
                 className={`font-semibold ${
@@ -323,7 +325,7 @@ export function EditTemplateScreen() {
                   >
                     <IconComp
                       size={20}
-                      color={selectedIcon === iconName ? '#ffffff' : colors.foreground}
+                      color={selectedIcon === iconName ? colors.onPrimary : colors.foreground}
                     />
                   </TouchableOpacity>
                 );

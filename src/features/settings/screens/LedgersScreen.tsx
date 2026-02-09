@@ -87,7 +87,7 @@ export function LedgersScreen() {
         <View className="flex-row items-center gap-2">
           {isActive && (
             <View className="h-6 w-6 items-center justify-center rounded-full bg-primary">
-              <Check size={14} color="#ffffff" />
+              <Check size={14} color={colors.onPrimary} />
             </View>
           )}
           <TouchableOpacity

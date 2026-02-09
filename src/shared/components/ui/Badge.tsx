@@ -25,7 +25,7 @@ export function Badge({ variant = 'default', children, className, style, ...prop
       case 'success':
         return colors.income;
       case 'warning':
-        return '#eab308';
+        return colors.warning;
       default:
         return colors.primary;
     }

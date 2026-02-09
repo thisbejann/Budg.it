@@ -29,6 +29,7 @@ import {
   TemplateRepository,
 } from '../../../database/repositories';
 import { getToday, getCurrentTime } from '../../../shared/utils/date';
+import { useTheme } from '../../../hooks/useColorScheme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -49,6 +50,7 @@ export function AddTransactionScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute();
   const { activeLedgerId } = useLedgerStore();
+  const { colors } = useTheme();
 
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
@@ -176,8 +178,9 @@ export function AddTransactionScreen() {
           <TouchableOpacity
             onPress={() => setValue('type', 'expense')}
             className={`flex-1 items-center rounded-lg py-3 ${
-              selectedType === 'expense' ? 'bg-red-500' : 'bg-secondary'
+              selectedType === 'expense' ? '' : 'bg-secondary'
             }`}
+            style={selectedType === 'expense' ? { backgroundColor: colors.expense } : undefined}
           >
             <Text
               className={`font-semibold ${
@@ -190,8 +193,9 @@ export function AddTransactionScreen() {
           <TouchableOpacity
             onPress={() => setValue('type', 'income')}
             className={`flex-1 items-center rounded-lg py-3 ${
-              selectedType === 'income' ? 'bg-green-500' : 'bg-secondary'
+              selectedType === 'income' ? '' : 'bg-secondary'
             }`}
+            style={selectedType === 'income' ? { backgroundColor: colors.income } : undefined}
           >
             <Text
               className={`font-semibold ${

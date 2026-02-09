@@ -86,11 +86,15 @@ export function Select({
             snapPoints={['50%', '75%']}
             enableDynamicSizing={false}
             backgroundClassName="rounded-t-3xl"
+            backgroundStyle={{ backgroundColor: colors.surface }}
             handleIndicatorClassName="bg-muted-foreground/30 w-10"
             contentContainerClassName="pb-8"
           >
             {label && (
-              <HeroSelect.ListLabel className="px-4 pt-2 pb-3 text-lg font-semibold text-foreground">
+              <HeroSelect.ListLabel
+                className="px-4 pt-2 pb-3 text-lg font-semibold"
+                style={{ color: colors.foreground }}
+              >
                 {label}
               </HeroSelect.ListLabel>
             )}
@@ -107,7 +111,8 @@ export function Select({
                       <View className="flex-1 flex-row items-center">
                         {option.icon && <View className="mr-3">{option.icon}</View>}
                         <HeroSelect.ItemLabel
-                          className={`text-base ${isSelected ? 'font-semibold text-primary' : 'text-foreground'}`}
+                          className={`text-base ${isSelected ? 'font-semibold' : ''}`}
+                          style={{ color: isSelected ? colors.primary : colors.foreground }}
                         />
                       </View>
                       <HeroSelect.ItemIndicator

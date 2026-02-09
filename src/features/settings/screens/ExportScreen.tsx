@@ -209,7 +209,7 @@ export function ExportScreen() {
                 >
                   <IconComponent
                     size={20}
-                    color={isSelected ? '#ffffff' : colors.mutedForeground}
+                    color={isSelected ? colors.onPrimary : colors.mutedForeground}
                   />
                 </View>
                 <View className="flex-1">
@@ -218,7 +218,7 @@ export function ExportScreen() {
                 </View>
                 {isSelected && (
                   <View className="h-6 w-6 items-center justify-center rounded-full bg-primary">
-                    <Check size={14} color="#ffffff" />
+                    <Check size={14} color={colors.onPrimary} />
                   </View>
                 )}
               </TouchableOpacity>
@@ -265,8 +265,8 @@ export function ExportScreen() {
         {/* Export Button */}
         <Button onPress={handleExport} loading={isExporting}>
           <View className="flex-row items-center gap-2">
-            {!isExporting && <Download size={18} color="#ffffff" />}
-            <Text className="font-semibold text-white">
+            {!isExporting && <Download size={18} color={colors.onPrimary} />}
+            <Text className="font-semibold" style={{ color: colors.onPrimary }}>
               Export {selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}
             </Text>
           </View>

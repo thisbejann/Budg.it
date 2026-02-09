@@ -153,7 +153,7 @@ export function AddCategoryScreen() {
                   >
                     <IconComp
                       size={20}
-                      color={selectedIcon === iconName ? '#ffffff' : colors.foreground}
+                      color={selectedIcon === iconName ? colors.onPrimary : colors.foreground}
                     />
                   </TouchableOpacity>
                 );
