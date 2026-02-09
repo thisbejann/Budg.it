@@ -10,6 +10,9 @@
 @layer theme {
   :root {
     @variant light {
+      /* Muted text color */
+      --color-muted-foreground: oklch(0.49 0.03 50);
+
       /* Light mode hover colors */
       --color-accent-hover: oklch(0.66 0.18 253.83);
       --color-default-hover: oklch(0.92 0.001 286.375);
@@ -48,6 +51,9 @@
     }
 
     @variant dark {
+      /* Muted text color */
+      --color-muted-foreground: oklch(0.74 0.02 50);
+
       /* Dark mode hover colors */
       --color-accent-hover: oklch(0.58 0.17 253.83);
       --color-default-hover: oklch(0.30 0.006 286.033);

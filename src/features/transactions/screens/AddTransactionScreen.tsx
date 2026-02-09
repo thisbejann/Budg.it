@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -10,6 +10,7 @@ import type { RootStackParamList } from '../../../types/navigation';
 import type {
   AccountWithPerson,
   CategoryWithSubcategories,
+  TransactionTemplateWithDetails,
 } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
 import {
@@ -30,6 +31,8 @@ import {
 } from '../../../database/repositories';
 import { getToday, getCurrentTime } from '../../../shared/utils/date';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { Chip } from 'heroui-native';
+import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -54,6 +57,8 @@ export function AddTransactionScreen() {
 
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
+  const [templates, setTemplates] = useState<TransactionTemplateWithDetails[]>([]);
+  const [appliedTemplateId, setAppliedTemplateId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const templateId = (route.params as any)?.templateId;
@@ -85,34 +90,42 @@ export function AddTransactionScreen() {
     if (!activeLedgerId) return;
 
     try {
-      const [accts, cats] = await Promise.all([
+      const [accts, cats, tmpls] = await Promise.all([
         AccountRepository.getAllByLedger(activeLedgerId),
         CategoryRepository.getAllWithSubcategories(),
+        TemplateRepository.getPopular(activeLedgerId),
       ]);
 
       setAccounts(accts);
       setCategories(cats);
+      setTemplates(tmpls);
 
       // Load template if provided
       if (templateId) {
         const template = await TemplateRepository.getById(templateId);
         if (template) {
-          if (template.amount) setValue('amount', template.amount.toString());
-          if (template.account_id) setValue('account_id', template.account_id);
-          if (template.category_id)
-            setValue('category_id', template.category_id);
-          if (template.subcategory_id)
-            setValue('subcategory_id', template.subcategory_id);
+          setValue('amount', template.amount ? template.amount.toString() : '');
+          setValue('account_id', template.account_id as any);
+          setValue('category_id', template.category_id ?? undefined);
+          setValue('subcategory_id', template.subcategory_id ?? undefined);
           setValue('type', template.type);
-          if (template.notes) setValue('notes', template.notes);
-
-          // Increment template usage
-          await TemplateRepository.incrementUsage(templateId);
+          setValue('notes', template.notes ?? '');
+          setAppliedTemplateId(template.id);
         }
       }
     } catch (error) {
       console.error('Error loading data:', error);
     }
+  };
+
+  const applyTemplate = (template: TransactionTemplateWithDetails) => {
+    setValue('amount', template.amount ? template.amount.toString() : '');
+    setValue('account_id', template.account_id as any);
+    setValue('category_id', template.category_id ?? undefined);
+    setValue('subcategory_id', template.subcategory_id ?? undefined);
+    setValue('type', template.type);
+    setValue('notes', template.notes ?? '');
+    setAppliedTemplateId(template.id);
   };
 
   const onSubmit = async (data: TransactionFormData) => {
@@ -131,6 +144,10 @@ export function AddTransactionScreen() {
         time: data.time,
         notes: data.notes,
       });
+
+      if (appliedTemplateId) {
+        await TemplateRepository.incrementUsage(appliedTemplateId);
+      }
 
       navigation.goBack();
     } catch (error) {
@@ -173,6 +190,42 @@ export function AddTransactionScreen() {
         bottomOffset={20}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
+        {/* Quick Templates */}
+        {templates.length > 0 && !templateId && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="mb-4"
+            contentContainerStyle={{ gap: 8 }}
+          >
+            {templates.map(template => {
+              const iconName = template.icon
+                .split('-')
+                .map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)))
+                .join('');
+              const IconComponent =
+                (LucideIcons as any)[iconName] || LucideIcons.Bookmark;
+
+              return (
+                <Chip
+                  key={template.id}
+                  variant="secondary"
+                  size="md"
+                  onPress={() => applyTemplate(template)}
+                >
+                  <View
+                    className="h-5 w-5 items-center justify-center rounded-full"
+                    style={{ backgroundColor: template.color }}
+                  >
+                    <IconComponent size={12} color="#ffffff" />
+                  </View>
+                  <Chip.Label>{template.name}</Chip.Label>
+                </Chip>
+              );
+            })}
+          </ScrollView>
+        )}
+
         {/* Type Toggle */}
         <View className="mb-4 flex-row gap-2">
           <TouchableOpacity
