@@ -66,16 +66,11 @@ export function TemplatesScreen() {
             <View className="mt-1 flex-row items-center gap-2">
               {isExpense ? <ExpenseBadge /> : <IncomeBadge />}
               {item.category_name && (
-                <Text className="text-xs" style={{ color: colors.mutedForeground }}>
-                  {item.category_name}
-                </Text>
+                <Text className="text-xs text-muted-foreground">{item.category_name}</Text>
               )}
             </View>
             {item.account_name && (
-              <Text
-                className="mt-0.5 text-xs"
-                style={{ color: colors.mutedForeground }}
-              >
+              <Text className="mt-0.5 text-xs text-muted-foreground">
                 Account: {item.account_name}
               </Text>
             )}
@@ -90,11 +85,9 @@ export function TemplatesScreen() {
               {formatPHP(item.amount)}
             </Text>
           ) : (
-            <Text className="text-xs" style={{ color: colors.mutedForeground }}>
-              No amount
-            </Text>
+            <Text className="text-xs text-muted-foreground">No amount</Text>
           )}
-          <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+          <Text className="text-xs text-muted-foreground">
             Used {item.usage_count}x
           </Text>
         </View>

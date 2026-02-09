@@ -205,7 +205,7 @@ export function EditTemplateScreen() {
         {/* Usage Stats */}
         {template && (
           <View className="mb-4 rounded-xl bg-secondary p-3">
-            <Text className="text-sm" style={{ color: colors.mutedForeground }}>
+            <Text className="text-sm text-muted-foreground">
               Used {template.usage_count} times
               {template.last_used_at && ` • Last used: ${template.last_used_at.split('T')[0]}`}
             </Text>
