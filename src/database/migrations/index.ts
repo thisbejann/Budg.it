@@ -2,11 +2,13 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { Migration } from './types';
 import { migration001 } from './001_initial_schema';
 import { migration002 } from './002_seed_categories';
+import { migration003 } from './003_add_credit_card_dates';
 
 // Register all migrations in order
 const migrations: Migration[] = [
   migration001,
   migration002,
+  migration003,
 ];
 
 // Create migrations tracking table

@@ -32,6 +32,7 @@ import {
 } from '../../../database/repositories';
 import { useLedgerStore } from '../../../store';
 import { formatPHP } from '../../../shared/utils/currency';
+import { getOrdinalSuffix } from '../../../shared/utils/date';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
 import {
@@ -39,10 +40,14 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   Receipt,
+  CalendarDays,
+  CalendarClock,
+  Clock,
 } from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type AccountDetailRouteProp = RouteProp<RootStackParamList, 'AccountDetail'>;
+
 
 export function AccountDetailScreen() {
   const navigation = useNavigation<NavigationProp>();
@@ -298,6 +303,57 @@ export function AccountDetailScreen() {
                         </View>
                       )}
                   </View>
+
+                  {/* Credit Card Dates */}
+                  {account.account_type === 'credit' &&
+                    (account.statement_date || account.due_date || account.payment_due_days) && (
+                      <View className="mt-3 gap-2">
+                        {account.statement_date && (
+                          <View className="flex-row items-center gap-2">
+                            <CalendarDays size={14} color={colors.mutedForeground} />
+                            <Text
+                              className="text-sm"
+                              style={{ color: colors.mutedForeground }}
+                            >
+                              Statement closes on the{' '}
+                              <Text className="font-medium" style={{ color: colors.foreground }}>
+                                {account.statement_date}{getOrdinalSuffix(account.statement_date)}
+                              </Text>{' '}
+                              of every month
+                            </Text>
+                          </View>
+                        )}
+                        {account.due_date && (
+                          <View className="flex-row items-center gap-2">
+                            <CalendarClock size={14} color={colors.mutedForeground} />
+                            <Text
+                              className="text-sm"
+                              style={{ color: colors.mutedForeground }}
+                            >
+                              Payment due on the{' '}
+                              <Text className="font-medium" style={{ color: colors.foreground }}>
+                                {account.due_date}{getOrdinalSuffix(account.due_date)}
+                              </Text>{' '}
+                              of every month
+                            </Text>
+                          </View>
+                        )}
+                        {account.payment_due_days && (
+                          <View className="flex-row items-center gap-2">
+                            <Clock size={14} color={colors.mutedForeground} />
+                            <Text
+                              className="text-sm"
+                              style={{ color: colors.mutedForeground }}
+                            >
+                              <Text className="font-medium" style={{ color: colors.foreground }}>
+                                {account.payment_due_days} days
+                              </Text>{' '}
+                              to pay after statement
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    )}
 
                   {/* Initial Balance */}
                   <View className="mt-3 flex-row justify-between">

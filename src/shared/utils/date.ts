@@ -155,6 +155,15 @@ export function getRelativeDate(dateStr: string): string {
 }
 
 /**
+ * Get the ordinal suffix for a number (1st, 2nd, 3rd, 4th, etc.)
+ */
+export function getOrdinalSuffix(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return s[(v - 20) % 10] || s[v] || s[0];
+}
+
+/**
  * Generate an array of dates for a month calendar
  */
 export function getCalendarDates(year: number, month: number): string[] {

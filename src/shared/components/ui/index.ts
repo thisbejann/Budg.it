@@ -11,6 +11,7 @@ export {
 export { Input, CurrencyInput } from './Input';
 export { DateInput } from './DateInput';
 export { TimeInput } from './TimeInput';
+export { DayOfMonthPicker } from './DayOfMonthPicker';
 export { Select, type SelectOption } from './Select';
 export {
   Badge,

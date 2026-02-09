@@ -39,8 +39,8 @@ export const AccountRepository = {
   async create(ledgerId: number, data: AccountFormData): Promise<number> {
     const id = await executeSqlInsert(
       `INSERT INTO accounts
-       (ledger_id, name, account_type, initial_balance, current_balance, credit_limit, person_id, icon, color, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (ledger_id, name, account_type, initial_balance, current_balance, credit_limit, statement_date, due_date, payment_due_days, person_id, icon, color, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         ledgerId,
         data.name,
@@ -48,6 +48,9 @@ export const AccountRepository = {
         data.initial_balance,
         data.initial_balance, // current_balance starts as initial_balance
         data.credit_limit || null,
+        data.statement_date || null,
+        data.due_date || null,
+        data.payment_due_days || null,
         data.person_id || null,
         data.icon,
         data.color,
@@ -88,6 +91,18 @@ export const AccountRepository = {
     if (data.color !== undefined) {
       fields.push('color = ?');
       values.push(data.color);
+    }
+    if (data.statement_date !== undefined) {
+      fields.push('statement_date = ?');
+      values.push(data.statement_date);
+    }
+    if (data.due_date !== undefined) {
+      fields.push('due_date = ?');
+      values.push(data.due_date);
+    }
+    if (data.payment_due_days !== undefined) {
+      fields.push('payment_due_days = ?');
+      values.push(data.payment_due_days);
     }
     if (data.notes !== undefined) {
       fields.push('notes = ?');
