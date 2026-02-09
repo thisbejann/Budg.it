@@ -52,9 +52,9 @@ export function TemplatesScreen() {
     return (
       <TouchableOpacity
         onPress={() => navigation.navigate('EditTemplate', { templateId: item.id })}
-        className="flex-row items-center justify-between border-b border-border px-4 py-3"
+        className="flex-row items-center border-b border-border px-4 py-3"
       >
-        <View className="flex-row items-center gap-3">
+        <View className="flex-1 flex-row items-center gap-3">
           <View
             className="h-12 w-12 items-center justify-center rounded-xl"
             style={{ backgroundColor: item.color }}
@@ -66,17 +66,22 @@ export function TemplatesScreen() {
             <View className="mt-1 flex-row items-center gap-2">
               {isExpense ? <ExpenseBadge /> : <IncomeBadge />}
               {item.category_name && (
-                <Text className="text-xs text-muted-foreground">{item.category_name}</Text>
+                <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                  {item.category_name}
+                </Text>
               )}
             </View>
             {item.account_name && (
-              <Text className="mt-0.5 text-xs text-muted-foreground">
+              <Text
+                className="mt-0.5 text-xs"
+                style={{ color: colors.mutedForeground }}
+              >
                 Account: {item.account_name}
               </Text>
             )}
           </View>
         </View>
-        <View className="items-end gap-1">
+        <View className="ml-3 items-end gap-1">
           {item.amount ? (
             <Text
               className="font-semibold"
@@ -85,9 +90,11 @@ export function TemplatesScreen() {
               {formatPHP(item.amount)}
             </Text>
           ) : (
-            <Text className="text-xs text-muted-foreground">No amount</Text>
+            <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+              No amount
+            </Text>
           )}
-          <Text className="text-xs text-muted-foreground">
+          <Text className="text-xs" style={{ color: colors.mutedForeground }}>
             Used {item.usage_count}x
           </Text>
         </View>

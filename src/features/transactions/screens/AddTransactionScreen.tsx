@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -10,6 +10,7 @@ import type { RootStackParamList } from '../../../types/navigation';
 import type {
   AccountWithPerson,
   CategoryWithSubcategories,
+  TransactionTemplateWithDetails,
 } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
 import {
@@ -30,6 +31,7 @@ import {
 } from '../../../database/repositories';
 import { getToday, getCurrentTime } from '../../../shared/utils/date';
 import { useTheme } from '../../../hooks/useColorScheme';
+import * as LucideIcons from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -54,6 +56,7 @@ export function AddTransactionScreen() {
 
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
+  const [templates, setTemplates] = useState<TransactionTemplateWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const templateId = (route.params as any)?.templateId;
@@ -85,13 +88,15 @@ export function AddTransactionScreen() {
     if (!activeLedgerId) return;
 
     try {
-      const [accts, cats] = await Promise.all([
+      const [accts, cats, tmpls] = await Promise.all([
         AccountRepository.getAllByLedger(activeLedgerId),
         CategoryRepository.getAllWithSubcategories(),
+        TemplateRepository.getPopular(activeLedgerId),
       ]);
 
       setAccounts(accts);
       setCategories(cats);
+      setTemplates(tmpls);
 
       // Load template if provided
       if (templateId) {
@@ -113,6 +118,17 @@ export function AddTransactionScreen() {
     } catch (error) {
       console.error('Error loading data:', error);
     }
+  };
+
+  const applyTemplate = async (template: TransactionTemplateWithDetails) => {
+    if (template.amount) setValue('amount', template.amount.toString());
+    if (template.account_id) setValue('account_id', template.account_id);
+    if (template.category_id) setValue('category_id', template.category_id);
+    if (template.subcategory_id) setValue('subcategory_id', template.subcategory_id);
+    setValue('type', template.type);
+    if (template.notes) setValue('notes', template.notes);
+
+    await TemplateRepository.incrementUsage(template.id);
   };
 
   const onSubmit = async (data: TransactionFormData) => {
@@ -173,6 +189,41 @@ export function AddTransactionScreen() {
         bottomOffset={20}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
+        {/* Quick Templates */}
+        {templates.length > 0 && !templateId && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="mb-4"
+            contentContainerStyle={{ gap: 8 }}
+          >
+            {templates.map(template => {
+              const iconName = template.icon
+                .split('-')
+                .map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)))
+                .join('');
+              const IconComponent =
+                (LucideIcons as any)[iconName] || LucideIcons.Bookmark;
+
+              return (
+                <TouchableOpacity
+                  key={template.id}
+                  onPress={() => applyTemplate(template)}
+                  className="flex-row items-center gap-2 rounded-full border border-border px-3 py-2"
+                >
+                  <View
+                    className="h-6 w-6 items-center justify-center rounded-full"
+                    style={{ backgroundColor: template.color }}
+                  >
+                    <IconComponent size={14} color="#ffffff" />
+                  </View>
+                  <Text className="text-sm text-foreground">{template.name}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        )}
+
         {/* Type Toggle */}
         <View className="mb-4 flex-row gap-2">
           <TouchableOpacity
