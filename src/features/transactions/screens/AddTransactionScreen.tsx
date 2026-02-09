@@ -57,6 +57,7 @@ export function AddTransactionScreen() {
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
   const [templates, setTemplates] = useState<TransactionTemplateWithDetails[]>([]);
+  const [appliedTemplateId, setAppliedTemplateId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const templateId = (route.params as any)?.templateId;
@@ -102,17 +103,13 @@ export function AddTransactionScreen() {
       if (templateId) {
         const template = await TemplateRepository.getById(templateId);
         if (template) {
-          if (template.amount) setValue('amount', template.amount.toString());
-          if (template.account_id) setValue('account_id', template.account_id);
-          if (template.category_id)
-            setValue('category_id', template.category_id);
-          if (template.subcategory_id)
-            setValue('subcategory_id', template.subcategory_id);
+          setValue('amount', template.amount ? template.amount.toString() : '');
+          setValue('account_id', template.account_id as any);
+          setValue('category_id', template.category_id ?? undefined);
+          setValue('subcategory_id', template.subcategory_id ?? undefined);
           setValue('type', template.type);
-          if (template.notes) setValue('notes', template.notes);
-
-          // Increment template usage
-          await TemplateRepository.incrementUsage(templateId);
+          setValue('notes', template.notes ?? '');
+          setAppliedTemplateId(template.id);
         }
       }
     } catch (error) {
@@ -120,15 +117,14 @@ export function AddTransactionScreen() {
     }
   };
 
-  const applyTemplate = async (template: TransactionTemplateWithDetails) => {
-    if (template.amount) setValue('amount', template.amount.toString());
-    if (template.account_id) setValue('account_id', template.account_id);
-    if (template.category_id) setValue('category_id', template.category_id);
-    if (template.subcategory_id) setValue('subcategory_id', template.subcategory_id);
+  const applyTemplate = (template: TransactionTemplateWithDetails) => {
+    setValue('amount', template.amount ? template.amount.toString() : '');
+    setValue('account_id', template.account_id as any);
+    setValue('category_id', template.category_id ?? undefined);
+    setValue('subcategory_id', template.subcategory_id ?? undefined);
     setValue('type', template.type);
-    if (template.notes) setValue('notes', template.notes);
-
-    await TemplateRepository.incrementUsage(template.id);
+    setValue('notes', template.notes ?? '');
+    setAppliedTemplateId(template.id);
   };
 
   const onSubmit = async (data: TransactionFormData) => {
@@ -147,6 +143,10 @@ export function AddTransactionScreen() {
         time: data.time,
         notes: data.notes,
       });
+
+      if (appliedTemplateId) {
+        await TemplateRepository.incrementUsage(appliedTemplateId);
+      }
 
       navigation.goBack();
     } catch (error) {
