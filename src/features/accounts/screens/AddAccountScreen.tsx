@@ -9,7 +9,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { Person, AccountType } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
-import { Button, CurrencyInput, Input, Select, SelectOption } from '../../../shared/components/ui';
+import { Button, CurrencyInput, Input, Select, SelectOption, DayOfMonthPicker } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { AccountRepository, PersonRepository } from '../../../database/repositories';
 import { ACCOUNT_COLORS } from '../../../constants/colors';
@@ -20,11 +20,23 @@ import * as LucideIcons from 'lucide-react-native';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type AddAccountRouteProp = RouteProp<RootStackParamList, 'AddAccount'>;
 
+const PAYMENT_DUE_DAYS_OPTIONS: SelectOption[] = [
+  { label: '15 days', value: 15 },
+  { label: '18 days', value: 18 },
+  { label: '20 days', value: 20 },
+  { label: '21 days', value: 21 },
+  { label: '25 days', value: 25 },
+  { label: '30 days', value: 30 },
+];
+
 const accountSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
   account_type: z.enum(['debit', 'credit', 'owed', 'debt']),
   initial_balance: z.string(),
   credit_limit: z.string().optional(),
+  statement_date: z.number().min(1).max(31).optional(),
+  due_date: z.number().min(1).max(31).optional(),
+  payment_due_days: z.number().optional(),
   person_id: z.number().optional(),
   icon: z.string(),
   color: z.string(),
@@ -100,6 +112,9 @@ export function AddAccountScreen() {
         account_type: data.account_type,
         initial_balance: parseFloat(data.initial_balance) || 0,
         credit_limit: data.credit_limit ? parseFloat(data.credit_limit) : undefined,
+        statement_date: data.statement_date,
+        due_date: data.due_date,
+        payment_due_days: data.payment_due_days,
         person_id: data.person_id,
         icon: data.icon,
         color: data.color,
@@ -197,6 +212,57 @@ export function AddAccountScreen() {
               )}
             />
           </View>
+        )}
+
+        {/* Credit Card Date Fields */}
+        {selectedType === 'credit' && (
+          <>
+            <View className="mb-4">
+              <Controller
+                control={control}
+                name="statement_date"
+                render={({ field: { onChange, value } }) => (
+                  <DayOfMonthPicker
+                    label="Statement Date"
+                    placeholder="Select statement day"
+                    value={value}
+                    onValueChange={onChange}
+                  />
+                )}
+              />
+            </View>
+
+            <View className="mb-4">
+              <Controller
+                control={control}
+                name="due_date"
+                render={({ field: { onChange, value } }) => (
+                  <DayOfMonthPicker
+                    label="Due Date"
+                    placeholder="Select due day"
+                    value={value}
+                    onValueChange={onChange}
+                  />
+                )}
+              />
+            </View>
+
+            <View className="mb-4">
+              <Controller
+                control={control}
+                name="payment_due_days"
+                render={({ field: { onChange, value } }) => (
+                  <Select
+                    label="Days to Pay After Statement"
+                    placeholder="Select days"
+                    value={value}
+                    options={PAYMENT_DUE_DAYS_OPTIONS}
+                    onValueChange={onChange}
+                  />
+                )}
+              />
+            </View>
+          </>
         )}
 
         {/* Person - Only for owed/debt types */}

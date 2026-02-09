@@ -33,6 +33,9 @@ export interface Account {
   initial_balance: number;
   current_balance: number;
   credit_limit: number | null;
+  statement_date: number | null;
+  due_date: number | null;
+  payment_due_days: number | null;
   person_id: number | null;
   icon: string;
   color: string;

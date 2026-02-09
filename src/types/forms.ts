@@ -21,6 +21,9 @@ export interface AccountFormData {
   account_type: AccountType;
   initial_balance: number;
   credit_limit?: number;
+  statement_date?: number;
+  due_date?: number;
+  payment_due_days?: number;
   person_id?: number;
   icon: string;
   color: string;
