@@ -264,7 +264,7 @@ export function EditAccountScreen() {
                   <DayOfMonthPicker
                     label="Statement Date"
                     placeholder="Select statement day"
-                    value={value}
+                    value={value ?? undefined}
                     onValueChange={onChange}
                   />
                 )}
@@ -279,7 +279,7 @@ export function EditAccountScreen() {
                   <DayOfMonthPicker
                     label="Due Date"
                     placeholder="Select due day"
-                    value={value}
+                    value={value ?? undefined}
                     onValueChange={onChange}
                   />
                 )}
