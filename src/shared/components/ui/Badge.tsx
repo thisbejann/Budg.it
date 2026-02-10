@@ -10,7 +10,7 @@ interface BadgeProps extends ViewProps {
 }
 
 export function Badge({ variant = 'default', children, className, style, ...props }: BadgeProps) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   const getBackgroundColor = () => {
     switch (variant) {
@@ -53,19 +53,23 @@ export function Badge({ variant = 'default', children, className, style, ...prop
   return (
     <View
       className={`
-        inline-flex items-center rounded-full px-2.5 py-0.5
+        inline-flex items-center rounded-full px-3 py-1
         ${variant === 'outline' ? 'border' : ''}
         ${className || ''}
       `}
       style={[
         { backgroundColor: getBackgroundColor() },
         variant === 'outline' && { borderColor: colors.border },
+        isDark && variant !== 'outline' && { borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.1)' },
         style,
       ]}
       {...props}
     >
       {typeof children === 'string' ? (
-        <Text className="text-xs font-semibold" style={{ color: getTextColor() }}>
+        <Text
+          className="text-xs font-semibold"
+          style={{ color: getTextColor(), letterSpacing: 0.5 }}
+        >
           {children}
         </Text>
       ) : (
@@ -97,7 +101,7 @@ const accountTypeLabels: Record<string, string> = {
 };
 
 export function AccountTypeBadge({ type }: AccountTypeBadgeProps) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   const bgColor =
     type === 'debit' ? colors.accountDebit :
@@ -106,10 +110,16 @@ export function AccountTypeBadge({ type }: AccountTypeBadgeProps) {
 
   return (
     <View
-      className="inline-flex items-center rounded-full px-2.5 py-0.5"
-      style={{ backgroundColor: bgColor }}
+      className="inline-flex items-center rounded-full px-3 py-1"
+      style={[
+        { backgroundColor: bgColor },
+        isDark && { borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.1)' },
+      ]}
     >
-      <Text className="text-xs font-semibold" style={{ color: '#ffffff' }}>
+      <Text
+        className="text-xs font-semibold"
+        style={{ color: '#ffffff', letterSpacing: 0.5 }}
+      >
         {accountTypeLabels[type]}
       </Text>
     </View>

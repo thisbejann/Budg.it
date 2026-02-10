@@ -2,6 +2,7 @@ import React from 'react';
 import { View, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { FLOATING_TAB_BAR_TOTAL_HEIGHT } from '../navigation/FloatingTabBar';
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -11,6 +12,8 @@ interface ScreenProps {
   onRefresh?: () => void;
   className?: string;
   contentClassName?: string;
+  /** Set to false to disable bottom padding for floating tab bar (e.g. in modal screens) */
+  hasTabBar?: boolean;
 }
 
 export function Screen({
@@ -21,13 +24,17 @@ export function Screen({
   onRefresh,
   className,
   contentClassName,
+  hasTabBar = false,
 }: ScreenProps) {
   const { colors } = useTheme();
 
   const content = scrollable ? (
     <ScrollView
       className={`flex-1 ${contentClassName || ''}`}
-      contentContainerStyle={{ flexGrow: 1 }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        paddingBottom: hasTabBar ? FLOATING_TAB_BAR_TOTAL_HEIGHT : 0,
+      }}
       showsVerticalScrollIndicator={false}
       refreshControl={
         onRefresh ? (

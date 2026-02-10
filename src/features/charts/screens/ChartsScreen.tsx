@@ -17,7 +17,7 @@ type ChartPeriod = 'week' | 'month' | '3months' | '6months';
 
 export function ChartsScreen() {
   const { activeLedgerId } = useLedgerStore();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   const [period, setPeriod] = useState<ChartPeriod>('month');
   const [categoryData, setCategoryData] = useState<CategorySpending[]>([]);
@@ -69,8 +69,17 @@ export function ChartsScreen() {
     income: m.income,
   }));
 
+  // Gold pill style for period selector
+  const pillStyle = (isActive: boolean) => ({
+    backgroundColor: isActive ? colors.primary : (isDark ? colors.surfaceContainer : colors.secondaryContainer),
+    borderRadius: 20,
+  });
+
+  const pillTextColor = (isActive: boolean) =>
+    isActive ? colors.onPrimary : (isDark ? colors.mutedForeground : colors.onSecondaryContainer);
+
   return (
-    <Screen>
+    <Screen hasTabBar>
       <SimpleHeader title="Charts & Insights" />
 
       <ScrollView className="flex-1 px-4 py-4">
@@ -80,12 +89,12 @@ export function ChartsScreen() {
             <TouchableOpacity
               key={p}
               onPress={() => setPeriod(p)}
-              className="rounded-lg px-3 py-1.5"
-              style={{ backgroundColor: period === p ? colors.primary : colors.secondaryContainer }}
+              className="px-4 py-1.5"
+              style={pillStyle(period === p)}
             >
               <Text
                 className="text-sm font-medium"
-                style={{ color: period === p ? colors.onPrimary : colors.onSecondaryContainer }}
+                style={{ color: pillTextColor(period === p) }}
               >
                 {p === 'month' ? 'This Month' : p === '3months' ? '3 Months' : '6 Months'}
               </Text>
@@ -95,13 +104,13 @@ export function ChartsScreen() {
 
         {/* Summary Cards */}
         <View className="mb-4 flex-row gap-3">
-          <Card className="flex-1">
+          <Card variant={isDark ? 'glass' : 'default'} className="flex-1">
             <CardContent>
               <Text className="text-xs" style={{ color: colors.mutedForeground }}>Total Expense</Text>
               <Text className="text-lg font-bold" style={{ color: colors.expense }}>{formatPHP(totalExpense)}</Text>
             </CardContent>
           </Card>
-          <Card className="flex-1">
+          <Card variant={isDark ? 'glass' : 'default'} className="flex-1">
             <CardContent>
               <Text className="text-xs" style={{ color: colors.mutedForeground }}>Total Income</Text>
               <Text className="text-lg font-bold" style={{ color: colors.income }}>{formatPHP(totalIncome)}</Text>
@@ -167,6 +176,7 @@ export function ChartsScreen() {
                   tickFormat={(t) => t}
                   style={{
                     tickLabels: { fontSize: 10, fill: colors.mutedForeground },
+                    axis: { stroke: isDark ? 'rgba(255,255,255,0.1)' : colors.border },
                   }}
                 />
                 <VictoryAxis
@@ -174,6 +184,8 @@ export function ChartsScreen() {
                   tickFormat={(t) => formatPHPCompact(t)}
                   style={{
                     tickLabels: { fontSize: 10, fill: colors.mutedForeground },
+                    axis: { stroke: isDark ? 'rgba(255,255,255,0.1)' : colors.border },
+                    grid: { stroke: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)' },
                   }}
                 />
                 <VictoryBar
@@ -217,7 +229,7 @@ export function ChartsScreen() {
               <View
                 key={cat.category_id}
                 className="flex-row items-center justify-between py-2"
-                style={index < categoryData.length - 1 ? { borderBottomWidth: 1, borderBottomColor: colors.border } : undefined}
+                style={index < categoryData.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border } : undefined}
               >
                 <View className="flex-row items-center gap-2">
                   <View

@@ -45,10 +45,7 @@ export function Header({
   };
 
   return (
-    <View
-      className="flex-row items-center justify-between px-4 py-3"
-      style={{ borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.background }}
-    >
+    <View className="flex-row items-center justify-between px-4 py-3">
       {/* Left section */}
       <View className="w-12">
         {showBack && (
@@ -66,7 +63,11 @@ export function Header({
 
       {/* Center section */}
       <View className="flex-1 items-center">
-        <Text className="text-lg font-semibold" style={{ color: colors.foreground }} numberOfLines={1}>
+        <Text
+          className="text-lg font-semibold"
+          style={{ color: colors.foreground, letterSpacing: -0.5 }}
+          numberOfLines={1}
+        >
           {title}
         </Text>
         {subtitle && (
@@ -86,11 +87,13 @@ export function Header({
 export function SimpleHeader({ title }: { title: string }) {
   const { colors } = useTheme();
   return (
-    <View
-      className="px-4 py-3"
-      style={{ borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.background }}
-    >
-      <Text className="text-xl font-bold" style={{ color: colors.foreground }}>{title}</Text>
+    <View className="px-4 py-3">
+      <Text
+        className="text-xl font-bold"
+        style={{ color: colors.foreground, letterSpacing: -0.5 }}
+      >
+        {title}
+      </Text>
     </View>
   );
 }

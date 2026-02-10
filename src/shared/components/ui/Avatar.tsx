@@ -74,14 +74,24 @@ export function IconAvatar({
   backgroundColor,
   className,
 }: IconAvatarProps) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const bgColor = backgroundColor || colors.primary;
   const { container } = sizeStyles[size];
 
   return (
     <View
       className={`items-center justify-center rounded-full ${container} ${className || ''}`}
-      style={{ backgroundColor: bgColor }}
+      style={[
+        { backgroundColor: bgColor },
+        {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: isDark ? 0.3 : 0.1,
+          shadowRadius: 4,
+          elevation: 2,
+        },
+        isDark && { borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)' },
+      ]}
     >
       {icon}
     </View>
