@@ -4,13 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Plus, ArrowUpRight, ArrowDownLeft, ArrowLeftRight, ChevronRight } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-// Safe haptic wrapper — native module may not be in current dev build
-const triggerHaptic = () => {
-  try {
-    const Haptics = require('expo-haptics');
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-  } catch {}
-};
+import * as Haptics from 'expo-haptics';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { TransactionWithDetails, CategorySpending } from '../../../types/database';
@@ -93,7 +87,7 @@ export function HomeScreen() {
   };
 
   const handleFABPress = () => {
-    triggerHaptic();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     navigation.navigate('AddTransaction');
   };
 

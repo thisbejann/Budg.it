@@ -1,12 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
-// Safe haptic wrapper — native module may not be in current dev build
-const triggerHaptic = () => {
-  try {
-    const Haptics = require('expo-haptics');
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  } catch {}
-};
+import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
 import Animated, {
   useAnimatedStyle,
   withSpring,
@@ -70,7 +65,7 @@ function TabItem({
     scale.value = withSpring(0.9, { damping: 12, stiffness: 500 }, () => {
       scale.value = withSpring(1, { damping: 12, stiffness: 500 });
     });
-    triggerHaptic();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress();
   };
 
@@ -149,7 +144,20 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
         elevation: 12,
       }}
     >
-      {/* Background */}
+      {/* Blur background */}
+      <BlurView
+        intensity={isDark ? 60 : 80}
+        tint={isDark ? 'dark' : 'light'}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      />
+
+      {/* Solid fallback (visible through blur) */}
       <View
         style={{
           position: 'absolute',

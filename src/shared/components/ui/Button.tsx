@@ -11,15 +11,8 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../../hooks/useColorScheme';
-
-// Safe haptic wrapper — native module may not be in current dev build
-const triggerHaptic = () => {
-  try {
-    const Haptics = require('expo-haptics');
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  } catch {}
-};
 
 // MD3 variants + destructive for delete actions
 type ButtonVariant = 'filled' | 'outlined' | 'tonal' | 'text' | 'destructive';
@@ -88,7 +81,7 @@ export function Button({
       scale.value = withSpring(1, { damping: 12, stiffness: 500 });
     })
     .onEnd(() => {
-      runOnJS(triggerHaptic)();
+      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
       if (onPress) {
         runOnJS(onPress)();
       }
