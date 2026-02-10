@@ -11,6 +11,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../../hooks/useColorScheme';
 
 // MD3 variants + destructive for delete actions
@@ -65,7 +66,7 @@ export function Button({
 }: ButtonProps) {
   const isDisabled = disabled || loading;
   const scale = useSharedValue(1);
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -74,12 +75,13 @@ export function Button({
   const gesture = Gesture.Tap()
     .enabled(!isDisabled)
     .onBegin(() => {
-      scale.value = withSpring(0.96, { damping: 15, stiffness: 400 });
+      scale.value = withSpring(0.96, { damping: 12, stiffness: 500 });
     })
     .onFinalize(() => {
-      scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+      scale.value = withSpring(1, { damping: 12, stiffness: 500 });
     })
     .onEnd(() => {
+      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
       if (onPress) {
         runOnJS(onPress)();
       }
@@ -145,6 +147,7 @@ export function Button({
   // Use inline styles for reliable circular buttons and exact dimensions
   const isCircular = fullRounded || size === 'fab';
   const isIconButton = size === 'fab' || size === 'icon';
+  const isFab = size === 'fab';
 
   const baseStyle = {
     borderRadius: isCircular ? 9999 : 20,
@@ -153,6 +156,17 @@ export function Button({
     justifyContent: 'center' as const,
     flexDirection: 'row' as const,
   };
+
+  // FAB gold glow shadow
+  const fabShadow = isFab && variant === 'filled'
+    ? {
+        shadowColor: colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: isDark ? 0.5 : 0.3,
+        shadowRadius: 12,
+        elevation: 8,
+      }
+    : {};
 
   return (
     <GestureDetector gesture={gesture}>
@@ -163,7 +177,7 @@ export function Button({
           ${isDisabled ? 'opacity-50' : ''}
           ${className || ''}
         `}
-        style={[animatedStyle, variantStyles, baseStyle, style]}
+        style={[animatedStyle, variantStyles, baseStyle, fabShadow, style]}
         {...props}
       >
         {loading ? (

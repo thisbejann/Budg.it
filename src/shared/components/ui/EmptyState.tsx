@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button } from './Button';
 import { useTheme } from '../../../hooks/useColorScheme';
 
@@ -21,7 +22,10 @@ export function EmptyState({
   const { colors } = useTheme();
 
   return (
-    <View className="flex-1 items-center justify-center px-6 py-12">
+    <Animated.View
+      entering={FadeInDown.springify().damping(15).stiffness(200)}
+      className="flex-1 items-center justify-center px-6 py-12"
+    >
       {icon && <View className="mb-4">{icon}</View>}
       <Text
         className="text-center text-lg font-semibold"
@@ -42,6 +46,6 @@ export function EmptyState({
           <Button onPress={onAction}>{actionLabel}</Button>
         </View>
       )}
-    </View>
+    </Animated.View>
   );
 }

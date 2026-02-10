@@ -32,6 +32,7 @@ interface SettingItemProps {
   description?: string;
   onPress: () => void;
   colors: ReturnType<typeof useTheme>['colors'];
+  isDark: boolean;
 }
 
 function SettingItem({
@@ -40,6 +41,7 @@ function SettingItem({
   description,
   onPress,
   colors,
+  isDark,
 }: SettingItemProps) {
   return (
     <TouchableOpacity
@@ -49,8 +51,13 @@ function SettingItem({
     >
       <View className="flex-row items-center gap-3">
         <View
-          className="h-10 w-10 items-center justify-center rounded-lg"
-          style={{ backgroundColor: colors.surfaceVariant }}
+          className="h-10 w-10 items-center justify-center"
+          style={{
+            backgroundColor: isDark ? colors.surfaceContainer : colors.surfaceVariant,
+            borderRadius: 12,
+            borderWidth: isDark ? 1 : 0,
+            borderColor: 'rgba(255, 255, 255, 0.06)',
+          }}
         >
           {icon}
         </View>
@@ -77,7 +84,7 @@ export function SettingsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { activeLedger } = useLedgerStore();
   const { themeMode, setThemeMode } = useThemeStore();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
 
   const themeModes: { mode: ThemeMode; label: string; icon: typeof Sun }[] = [
     { mode: 'light', label: 'Light', icon: Sun },
@@ -86,12 +93,12 @@ export function SettingsScreen() {
   ];
 
   return (
-    <Screen>
+    <Screen hasTabBar>
       <SimpleHeader title="Settings" />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Current Ledger Info */}
-        <Card className="mb-4">
+        <Card variant={isDark ? 'glass' : 'default'} className="mb-4">
           <CardContent>
             <Text className="text-xs" style={{ color: colors.mutedForeground }}>
               Current Ledger
@@ -106,49 +113,51 @@ export function SettingsScreen() {
         </Card>
 
         {/* Theme Selection */}
-        <Card className="mb-4">
+        <Card variant={isDark ? 'glass' : 'default'} className="mb-4">
           <CardHeader>
             <CardTitle>Appearance</CardTitle>
           </CardHeader>
           <CardContent>
             <View className="flex-row gap-2 py-3">
-              {themeModes.map(({ mode, label, icon: Icon }) => (
-                <TouchableOpacity
-                  key={mode}
-                  onPress={() => setThemeMode(mode)}
-                  className="flex-1 items-center rounded-lg py-3"
-                  style={{
-                    backgroundColor:
-                      themeMode === mode
-                        ? colors.primary
-                        : colors.surfaceVariant,
-                  }}
-                >
-                  <Icon
-                    size={20}
-                    color={
-                      themeMode === mode ? colors.onPrimary : colors.foreground
-                    }
-                  />
-                  <Text
-                    className="mt-1 text-sm font-medium"
+              {themeModes.map(({ mode, label, icon: Icon }) => {
+                const isActive = themeMode === mode;
+                return (
+                  <TouchableOpacity
+                    key={mode}
+                    onPress={() => setThemeMode(mode)}
+                    className="flex-1 items-center py-3"
                     style={{
-                      color:
-                        themeMode === mode
-                          ? colors.onPrimary
-                          : colors.foreground,
+                      backgroundColor: isActive
+                        ? colors.primary
+                        : isDark
+                          ? colors.surfaceContainer
+                          : colors.surfaceVariant,
+                      borderRadius: 16,
+                      borderWidth: isActive && isDark ? 1 : 0,
+                      borderColor: 'rgba(255, 255, 255, 0.15)',
                     }}
                   >
-                    {label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Icon
+                      size={20}
+                      color={isActive ? colors.onPrimary : colors.foreground}
+                    />
+                    <Text
+                      className="mt-1 text-sm font-medium"
+                      style={{
+                        color: isActive ? colors.onPrimary : colors.foreground,
+                      }}
+                    >
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </CardContent>
         </Card>
 
         {/* Data Management */}
-        <Card className="mb-4">
+        <Card variant={isDark ? 'glass' : 'default'} className="mb-4">
           <CardHeader>
             <CardTitle>Data Management</CardTitle>
           </CardHeader>
@@ -159,28 +168,31 @@ export function SettingsScreen() {
               description="Manage expense and income categories"
               onPress={() => navigation.navigate('Categories')}
               colors={colors}
+              isDark={isDark}
             />
-            <View style={{ height: 1, backgroundColor: colors.border }} />
+            <View style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border }} />
             <SettingItem
               icon={<Bookmark size={20} color={colors.primary} />}
               title="Quick Add Templates"
               description="Save frequent transactions for quick entry"
               onPress={() => navigation.navigate('Templates')}
               colors={colors}
+              isDark={isDark}
             />
-            <View style={{ height: 1, backgroundColor: colors.border }} />
+            <View style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border }} />
             <SettingItem
               icon={<BookOpen size={20} color={colors.primary} />}
               title="Ledgers"
               description="Manage multiple ledgers (personal, business)"
               onPress={() => navigation.navigate('Ledgers')}
               colors={colors}
+              isDark={isDark}
             />
           </CardContent>
         </Card>
 
         {/* Export */}
-        <Card className="mb-4">
+        <Card variant={isDark ? 'glass' : 'default'} className="mb-4">
           <CardHeader>
             <CardTitle>Backup & Export</CardTitle>
           </CardHeader>
@@ -191,20 +203,26 @@ export function SettingsScreen() {
               description="Export transactions to CSV"
               onPress={() => navigation.navigate('Export')}
               colors={colors}
+              isDark={isDark}
             />
           </CardContent>
         </Card>
 
         {/* About */}
-        <Card className="mb-6">
+        <Card variant={isDark ? 'glass' : 'default'} className="mb-6">
           <CardHeader>
             <CardTitle>About</CardTitle>
           </CardHeader>
           <CardContent>
             <View className="flex-row items-center gap-3 py-3">
               <View
-                className="h-10 w-10 items-center justify-center rounded-lg"
-                style={{ backgroundColor: colors.surfaceVariant }}
+                className="h-10 w-10 items-center justify-center"
+                style={{
+                  backgroundColor: isDark ? colors.surfaceContainer : colors.surfaceVariant,
+                  borderRadius: 12,
+                  borderWidth: isDark ? 1 : 0,
+                  borderColor: 'rgba(255, 255, 255, 0.06)',
+                }}
               >
                 <Info size={20} color={colors.primary} />
               </View>

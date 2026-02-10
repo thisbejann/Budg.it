@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState } from 'react';
 import { TextInput, TextInputProps, View, Text } from 'react-native';
 import { useTheme } from '../../../hooks/useColorScheme';
 
@@ -10,14 +10,15 @@ interface InputProps extends TextInputProps {
 }
 
 export const Input = forwardRef<TextInput, InputProps>(
-  ({ label, error, leftIcon, rightIcon, className, style, ...props }, ref) => {
+  ({ label, error, leftIcon, rightIcon, className, style, onFocus, onBlur, ...props }, ref) => {
     const { colors } = useTheme();
+    const [isFocused, setIsFocused] = useState(false);
 
     const containerStyle = {
-      backgroundColor: colors.surfaceVariant,
-      borderColor: error ? colors.destructive : colors.outline,
-      borderWidth: 1,
-      borderRadius: 12,
+      backgroundColor: colors.surfaceContainer,
+      borderColor: error ? colors.destructive : isFocused ? colors.primary : colors.border,
+      borderWidth: isFocused ? 1.5 : 1,
+      borderRadius: 16,
     };
 
     return (
@@ -40,6 +41,14 @@ export const Input = forwardRef<TextInput, InputProps>(
             className={`flex-1 py-3 text-base ${className || ''}`}
             style={[{ color: colors.foreground }, style]}
             placeholderTextColor={colors.mutedForeground}
+            onFocus={(e) => {
+              setIsFocused(true);
+              onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setIsFocused(false);
+              onBlur?.(e);
+            }}
             {...props}
           />
           {rightIcon && <View className="ml-2">{rightIcon}</View>}
