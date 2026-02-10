@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   TouchableOpacityProps,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
 import { Card as HeroCard } from 'heroui-native';
 import { useTheme } from '../../../hooks/useColorScheme';
 
@@ -46,17 +45,6 @@ export function Card({
         ]}
         {...props}
       >
-        <BlurView
-          intensity={40}
-          tint="dark"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          }}
-        />
         {/* Top inner highlight */}
         <View
           style={{
