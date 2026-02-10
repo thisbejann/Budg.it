@@ -132,9 +132,10 @@ App uses dynamic config (`app.config.js`) with APP_VARIANT env:
 
 ## Git
 
-- create a new branch named [`jannjaspher/branch-name`] for each feature or bugfix
+- create a new branch named [`jannjaspher/branch-name`] for each feature, bugfix, or enhancement
+- NEVER commit directly to `master`
+- Open a PR against `master` when your work is ready for review
 - Branch naming: `jannjaspher/<descriptive-name>` (e.g., `jannjaspher/add-transaction-form`)
-- Open PRs against `master`
 - Commit often with clear messages
 
 ## Plan Mode
