@@ -56,6 +56,7 @@ export function Select({
         value={selectedOption ? { value: String(selectedOption.value), label: selectedOption.label } : undefined}
         onValueChange={handleValueChange}
         isDisabled={disabled}
+        presentation="bottom-sheet"
       >
         <HeroSelect.Trigger
           className={`flex-row items-center justify-between px-3 ${disabled ? 'opacity-50' : ''}`}

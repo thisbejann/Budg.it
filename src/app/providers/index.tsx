@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { HeroUINativeProvider } from 'heroui-native';
 import { Uniwind } from 'uniwind';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { DatabaseProvider } from './DatabaseProvider';
 import { useThemeStore } from '../../store';
 
@@ -38,13 +39,15 @@ export function AppProviders({ children }: AppProvidersProps) {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
         <SafeAreaProvider>
-          <HeroUINativeProvider>
-            <ThemeSyncer>
-              <NavigationContainer>
-                <DatabaseProvider>{children}</DatabaseProvider>
-              </NavigationContainer>
-            </ThemeSyncer>
-          </HeroUINativeProvider>
+          <BottomSheetModalProvider>
+            <HeroUINativeProvider>
+              <ThemeSyncer>
+                <NavigationContainer>
+                  <DatabaseProvider>{children}</DatabaseProvider>
+                </NavigationContainer>
+              </ThemeSyncer>
+            </HeroUINativeProvider>
+          </BottomSheetModalProvider>
         </SafeAreaProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
