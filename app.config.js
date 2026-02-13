@@ -3,7 +3,7 @@ const IS_BETA = process.env.APP_VARIANT === 'beta';
 
 const getAppName = () => {
   if (IS_DEV) return 'BudgetTracker (Dev)';
-  if (IS_BETA) return 'BudgetTracker (Beta)';
+  if (IS_BETA) return 'BudgetTracker';
   return 'BudgetTracker';
 };
 
