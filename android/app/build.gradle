@@ -3,6 +3,17 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
+def appVariant = System.getenv("APP_VARIANT") ?: "production"
+def resolvedAppName = "BudgetTracker"
+def resolvedApplicationId = "com.budgettracker"
+
+if (appVariant == "development") {
+    resolvedAppName = "BudgetTracker (Dev)"
+    resolvedApplicationId = "com.budgettracker.dev"
+} else if (appVariant == "beta") {
+    resolvedAppName = "BudgetTracker"
+    resolvedApplicationId = "com.budgettracker.beta"
+}
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -89,11 +100,12 @@ android {
 
     namespace 'com.budgettracker'
     defaultConfig {
-        applicationId 'com.budgettracker'
+        applicationId resolvedApplicationId
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
+        resValue "string", "app_name", "\"${resolvedAppName}\""
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
