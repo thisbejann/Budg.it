@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,6 +37,7 @@ export function EditLedgerScreen() {
   const { colors } = useTheme();
 
   const [ledger, setLedger] = useState<Ledger | null>(null);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [showIconPicker, setShowIconPicker] = useState(false);
@@ -72,7 +73,7 @@ export function EditLedgerScreen() {
 
       if (!data) {
         Alert.alert('Error', 'Ledger not found');
-        navigation.goBack();
+        InteractionManager.runAfterInteractions(() => navigation.goBack());
         return;
       }
 
@@ -92,9 +93,8 @@ export function EditLedgerScreen() {
   };
 
   const onSubmit = async (data: LedgerFormSchema) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
       await LedgerRepository.update(ledgerId, {
         name: data.name,
         description: data.description,
@@ -102,12 +102,12 @@ export function EditLedgerScreen() {
         color: data.color,
       });
 
-      navigation.goBack();
+      Keyboard.dismiss();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
+      setIsLoading(false);
       console.error('Error updating ledger:', error);
       Alert.alert('Error', 'Failed to update ledger');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -144,7 +144,7 @@ export function EditLedgerScreen() {
           onPress: async () => {
             try {
               await LedgerRepository.delete(ledgerId);
-              navigation.goBack();
+              InteractionManager.runAfterInteractions(() => navigation.goBack());
             } catch (error) {
               console.error('Error deleting ledger:', error);
               Alert.alert('Error', 'Failed to delete ledger');
@@ -309,3 +309,5 @@ export function EditLedgerScreen() {
     </Screen>
   );
 }
+
+

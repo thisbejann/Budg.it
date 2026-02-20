@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Alert } from 'react-native';
+import { View, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,6 +23,7 @@ type PersonFormSchema = z.infer<typeof personSchema>;
 
 export function AddPersonScreen() {
   const navigation = useNavigation<NavigationProp>();
+  
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -40,9 +41,8 @@ export function AddPersonScreen() {
   });
 
   const onSubmit = async (data: PersonFormSchema) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
       await PersonRepository.create({
         name: data.name,
         phone: data.phone || undefined,
@@ -50,12 +50,12 @@ export function AddPersonScreen() {
         notes: data.notes || undefined,
       });
 
-      navigation.goBack();
+      Keyboard.dismiss();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
+      setIsLoading(false);
       console.error('Error creating person:', error);
       Alert.alert('Error', 'Failed to create person');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -147,3 +147,5 @@ export function AddPersonScreen() {
     </Screen>
   );
 }
+
+

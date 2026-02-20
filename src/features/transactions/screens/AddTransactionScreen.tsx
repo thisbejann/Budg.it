@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ScrollView, InteractionManager, Keyboard } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -59,6 +59,7 @@ export function AddTransactionScreen() {
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
   const [templates, setTemplates] = useState<TransactionTemplateWithDetails[]>([]);
   const [appliedTemplateId, setAppliedTemplateId] = useState<number | null>(null);
+  
   const [isLoading, setIsLoading] = useState(false);
 
   const templateId = (route.params as any)?.templateId;
@@ -131,9 +132,8 @@ export function AddTransactionScreen() {
   const onSubmit = async (data: TransactionFormData) => {
     if (!activeLedgerId) return;
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
       await TransactionRepository.create(activeLedgerId, {
         account_id: data.account_id,
         category_id: data.category_id,
@@ -149,12 +149,12 @@ export function AddTransactionScreen() {
         await TemplateRepository.incrementUsage(appliedTemplateId);
       }
 
-      navigation.goBack();
+      Keyboard.dismiss();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
+      setIsLoading(false);
       console.error('Error creating transaction:', error);
       Alert.alert('Error', 'Failed to create transaction');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -392,3 +392,5 @@ export function AddTransactionScreen() {
     </Screen>
   );
 }
+
+

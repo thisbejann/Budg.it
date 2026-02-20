@@ -1,16 +1,16 @@
 import React from 'react';
 import {
+  Pressable,
   Text,
   ActivityIndicator,
+  GestureResponderEvent,
   TouchableOpacityProps,
 } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  runOnJS,
 } from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../../hooks/useColorScheme';
 
@@ -61,6 +61,8 @@ export function Button({
   className,
   fullRounded = false,
   onPress,
+  onPressIn,
+  onPressOut,
   style,
   ...props
 }: ButtonProps) {
@@ -72,20 +74,28 @@ export function Button({
     transform: [{ scale: scale.value }],
   }));
 
-  const gesture = Gesture.Tap()
-    .enabled(!isDisabled)
-    .onBegin(() => {
-      scale.value = withSpring(0.96, { damping: 12, stiffness: 500 });
-    })
-    .onFinalize(() => {
-      scale.value = withSpring(1, { damping: 12, stiffness: 500 });
-    })
-    .onEnd(() => {
-      runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
-      if (onPress) {
-        runOnJS(onPress)();
-      }
-    });
+  const handlePress = async () => {
+    if (isDisabled) return;
+
+    try {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch {
+      // Ignore haptics failures to avoid breaking button presses.
+    }
+
+    onPress?.();
+  };
+
+  const handlePressIn = (event: GestureResponderEvent) => {
+    if (isDisabled) return;
+    scale.value = withSpring(0.96, { damping: 12, stiffness: 500 });
+    onPressIn?.(event);
+  };
+
+  const handlePressOut = (event: GestureResponderEvent) => {
+    scale.value = withSpring(1, { damping: 12, stiffness: 500 });
+    onPressOut?.(event);
+  };
 
   // Get variant-specific styles
   const getVariantStyles = () => {
@@ -169,7 +179,13 @@ export function Button({
     : {};
 
   return (
-    <GestureDetector gesture={gesture}>
+    <Pressable
+      {...props}
+      onPress={handlePress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      disabled={isDisabled}
+    >
       <Animated.View
         className={`
           ${isIconButton ? '' : 'flex-row items-center justify-center'}
@@ -178,7 +194,6 @@ export function Button({
           ${className || ''}
         `}
         style={[animatedStyle, variantStyles, baseStyle, fabShadow, style]}
-        {...props}
       >
         {loading ? (
           <ActivityIndicator
@@ -196,7 +211,7 @@ export function Button({
           children
         )}
       </Animated.View>
-    </GestureDetector>
+    </Pressable>
   );
 }
 

@@ -31,7 +31,7 @@ function ThemeSyncer({ children }: { children: React.ReactNode }) {
     Uniwind.setTheme(themeMode);
   }, [themeMode, hydrated]);
 
-  return <>{children}</>;
+  return children;
 }
 
 export function AppProviders({ children }: AppProvidersProps) {
