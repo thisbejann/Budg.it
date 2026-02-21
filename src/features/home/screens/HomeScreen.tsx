@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Plus, ArrowUpRight, ArrowDownLeft, ArrowLeftRight, ChevronRight } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -24,6 +24,7 @@ export function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { activeLedger, activeLedgerId } = useLedgerStore();
   const { colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -326,13 +327,19 @@ export function HomeScreen() {
       </Screen>
 
       {/* Floating Action Button */}
-      <SafeAreaView edges={['bottom', 'right']} style={{ position: 'absolute', bottom: FLOATING_TAB_BAR_TOTAL_HEIGHT, right: 0 }}>
+      <View
+        style={{
+          position: 'absolute',
+          bottom: FLOATING_TAB_BAR_TOTAL_HEIGHT + insets.bottom,
+          right: insets.right,
+        }}
+      >
         <View style={{ padding: 16 }}>
           <FAB onPress={handleFABPress}>
             <Plus size={24} color={colors.onPrimary} />
           </FAB>
         </View>
-      </SafeAreaView>
+      </View>
     </View>
   );
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ScrollView, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../../hooks/useColorScheme';
 import { FLOATING_TAB_BAR_TOTAL_HEIGHT } from '../navigation/FloatingTabBar';
 
@@ -27,6 +27,7 @@ export function Screen({
   hasTabBar = false,
 }: ScreenProps) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const content = scrollable ? (
     <ScrollView
@@ -49,24 +50,17 @@ export function Screen({
   );
 
   return (
-    <>
-      {safeArea ? (
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: colors.background }}
-          edges={['top', 'left', 'right']}
-          className={className}
-        >
-          {content}
-        </SafeAreaView>
-      ) : (
-        <View
-          className={`flex-1 ${className || ''}`}
-          style={{ backgroundColor: colors.background }}
-        >
-          {content}
-        </View>
-      )}
-    </>
+    <View
+      className={`flex-1 ${className || ''}`}
+      style={{
+        backgroundColor: colors.background,
+        paddingTop: safeArea ? insets.top : 0,
+        paddingLeft: safeArea ? insets.left : 0,
+        paddingRight: safeArea ? insets.right : 0,
+      }}
+    >
+      {content}
+    </View>
   );
 }
 

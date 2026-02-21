@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { HeroUINativeProvider } from 'heroui-native';
 import { Uniwind } from 'uniwind';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { DatabaseProvider } from './DatabaseProvider';
 import { useThemeStore } from '../../store';
 
@@ -37,9 +37,9 @@ function ThemeSyncer({ children }: { children: React.ReactNode }) {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <KeyboardProvider>
-        <SafeAreaProvider>
-          <BottomSheetModalProvider>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <View style={{ flex: 1 }}>
+          <KeyboardProvider>
             <HeroUINativeProvider>
               <ThemeSyncer>
                 <NavigationContainer>
@@ -47,9 +47,9 @@ export function AppProviders({ children }: AppProvidersProps) {
                 </NavigationContainer>
               </ThemeSyncer>
             </HeroUINativeProvider>
-          </BottomSheetModalProvider>
-        </SafeAreaProvider>
-      </KeyboardProvider>
+          </KeyboardProvider>
+        </View>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
