@@ -91,6 +91,8 @@ export function EditAccountScreen() {
   }, [accountId]);
 
   const loadData = async () => {
+    let shouldKeepLoadingUntilUnmount = false;
+
     try {
       setIsLoadingData(true);
       const [acct, personsList] = await Promise.all([
@@ -100,6 +102,7 @@ export function EditAccountScreen() {
 
       if (!acct) {
         Alert.alert('Error', 'Account not found');
+        shouldKeepLoadingUntilUnmount = true;
         InteractionManager.runAfterInteractions(() => navigation.goBack());
         return;
       }
@@ -123,7 +126,9 @@ export function EditAccountScreen() {
       console.error('Error loading data:', error);
       Alert.alert('Error', 'Failed to load account');
     } finally {
-      setIsLoadingData(false);
+      if (!shouldKeepLoadingUntilUnmount) {
+        setIsLoadingData(false);
+      }
     }
   };
 
@@ -146,9 +151,10 @@ export function EditAccountScreen() {
       Keyboard.dismiss();
       InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
-      setIsLoading(false);
       console.error('Error updating account:', error);
       Alert.alert('Error', 'Failed to update account');
+    } finally {
+      setIsLoading(false);
     }
   };
 

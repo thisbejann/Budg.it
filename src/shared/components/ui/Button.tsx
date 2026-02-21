@@ -25,6 +25,8 @@ interface ButtonProps extends Omit<TouchableOpacityProps, 'onPress'> {
   children: React.ReactNode;
   fullRounded?: boolean;
   onPress?: () => void;
+  onPressIn?: (event: GestureResponderEvent) => void;
+  onPressOut?: (event: GestureResponderEvent) => void;
 }
 
 const sizeStyles: Record<ButtonSize, string> = {

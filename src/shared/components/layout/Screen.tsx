@@ -57,6 +57,7 @@ export function Screen({
         paddingTop: safeArea ? insets.top : 0,
         paddingLeft: safeArea ? insets.left : 0,
         paddingRight: safeArea ? insets.right : 0,
+        paddingBottom: safeArea && !hasTabBar ? insets.bottom : 0,
       }}
     >
       {content}
