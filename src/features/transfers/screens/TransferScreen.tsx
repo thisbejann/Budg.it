@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Alert } from 'react-native';
+import { View, Text, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -38,6 +38,7 @@ export function TransferScreen() {
   const { activeLedgerId } = useLedgerStore();
 
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
+  
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -77,17 +78,16 @@ export function TransferScreen() {
   const onSubmit = async (data: TransferFormData) => {
     if (!activeLedgerId) return;
 
+    const amount = parseFloat(data.amount);
+    const fee = data.fee ? parseFloat(data.fee) : 0;
+
+    if (isNaN(amount) || amount <= 0) {
+      Alert.alert('Error', 'Please enter a valid amount');
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
-      const amount = parseFloat(data.amount);
-      const fee = data.fee ? parseFloat(data.fee) : 0;
-
-      if (isNaN(amount) || amount <= 0) {
-        Alert.alert('Error', 'Please enter a valid amount');
-        return;
-      }
-
       await TransferRepository.create(activeLedgerId, {
         from_account_id: data.from_account_id,
         to_account_id: data.to_account_id,
@@ -98,12 +98,12 @@ export function TransferScreen() {
         notes: data.notes,
       });
 
-      navigation.goBack();
+      Keyboard.dismiss();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
+      setIsLoading(false);
       console.error('Error creating transfer:', error);
       Alert.alert('Error', 'Failed to create transfer');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -258,3 +258,5 @@ export function TransferScreen() {
     </Screen>
   );
 }
+
+

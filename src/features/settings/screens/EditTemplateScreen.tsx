@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -44,6 +44,7 @@ export function EditTemplateScreen() {
   const [template, setTemplate] = useState<TransactionTemplateWithDetails | null>(null);
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [showIconPicker, setShowIconPicker] = useState(false);
@@ -89,7 +90,7 @@ export function EditTemplateScreen() {
 
       if (!tmpl) {
         Alert.alert('Error', 'Template not found');
-        navigation.goBack();
+        InteractionManager.runAfterInteractions(() => navigation.goBack());
         return;
       }
 
@@ -117,9 +118,8 @@ export function EditTemplateScreen() {
   };
 
   const onSubmit = async (data: TemplateFormSchema) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
       await TemplateRepository.update(templateId, {
         name: data.name,
         type: data.type,
@@ -132,12 +132,12 @@ export function EditTemplateScreen() {
         color: data.color,
       });
 
-      navigation.goBack();
+      Keyboard.dismiss();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
+      setIsLoading(false);
       console.error('Error updating template:', error);
       Alert.alert('Error', 'Failed to update template');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -153,7 +153,7 @@ export function EditTemplateScreen() {
           onPress: async () => {
             try {
               await TemplateRepository.delete(templateId);
-              navigation.goBack();
+              InteractionManager.runAfterInteractions(() => navigation.goBack());
             } catch (error) {
               console.error('Error deleting template:', error);
               Alert.alert('Error', 'Failed to delete template');
@@ -441,3 +441,5 @@ export function EditTemplateScreen() {
     </Screen>
   );
 }
+
+

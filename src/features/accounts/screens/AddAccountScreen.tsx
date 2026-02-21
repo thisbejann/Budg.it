@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -59,6 +59,7 @@ export function AddAccountScreen() {
   const { colors } = useTheme();
 
   const [persons, setPersons] = useState<Person[]>([]);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -104,9 +105,8 @@ export function AddAccountScreen() {
   const onSubmit = async (data: AccountFormSchema) => {
     if (!activeLedgerId) return;
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
       await AccountRepository.create(activeLedgerId, {
         name: data.name,
         account_type: data.account_type,
@@ -121,12 +121,12 @@ export function AddAccountScreen() {
         notes: data.notes,
       });
 
-      navigation.goBack();
+      Keyboard.dismiss();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
+      setIsLoading(false);
       console.error('Error creating account:', error);
       Alert.alert('Error', 'Failed to create account');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -380,3 +380,5 @@ export function AddAccountScreen() {
     </Screen>
   );
 }
+
+

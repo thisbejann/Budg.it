@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -39,6 +39,7 @@ export function AddTemplateScreen() {
 
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
 
@@ -87,9 +88,8 @@ export function AddTemplateScreen() {
   const onSubmit = async (data: TemplateFormSchema) => {
     if (!activeLedgerId) return;
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
       await TemplateRepository.create(activeLedgerId, {
         name: data.name,
         type: data.type,
@@ -102,12 +102,12 @@ export function AddTemplateScreen() {
         color: data.color,
       });
 
-      navigation.goBack();
+      Keyboard.dismiss();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
+      setIsLoading(false);
       console.error('Error creating template:', error);
       Alert.alert('Error', 'Failed to create template');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -360,3 +360,5 @@ export function AddTemplateScreen() {
     </Screen>
   );
 }
+
+

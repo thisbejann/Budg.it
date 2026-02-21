@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,6 +32,7 @@ export function EditPersonScreen() {
   const { colors } = useTheme();
 
   const [person, setPerson] = useState<Person | null>(null);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
@@ -61,7 +62,7 @@ export function EditPersonScreen() {
 
       if (!data) {
         Alert.alert('Error', 'Person not found');
-        navigation.goBack();
+        InteractionManager.runAfterInteractions(() => navigation.goBack());
         return;
       }
 
@@ -81,9 +82,8 @@ export function EditPersonScreen() {
   };
 
   const onSubmit = async (data: PersonFormSchema) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
       await PersonRepository.update(personId, {
         name: data.name,
         phone: data.phone || undefined,
@@ -91,12 +91,12 @@ export function EditPersonScreen() {
         notes: data.notes || undefined,
       });
 
-      navigation.goBack();
+      Keyboard.dismiss();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
+      setIsLoading(false);
       console.error('Error updating person:', error);
       Alert.alert('Error', 'Failed to update person');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -112,7 +112,7 @@ export function EditPersonScreen() {
           onPress: async () => {
             try {
               await PersonRepository.delete(personId);
-              navigation.goBack();
+              InteractionManager.runAfterInteractions(() => navigation.goBack());
             } catch (error) {
               console.error('Error deleting person:', error);
               Alert.alert('Error', 'Failed to delete person');
@@ -229,3 +229,5 @@ export function EditPersonScreen() {
     </Screen>
   );
 }
+
+

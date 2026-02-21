@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -28,6 +28,7 @@ type LedgerFormSchema = z.infer<typeof ledgerSchema>;
 export function AddLedgerScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { colors } = useTheme();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
 
@@ -51,9 +52,8 @@ export function AddLedgerScreen() {
   const selectedColor = watch('color');
 
   const onSubmit = async (data: LedgerFormSchema) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
       await LedgerRepository.create({
         name: data.name,
         description: data.description,
@@ -61,12 +61,12 @@ export function AddLedgerScreen() {
         color: data.color,
       });
 
-      navigation.goBack();
+      Keyboard.dismiss();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
+      setIsLoading(false);
       console.error('Error creating ledger:', error);
       Alert.alert('Error', 'Failed to create ledger');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -186,3 +186,5 @@ export function AddLedgerScreen() {
     </Screen>
   );
 }
+
+

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, InteractionManager } from 'react-native';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
@@ -55,7 +55,7 @@ export function TransactionDetailScreen() {
           onPress: async () => {
             try {
               await TransactionRepository.delete(transactionId);
-              navigation.goBack();
+              InteractionManager.runAfterInteractions(() => navigation.goBack());
             } catch (error) {
               console.error('Error deleting transaction:', error);
               Alert.alert('Error', 'Failed to delete transaction');

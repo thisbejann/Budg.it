@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -40,6 +40,7 @@ export function EditTransactionScreen() {
   const [transaction, setTransaction] = useState<TransactionWithDetails | null>(null);
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
@@ -80,7 +81,7 @@ export function EditTransactionScreen() {
 
       if (!txn) {
         Alert.alert('Error', 'Transaction not found');
-        navigation.goBack();
+        InteractionManager.runAfterInteractions(() => navigation.goBack());
         return;
       }
 
@@ -107,9 +108,8 @@ export function EditTransactionScreen() {
   };
 
   const onSubmit = async (data: TransactionFormData) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
       await TransactionRepository.update(transactionId, {
         account_id: data.account_id,
         category_id: data.category_id,
@@ -121,12 +121,12 @@ export function EditTransactionScreen() {
         notes: data.notes,
       });
 
-      navigation.goBack();
+      Keyboard.dismiss();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
+      setIsLoading(false);
       console.error('Error updating transaction:', error);
       Alert.alert('Error', 'Failed to update transaction');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -340,3 +340,5 @@ export function EditTransactionScreen() {
     </Screen>
   );
 }
+
+

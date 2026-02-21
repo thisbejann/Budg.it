@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,6 +32,7 @@ export function AddCategoryScreen() {
   const categoryType = route.params.type;
   const { colors } = useTheme();
 
+  
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
 
@@ -54,9 +55,8 @@ export function AddCategoryScreen() {
   const selectedColor = watch('color');
 
   const onSubmit = async (data: CategoryFormSchema) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
       await CategoryRepository.create({
         name: data.name,
         icon: data.icon,
@@ -64,12 +64,12 @@ export function AddCategoryScreen() {
         type: categoryType,
       });
 
-      navigation.goBack();
+      Keyboard.dismiss();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
+      setIsLoading(false);
       console.error('Error creating category:', error);
       Alert.alert('Error', 'Failed to create category');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -174,3 +174,5 @@ export function AddCategoryScreen() {
     </Screen>
   );
 }
+
+
