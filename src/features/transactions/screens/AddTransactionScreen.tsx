@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, ScrollView, InteractionManager, Keyboard } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { View, Text, TouchableOpacity, Alert, ScrollView, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -150,7 +149,7 @@ export function AddTransactionScreen() {
       }
 
       Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      navigation.goBack();
     } catch (error) {
       setIsLoading(false);
       console.error('Error creating transaction:', error);
@@ -184,10 +183,9 @@ export function AddTransactionScreen() {
     <Screen scrollable={false}>
       <Header title="Add Transaction" showClose />
 
-      <KeyboardAwareScrollView
+      <ScrollView
         className="flex-1 px-4 py-4"
         keyboardShouldPersistTaps="handled"
-        bottomOffset={20}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         {/* Quick Templates */}
@@ -388,9 +386,10 @@ export function AddTransactionScreen() {
             Add Transaction
           </Button>
         </View>
-      </KeyboardAwareScrollView>
+      </ScrollView>
     </Screen>
   );
 }
+
 
 

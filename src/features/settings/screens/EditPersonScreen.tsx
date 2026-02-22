@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
+import { View, ScrollView, Alert, ActivityIndicator, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -62,7 +62,7 @@ export function EditPersonScreen() {
 
       if (!data) {
         Alert.alert('Error', 'Person not found');
-        InteractionManager.runAfterInteractions(() => navigation.goBack());
+        navigation.goBack();
         return;
       }
 
@@ -92,7 +92,7 @@ export function EditPersonScreen() {
       });
 
       Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      navigation.goBack();
     } catch (error) {
       setIsLoading(false);
       console.error('Error updating person:', error);
@@ -112,7 +112,7 @@ export function EditPersonScreen() {
           onPress: async () => {
             try {
               await PersonRepository.delete(personId);
-              InteractionManager.runAfterInteractions(() => navigation.goBack());
+              navigation.goBack();
             } catch (error) {
               console.error('Error deleting person:', error);
               Alert.alert('Error', 'Failed to delete person');
@@ -229,5 +229,6 @@ export function EditPersonScreen() {
     </Screen>
   );
 }
+
 
 
