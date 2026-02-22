@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
+import { View, Text, ScrollView, Alert, Keyboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -99,7 +99,7 @@ export function TransferScreen() {
       });
 
       Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      navigation.goBack();
     } catch (error) {
       setIsLoading(false);
       console.error('Error creating transfer:', error);
@@ -258,5 +258,6 @@ export function TransferScreen() {
     </Screen>
   );
 }
+
 
 

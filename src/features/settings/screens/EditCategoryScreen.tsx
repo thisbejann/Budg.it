@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -69,7 +69,7 @@ export function EditCategoryScreen() {
 
       if (!data) {
         Alert.alert('Error', 'Category not found');
-        InteractionManager.runAfterInteractions(() => navigation.goBack());
+        navigation.goBack();
         return;
       }
 
@@ -97,7 +97,7 @@ export function EditCategoryScreen() {
       });
 
       Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      navigation.goBack();
     } catch (error) {
       setIsLoading(false);
       console.error('Error updating category:', error);
@@ -122,7 +122,7 @@ export function EditCategoryScreen() {
           onPress: async () => {
             try {
               await CategoryRepository.delete(categoryId);
-              InteractionManager.runAfterInteractions(() => navigation.goBack());
+              navigation.goBack();
             } catch (error) {
               console.error('Error deleting category:', error);
               Alert.alert('Error', 'Failed to delete category');
@@ -276,5 +276,6 @@ export function EditCategoryScreen() {
     </Screen>
   );
 }
+
 
 

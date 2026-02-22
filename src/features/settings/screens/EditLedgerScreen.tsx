@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -73,7 +73,7 @@ export function EditLedgerScreen() {
 
       if (!data) {
         Alert.alert('Error', 'Ledger not found');
-        InteractionManager.runAfterInteractions(() => navigation.goBack());
+        navigation.goBack();
         return;
       }
 
@@ -103,7 +103,7 @@ export function EditLedgerScreen() {
       });
 
       Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      navigation.goBack();
     } catch (error) {
       setIsLoading(false);
       console.error('Error updating ledger:', error);
@@ -144,7 +144,7 @@ export function EditLedgerScreen() {
           onPress: async () => {
             try {
               await LedgerRepository.delete(ledgerId);
-              InteractionManager.runAfterInteractions(() => navigation.goBack());
+              navigation.goBack();
             } catch (error) {
               console.error('Error deleting ledger:', error);
               Alert.alert('Error', 'Failed to delete ledger');
@@ -309,5 +309,6 @@ export function EditLedgerScreen() {
     </Screen>
   );
 }
+
 
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -90,7 +90,7 @@ export function EditTemplateScreen() {
 
       if (!tmpl) {
         Alert.alert('Error', 'Template not found');
-        InteractionManager.runAfterInteractions(() => navigation.goBack());
+        navigation.goBack();
         return;
       }
 
@@ -133,7 +133,7 @@ export function EditTemplateScreen() {
       });
 
       Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      navigation.goBack();
     } catch (error) {
       setIsLoading(false);
       console.error('Error updating template:', error);
@@ -153,7 +153,7 @@ export function EditTemplateScreen() {
           onPress: async () => {
             try {
               await TemplateRepository.delete(templateId);
-              InteractionManager.runAfterInteractions(() => navigation.goBack());
+              navigation.goBack();
             } catch (error) {
               console.error('Error deleting template:', error);
               Alert.alert('Error', 'Failed to delete template');
@@ -441,5 +441,6 @@ export function EditTemplateScreen() {
     </Screen>
   );
 }
+
 
 
