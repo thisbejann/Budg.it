@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Alert, Keyboard } from 'react-native';
+import { View, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -51,7 +51,7 @@ export function AddPersonScreen() {
       });
 
       Keyboard.dismiss();
-      navigation.goBack();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
       setIsLoading(false);
       console.error('Error creating person:', error);
@@ -147,6 +147,5 @@ export function AddPersonScreen() {
     </Screen>
   );
 }
-
 
 

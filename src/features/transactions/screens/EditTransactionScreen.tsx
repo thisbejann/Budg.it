@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -81,7 +81,7 @@ export function EditTransactionScreen() {
 
       if (!txn) {
         Alert.alert('Error', 'Transaction not found');
-        navigation.goBack();
+        InteractionManager.runAfterInteractions(() => navigation.goBack());
         return;
       }
 
@@ -122,7 +122,7 @@ export function EditTransactionScreen() {
       });
 
       Keyboard.dismiss();
-      navigation.goBack();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
       setIsLoading(false);
       console.error('Error updating transaction:', error);
@@ -340,6 +340,5 @@ export function EditTransactionScreen() {
     </Screen>
   );
 }
-
 
 

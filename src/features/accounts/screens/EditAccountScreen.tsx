@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -91,8 +91,6 @@ export function EditAccountScreen() {
   }, [accountId]);
 
   const loadData = async () => {
-    let shouldKeepLoadingUntilUnmount = false;
-
     try {
       setIsLoadingData(true);
       const [acct, personsList] = await Promise.all([
@@ -102,8 +100,7 @@ export function EditAccountScreen() {
 
       if (!acct) {
         Alert.alert('Error', 'Account not found');
-        shouldKeepLoadingUntilUnmount = true;
-        navigation.goBack();
+        InteractionManager.runAfterInteractions(() => navigation.goBack());
         return;
       }
 
@@ -126,9 +123,7 @@ export function EditAccountScreen() {
       console.error('Error loading data:', error);
       Alert.alert('Error', 'Failed to load account');
     } finally {
-      if (!shouldKeepLoadingUntilUnmount) {
-        setIsLoadingData(false);
-      }
+      setIsLoadingData(false);
     }
   };
 
@@ -149,12 +144,11 @@ export function EditAccountScreen() {
       });
 
       Keyboard.dismiss();
-      navigation.goBack();
+      InteractionManager.runAfterInteractions(() => navigation.goBack());
     } catch (error) {
+      setIsLoading(false);
       console.error('Error updating account:', error);
       Alert.alert('Error', 'Failed to update account');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -170,7 +164,7 @@ export function EditAccountScreen() {
           onPress: async () => {
             try {
               await AccountRepository.delete(accountId);
-              navigation.goBack();
+              InteractionManager.runAfterInteractions(() => navigation.goBack());
             } catch (error) {
               console.error('Error deleting account:', error);
               Alert.alert('Error', 'Failed to delete account');
@@ -432,6 +426,5 @@ export function EditAccountScreen() {
     </Screen>
   );
 }
-
 
 

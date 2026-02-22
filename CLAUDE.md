@@ -1,4 +1,4 @@
-# CLAUDE.md
+﻿# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -9,7 +9,7 @@ npm start          # Start Expo dev server
 npm run android    # Run on Android (requires dev build)
 npm run ios        # Run on iOS simulator
 npm run lint       # Run ESLint
-npm test           # Run Jest tests
+npm test           # Run Jest
 npm run build:dev  # Build dev APK (EAS Cloud)
 npm run build:beta # Build beta APK (EAS Cloud)
 ```
@@ -23,11 +23,11 @@ npm run build:beta # Build beta APK (EAS Cloud)
 ### Styling Stack
 
 ```
-global.css → Tailwind CSS v4 + Uniwind + HeroUI Native styles
-           ↓
-metro.config.js → withUniwindConfig() processes CSS
-           ↓
-Components → Use Tailwind classes via className prop
+global.css -> Tailwind CSS v4 + Uniwind + HeroUI Native styles
+           ->
+metro.config.js -> withUniwindConfig() processes CSS
+           ->
+Components -> Use Tailwind classes via className prop
 ```
 
 - **Uniwind**: Tailwind CSS for React Native (replaces NativeWind)
@@ -65,7 +65,7 @@ HeroUI Native is a React Native component library using:
 ### Data Flow
 
 ```
-UI Components → Zustand Store → Repositories → Database Helpers → SQLite
+UI Components -> Zustand Store -> Repositories -> Database Helpers -> SQLite
 ```
 
 ### Directory Structure
@@ -94,10 +94,38 @@ UI Components → Zustand Store → Repositories → Database Helpers → SQLite
 ### Provider Hierarchy
 
 ```
-GestureHandlerRootView → SafeAreaProvider → NavigationContainer → DatabaseProvider → RootNavigator
+GestureHandlerRootView -> SafeAreaProvider(initialWindowMetrics) -> KeyboardProvider -> NavigationContainer -> DatabaseProvider -> RootNavigator
 ```
 
 DatabaseProvider initializes the database and creates default ledger on first run.
+
+## Critical Android Stability Rules
+
+A regression after PR #27 (`d00150e`, merged as `0dc889c`) reintroduced Android save crashes (`SafeAreaProvider contains null child`).
+
+Do not change these patterns unless explicitly asked and fully re-tested on Android dev APK:
+
+1. Save handler pattern for add/edit forms that close on success:
+   - `setIsLoading(true)` before `try`
+   - success path: `Keyboard.dismiss(); InteractionManager.runAfterInteractions(() => navigation.goBack());`
+   - `catch` path: `setIsLoading(false)` and show error
+   - never use `finally { setIsLoading(false) }` in handlers that navigate away on success
+   - never use immediate `navigation.goBack()` after successful save
+2. Provider stack safety:
+   - Keep `SafeAreaProvider` with `initialWindowMetrics`
+   - Keep `KeyboardProvider` in the provider tree
+   - Do not reorder/remove these providers without Android save-flow validation
+3. Architecture toggle safety:
+   - Treat `newArchEnabled` changes (`android/gradle.properties`, `app.config.js`) as high-risk
+   - Never toggle these as part of unrelated refactors
+
+## Save-Flow Regression Checklist (Android)
+
+Before merging PRs touching providers, forms, or navigation:
+
+1. Test local dev APK flows: Add Account, Add Transaction, Edit Transaction, Transfer.
+2. Verify no direct post-save `navigation.goBack()` replaced deferred navigation in these flows.
+3. Verify no submit handler uses `finally { setIsLoading(false) }` when success path navigates away.
 
 ### Navigation
 
@@ -117,11 +145,11 @@ DatabaseProvider initializes the database and creates default ledger on first ru
 
 App uses dynamic config (`app.config.js`) with APP_VARIANT env:
 
-| Variant     | Package Name           | App Name             |
-| ----------- | ---------------------- | -------------------- |
-| development | com.budgettracker.dev  | BudgetTracker (Dev)  |
-| beta        | com.budgettracker.beta | BudgetTracker (Beta) |
-| production  | com.budgettracker      | BudgetTracker        |
+| Variant     | Package Name           | App Name            |
+| ----------- | ---------------------- | ------------------- |
+| development | com.budgettracker.dev  | BudgetTracker (Dev) |
+| beta        | com.budgettracker.beta | BudgetTracker       |
+| production  | com.budgettracker      | BudgetTracker       |
 
 ## Account Types
 

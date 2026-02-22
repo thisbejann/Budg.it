@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { HeroUINativeProvider } from 'heroui-native';
 import { Uniwind } from 'uniwind';
 import { DatabaseProvider } from './DatabaseProvider';
@@ -38,13 +39,15 @@ export function AppProviders({ children }: AppProvidersProps) {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <View style={{ flex: 1 }}>
-          <HeroUINativeProvider>
-            <ThemeSyncer>
-              <NavigationContainer>
-                <DatabaseProvider>{children}</DatabaseProvider>
-              </NavigationContainer>
-            </ThemeSyncer>
-          </HeroUINativeProvider>
+          <KeyboardProvider>
+            <HeroUINativeProvider>
+              <ThemeSyncer>
+                <NavigationContainer>
+                  <DatabaseProvider>{children}</DatabaseProvider>
+                </NavigationContainer>
+              </ThemeSyncer>
+            </HeroUINativeProvider>
+          </KeyboardProvider>
         </View>
       </SafeAreaProvider>
     </GestureHandlerRootView>
