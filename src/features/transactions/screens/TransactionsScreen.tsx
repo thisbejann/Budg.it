@@ -23,6 +23,7 @@ export function TransactionsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { activeLedgerId } = useLedgerStore();
   const { colors, isDark } = useTheme();
+  const shouldAnimateEntry = process.env.EXPO_OS !== 'android';
 
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('list');
   const [selectedDate, setSelectedDate] = useState(getToday());
@@ -170,7 +171,7 @@ export function TransactionsScreen() {
       : transactions;
 
   const renderTransaction = ({ item, index }: { item: TransactionWithDetails; index: number }) => (
-    <Animated.View entering={FadeInDown.delay(index * 40).springify()}>
+    <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(index * 40).springify() : undefined}>
       <TouchableOpacity
         onPress={() => navigation.navigate('TransactionDetail', { transactionId: item.id })}
         className="flex-row items-center justify-between px-4 py-3"

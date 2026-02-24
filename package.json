@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "test": "jest",
     "build:dev": "eas build --profile development --platform android",
-    "build:beta": "eas build --profile beta --platform android"
+    "build:beta": "eas build --profile beta --platform android",
+    "build:beta-debug": "eas build --profile beta-debug --platform android"
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.2.8",

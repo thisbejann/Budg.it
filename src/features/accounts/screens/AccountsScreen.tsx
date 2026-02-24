@@ -29,6 +29,7 @@ export function AccountsScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { activeLedgerId } = useLedgerStore();
   const { colors, isDark } = useTheme();
+  const shouldAnimateEntry = process.env.EXPO_OS !== 'android';
 
   const [sections, setSections] = useState<AccountSection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -104,7 +105,7 @@ export function AccountsScreen() {
   };
 
   const renderAccount = ({ item, index }: { item: AccountWithPerson; index: number }) => (
-    <Animated.View entering={FadeInDown.delay(index * 50).springify()}>
+    <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(index * 50).springify() : undefined}>
       <TouchableOpacity
         onPress={() => navigation.navigate('AccountDetail', { accountId: item.id })}
         className="flex-row items-center justify-between px-4 py-3"
