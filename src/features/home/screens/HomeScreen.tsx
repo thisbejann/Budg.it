@@ -25,6 +25,7 @@ export function HomeScreen() {
   const { activeLedger, activeLedgerId } = useLedgerStore();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const shouldAnimateEntry = process.env.EXPO_OS !== 'android';
 
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -97,7 +98,7 @@ export function HomeScreen() {
       <Screen refreshing={refreshing} onRefresh={onRefresh} hasTabBar>
         <View className="px-4 py-6">
         {/* Hero Header */}
-        <Animated.View entering={FadeInDown.delay(0).springify()} className="mb-6">
+        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(0).springify() : undefined} className="mb-6">
           <Text
             className="text-3xl font-bold"
             style={{ color: colors.foreground, letterSpacing: -0.8 }}
@@ -113,7 +114,7 @@ export function HomeScreen() {
         </Animated.View>
 
         {/* Quick Transfer Action */}
-        <Animated.View entering={FadeInDown.delay(80).springify()} className="mb-6">
+        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(80).springify() : undefined} className="mb-6">
           <TouchableOpacity
             onPress={() => navigation.navigate('Transfer')}
             className="flex-row items-center justify-center gap-2 px-4 py-3"
@@ -130,7 +131,7 @@ export function HomeScreen() {
         </Animated.View>
 
         {/* Monthly Summary Card */}
-        <Animated.View entering={FadeInDown.delay(160).springify()}>
+        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(160).springify() : undefined}>
           <Card variant={isDark ? 'glass' : 'default'} className="mb-4">
             <CardHeader>
               <CardTitle>Monthly Summary</CardTitle>
@@ -170,7 +171,7 @@ export function HomeScreen() {
         </Animated.View>
 
         {/* Account Balances Card */}
-        <Animated.View entering={FadeInDown.delay(240).springify()}>
+        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(240).springify() : undefined}>
           <Card variant={isDark ? 'glass' : 'default'} className="mb-4">
             <CardHeader>
               <View className="flex-row items-center justify-between">
@@ -229,7 +230,7 @@ export function HomeScreen() {
 
         {/* Top Categories */}
         {categorySpending.length > 0 && (
-          <Animated.View entering={FadeInDown.delay(320).springify()}>
+          <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(320).springify() : undefined}>
             <Card className="mb-4">
               <CardHeader>
                 <View className="flex-row items-center justify-between">
@@ -272,7 +273,7 @@ export function HomeScreen() {
         )}
 
         {/* Recent Transactions */}
-        <Animated.View entering={FadeInDown.delay(400).springify()}>
+        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(400).springify() : undefined}>
           <Card>
             <CardHeader>
               <View className="flex-row items-center justify-between">

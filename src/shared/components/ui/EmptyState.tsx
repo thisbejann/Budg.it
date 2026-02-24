@@ -20,10 +20,11 @@ export function EmptyState({
   onAction,
 }: EmptyStateProps) {
   const { colors } = useTheme();
+  const shouldAnimateEntry = process.env.EXPO_OS !== 'android';
 
   return (
     <Animated.View
-      entering={FadeInDown.springify().damping(15).stiffness(200)}
+      entering={shouldAnimateEntry ? FadeInDown.springify().damping(15).stiffness(200) : undefined}
       className="flex-1 items-center justify-center px-6 py-12"
     >
       {icon && <View className="mb-4">{icon}</View>}
