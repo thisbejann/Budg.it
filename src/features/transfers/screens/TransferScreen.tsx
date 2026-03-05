@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +14,7 @@ import { TransferRepository, AccountRepository } from '../../../database/reposit
 import { getToday, getCurrentTime } from '../../../shared/utils/date';
 import { ArrowDown } from 'lucide-react-native';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -40,6 +41,8 @@ export function TransferScreen() {
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
   
   const [isLoading, setIsLoading] = useState(false);
+  const isSubmittingRef = useRef(false);
+  const closeAfterSaveRef = useRef(false);
 
   const {
     control,
@@ -77,6 +80,7 @@ export function TransferScreen() {
 
   const onSubmit = async (data: TransferFormData) => {
     if (!activeLedgerId) return;
+    if (isSubmittingRef.current) return;
 
     const amount = parseFloat(data.amount);
     const fee = data.fee ? parseFloat(data.fee) : 0;
@@ -86,6 +90,8 @@ export function TransferScreen() {
       return;
     }
 
+    isSubmittingRef.current = true;
+    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await TransferRepository.create(activeLedgerId, {
@@ -98,9 +104,10 @@ export function TransferScreen() {
         notes: data.notes,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, closeAfterSaveRef);
     } catch (error) {
+      isSubmittingRef.current = false;
+      closeAfterSaveRef.current = false;
       setIsLoading(false);
       console.error('Error creating transfer:', error);
       Alert.alert('Error', 'Failed to create transfer');
@@ -122,7 +129,7 @@ export function TransferScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Transfer Funds" showClose />
+      <Header title="Transfer Funds" showClose disableClose={isLoading} />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* From Account */}

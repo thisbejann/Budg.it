@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +16,7 @@ import { CATEGORY_COLORS } from '../../../constants/colors';
 import { LEDGER_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type EditLedgerRouteProp = RouteProp<RootStackParamList, 'EditLedger'>;
@@ -39,8 +40,13 @@ export function EditLedgerScreen() {
   const [ledger, setLedger] = useState<Ledger | null>(null);
   
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const isSubmittingRef = useRef(false);
+  const closeAfterSaveRef = useRef(false);
+  const isDeletingRef = useRef(false);
+  const closeAfterDeleteRef = useRef(false);
 
   const {
     control,
@@ -73,7 +79,7 @@ export function EditLedgerScreen() {
 
       if (!data) {
         Alert.alert('Error', 'Ledger not found');
-        InteractionManager.runAfterInteractions(() => navigation.goBack());
+        safeCloseAfterMutation(navigation);
         return;
       }
 
@@ -93,6 +99,10 @@ export function EditLedgerScreen() {
   };
 
   const onSubmit = async (data: LedgerFormSchema) => {
+    if (isSubmittingRef.current) return;
+
+    isSubmittingRef.current = true;
+    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await LedgerRepository.update(ledgerId, {
@@ -102,9 +112,10 @@ export function EditLedgerScreen() {
         color: data.color,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, closeAfterSaveRef);
     } catch (error) {
+      isSubmittingRef.current = false;
+      closeAfterSaveRef.current = false;
       setIsLoading(false);
       console.error('Error updating ledger:', error);
       Alert.alert('Error', 'Failed to update ledger');
@@ -142,10 +153,18 @@ export function EditLedgerScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            if (isDeletingRef.current) return;
+
+            isDeletingRef.current = true;
+            closeAfterDeleteRef.current = false;
+            setIsDeleting(true);
             try {
               await LedgerRepository.delete(ledgerId);
-              InteractionManager.runAfterInteractions(() => navigation.goBack());
+              safeCloseAfterMutation(navigation, closeAfterDeleteRef);
             } catch (error) {
+              isDeletingRef.current = false;
+              closeAfterDeleteRef.current = false;
+              setIsDeleting(false);
               console.error('Error deleting ledger:', error);
               Alert.alert('Error', 'Failed to delete ledger');
             }
@@ -162,7 +181,7 @@ export function EditLedgerScreen() {
   if (isLoadingData) {
     return (
       <Screen>
-        <Header title="Edit Ledger" showBack />
+        <Header title="Edit Ledger" showBack disableBack={isLoading || isDeleting} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -172,7 +191,7 @@ export function EditLedgerScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Edit Ledger" showBack />
+      <Header title="Edit Ledger" showBack disableBack={isLoading || isDeleting} />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Default Badge */}
@@ -281,7 +300,7 @@ export function EditLedgerScreen() {
 
         {/* Submit */}
         <View className="mt-2">
-          <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
+          <Button onPress={handleSubmit(onSubmit)} loading={isLoading} disabled={isDeleting}>
             Save Changes
           </Button>
         </View>
@@ -289,7 +308,7 @@ export function EditLedgerScreen() {
         {/* Set as Default */}
         {!ledger?.is_default && (
           <View className="mt-4">
-            <Button variant="outline" onPress={handleSetDefault}>
+            <Button variant="outlined" onPress={handleSetDefault} disabled={isLoading || isDeleting}>
               Set as Default Ledger
             </Button>
           </View>
@@ -298,7 +317,7 @@ export function EditLedgerScreen() {
         {/* Delete */}
         {!ledger?.is_default && ledgerId !== activeLedgerId && (
           <View className="mt-4">
-            <Button variant="destructive" onPress={handleDelete}>
+            <Button variant="destructive" onPress={handleDelete} loading={isDeleting} disabled={isLoading}>
               Delete Ledger
             </Button>
           </View>

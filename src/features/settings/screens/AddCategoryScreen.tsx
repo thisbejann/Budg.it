@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +14,7 @@ import { CATEGORY_COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type AddCategoryRouteProp = RouteProp<RootStackParamList, 'AddCategory'>;
@@ -35,6 +36,8 @@ export function AddCategoryScreen() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const isSubmittingRef = useRef(false);
+  const closeAfterSaveRef = useRef(false);
 
   const {
     control,
@@ -55,6 +58,10 @@ export function AddCategoryScreen() {
   const selectedColor = watch('color');
 
   const onSubmit = async (data: CategoryFormSchema) => {
+    if (isSubmittingRef.current) return;
+
+    isSubmittingRef.current = true;
+    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await CategoryRepository.create({
@@ -64,9 +71,10 @@ export function AddCategoryScreen() {
         type: categoryType,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, closeAfterSaveRef);
     } catch (error) {
+      isSubmittingRef.current = false;
+      closeAfterSaveRef.current = false;
       setIsLoading(false);
       console.error('Error creating category:', error);
       Alert.alert('Error', 'Failed to create category');
@@ -79,7 +87,11 @@ export function AddCategoryScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title={`Add ${categoryType === 'expense' ? 'Expense' : 'Income'} Category`} showClose />
+      <Header
+        title={`Add ${categoryType === 'expense' ? 'Expense' : 'Income'} Category`}
+        showClose
+        disableClose={isLoading}
+      />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Name */}

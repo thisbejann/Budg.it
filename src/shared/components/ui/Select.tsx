@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, Platform } from 'react-native';
 import { Select as HeroSelect } from 'heroui-native';
 import { ChevronDown } from 'lucide-react-native';
 import { useTheme } from '../../../hooks/useColorScheme';
@@ -31,6 +31,8 @@ export function Select({
   disabled,
 }: SelectProps) {
   const { colors } = useTheme();
+  const isAndroidDialog = Platform.OS === 'android';
+  const presentation = isAndroidDialog ? 'dialog' : 'bottom-sheet';
 
   const selectedOption = options.find((opt) => opt.value === value);
 
@@ -56,7 +58,7 @@ export function Select({
         value={selectedOption ? { value: String(selectedOption.value), label: selectedOption.label } : undefined}
         onValueChange={handleValueChange}
         isDisabled={disabled}
-        presentation="bottom-sheet"
+        presentation={presentation}
       >
         <HeroSelect.Trigger
           className={`flex-row items-center justify-between px-3 ${disabled ? 'opacity-50' : ''}`}
@@ -82,49 +84,98 @@ export function Select({
 
         <HeroSelect.Portal>
           <HeroSelect.Overlay className="bg-black/50" />
-          <HeroSelect.Content
-            presentation="bottom-sheet"
-            snapPoints={['50%', '75%']}
-            enableDynamicSizing={false}
-            backgroundClassName="rounded-t-3xl"
-            backgroundStyle={{ backgroundColor: colors.surface }}
-            handleIndicatorClassName="bg-muted-foreground/30 w-10"
-            contentContainerClassName="pb-8"
-          >
-            {label && (
-              <HeroSelect.ListLabel
-                className="px-4 pt-2 pb-3 text-lg font-semibold"
-                style={{ color: colors.foreground }}
-              >
-                {label}
-              </HeroSelect.ListLabel>
-            )}
-            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-              {options.map((option) => (
-                <HeroSelect.Item
-                  key={String(option.value)}
-                  value={String(option.value)}
-                  label={option.label}
-                  className="mx-3 rounded-xl px-4 py-4"
+          {isAndroidDialog ? (
+            <HeroSelect.Content
+              presentation="dialog"
+              classNames={{
+                wrapper: 'absolute inset-0 justify-center p-5',
+                content: 'rounded-3xl',
+              }}
+              style={{ backgroundColor: colors.surface, maxHeight: 420 }}
+            >
+              {label && (
+                <HeroSelect.ListLabel
+                  className="px-4 pt-3 pb-2 text-lg font-semibold"
+                  style={{ color: colors.foreground }}
                 >
-                  {({ isSelected }) => (
-                    <>
-                      <View className="flex-1 flex-row items-center">
-                        {option.icon && <View className="mr-3">{option.icon}</View>}
-                        <HeroSelect.ItemLabel
-                          className={`text-base ${isSelected ? 'font-semibold' : ''}`}
-                          style={{ color: isSelected ? colors.primary : colors.foreground }}
+                  {label}
+                </HeroSelect.ListLabel>
+              )}
+              <ScrollView
+                style={{ maxHeight: 320 }}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 8 }}
+              >
+                {options.map((option) => (
+                  <HeroSelect.Item
+                    key={String(option.value)}
+                    value={String(option.value)}
+                    label={option.label}
+                    className="mx-3 rounded-xl px-4 py-4"
+                  >
+                    {({ isSelected }) => (
+                      <>
+                        <View className="flex-1 flex-row items-center">
+                          {option.icon && <View className="mr-3">{option.icon}</View>}
+                          <HeroSelect.ItemLabel
+                            className={`text-base ${isSelected ? 'font-semibold' : ''}`}
+                            style={{ color: isSelected ? colors.primary : colors.foreground }}
+                          />
+                        </View>
+                        <HeroSelect.ItemIndicator
+                          iconProps={{ size: 20, color: colors.primary }}
                         />
-                      </View>
-                      <HeroSelect.ItemIndicator
-                        iconProps={{ size: 20, color: colors.primary }}
-                      />
-                    </>
-                  )}
-                </HeroSelect.Item>
-              ))}
-            </ScrollView>
-          </HeroSelect.Content>
+                      </>
+                    )}
+                  </HeroSelect.Item>
+                ))}
+              </ScrollView>
+            </HeroSelect.Content>
+          ) : (
+            <HeroSelect.Content
+              presentation="bottom-sheet"
+              snapPoints={['50%', '75%']}
+              enableDynamicSizing={false}
+              backgroundClassName="rounded-t-3xl"
+              backgroundStyle={{ backgroundColor: colors.surface }}
+              handleIndicatorClassName="bg-muted-foreground/30 w-10"
+              contentContainerClassName="pb-8"
+            >
+              {label && (
+                <HeroSelect.ListLabel
+                  className="px-4 pt-2 pb-3 text-lg font-semibold"
+                  style={{ color: colors.foreground }}
+                >
+                  {label}
+                </HeroSelect.ListLabel>
+              )}
+              <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+                {options.map((option) => (
+                  <HeroSelect.Item
+                    key={String(option.value)}
+                    value={String(option.value)}
+                    label={option.label}
+                    className="mx-3 rounded-xl px-4 py-4"
+                  >
+                    {({ isSelected }) => (
+                      <>
+                        <View className="flex-1 flex-row items-center">
+                          {option.icon && <View className="mr-3">{option.icon}</View>}
+                          <HeroSelect.ItemLabel
+                            className={`text-base ${isSelected ? 'font-semibold' : ''}`}
+                            style={{ color: isSelected ? colors.primary : colors.foreground }}
+                          />
+                        </View>
+                        <HeroSelect.ItemIndicator
+                          iconProps={{ size: 20, color: colors.primary }}
+                        />
+                      </>
+                    )}
+                  </HeroSelect.Item>
+                ))}
+              </ScrollView>
+            </HeroSelect.Content>
+          )}
         </HeroSelect.Portal>
       </HeroSelect>
 

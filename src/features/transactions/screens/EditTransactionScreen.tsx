@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +13,7 @@ import { Button, CurrencyInput, Input, DateInput, TimeInput, Select, SelectOptio
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository, AccountRepository, CategoryRepository } from '../../../database/repositories';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type EditTransactionRouteProp = RouteProp<RootStackParamList, 'EditTransaction'>;
@@ -43,6 +44,8 @@ export function EditTransactionScreen() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const isSubmittingRef = useRef(false);
+  const closeAfterSaveRef = useRef(false);
 
   const {
     control,
@@ -81,7 +84,7 @@ export function EditTransactionScreen() {
 
       if (!txn) {
         Alert.alert('Error', 'Transaction not found');
-        InteractionManager.runAfterInteractions(() => navigation.goBack());
+        safeCloseAfterMutation(navigation);
         return;
       }
 
@@ -108,6 +111,10 @@ export function EditTransactionScreen() {
   };
 
   const onSubmit = async (data: TransactionFormData) => {
+    if (isSubmittingRef.current) return;
+
+    isSubmittingRef.current = true;
+    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await TransactionRepository.update(transactionId, {
@@ -121,9 +128,10 @@ export function EditTransactionScreen() {
         notes: data.notes,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, closeAfterSaveRef);
     } catch (error) {
+      isSubmittingRef.current = false;
+      closeAfterSaveRef.current = false;
       setIsLoading(false);
       console.error('Error updating transaction:', error);
       Alert.alert('Error', 'Failed to update transaction');
@@ -151,7 +159,7 @@ export function EditTransactionScreen() {
   if (isLoadingData) {
     return (
       <Screen>
-        <Header title="Edit Transaction" showBack />
+        <Header title="Edit Transaction" showBack disableBack={isLoading} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -161,7 +169,7 @@ export function EditTransactionScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Edit Transaction" showBack />
+      <Header title="Edit Transaction" showBack disableBack={isLoading} />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Type Toggle */}

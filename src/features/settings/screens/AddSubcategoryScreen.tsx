@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +14,7 @@ import { CategoryRepository } from '../../../database/repositories';
 import { CATEGORY_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type AddSubcategoryRouteProp = RouteProp<RootStackParamList, 'AddSubcategory'>;
@@ -36,6 +37,8 @@ export function AddSubcategoryScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const isSubmittingRef = useRef(false);
+  const closeAfterSaveRef = useRef(false);
 
   const {
     control,
@@ -64,7 +67,7 @@ export function AddSubcategoryScreen() {
 
       if (!data) {
         Alert.alert('Error', 'Category not found');
-        InteractionManager.runAfterInteractions(() => navigation.goBack());
+        safeCloseAfterMutation(navigation);
         return;
       }
 
@@ -78,6 +81,10 @@ export function AddSubcategoryScreen() {
   };
 
   const onSubmit = async (data: SubcategoryFormSchema) => {
+    if (isSubmittingRef.current) return;
+
+    isSubmittingRef.current = true;
+    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await CategoryRepository.createSubcategory({
@@ -86,9 +93,10 @@ export function AddSubcategoryScreen() {
         icon: data.icon || undefined,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, closeAfterSaveRef);
     } catch (error) {
+      isSubmittingRef.current = false;
+      closeAfterSaveRef.current = false;
       setIsLoading(false);
       console.error('Error creating subcategory:', error);
       Alert.alert('Error', 'Failed to create subcategory');
@@ -104,7 +112,7 @@ export function AddSubcategoryScreen() {
   if (isLoadingData) {
     return (
       <Screen>
-        <Header title="Add Subcategory" showClose />
+        <Header title="Add Subcategory" showClose disableClose={isLoading} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -114,7 +122,7 @@ export function AddSubcategoryScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Add Subcategory" showClose />
+      <Header title="Add Subcategory" showClose disableClose={isLoading} />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Parent Category Info */}

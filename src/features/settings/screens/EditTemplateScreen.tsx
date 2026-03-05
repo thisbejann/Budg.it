@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,6 +16,7 @@ import { CATEGORY_COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type EditTemplateRouteProp = RouteProp<RootStackParamList, 'EditTemplate'>;
@@ -46,8 +47,13 @@ export function EditTemplateScreen() {
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
   
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const isSubmittingRef = useRef(false);
+  const closeAfterSaveRef = useRef(false);
+  const isDeletingRef = useRef(false);
+  const closeAfterDeleteRef = useRef(false);
 
   const {
     control,
@@ -90,7 +96,7 @@ export function EditTemplateScreen() {
 
       if (!tmpl) {
         Alert.alert('Error', 'Template not found');
-        InteractionManager.runAfterInteractions(() => navigation.goBack());
+        safeCloseAfterMutation(navigation);
         return;
       }
 
@@ -118,6 +124,10 @@ export function EditTemplateScreen() {
   };
 
   const onSubmit = async (data: TemplateFormSchema) => {
+    if (isSubmittingRef.current) return;
+
+    isSubmittingRef.current = true;
+    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await TemplateRepository.update(templateId, {
@@ -132,9 +142,10 @@ export function EditTemplateScreen() {
         color: data.color,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, closeAfterSaveRef);
     } catch (error) {
+      isSubmittingRef.current = false;
+      closeAfterSaveRef.current = false;
       setIsLoading(false);
       console.error('Error updating template:', error);
       Alert.alert('Error', 'Failed to update template');
@@ -151,10 +162,18 @@ export function EditTemplateScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            if (isDeletingRef.current) return;
+
+            isDeletingRef.current = true;
+            closeAfterDeleteRef.current = false;
+            setIsDeleting(true);
             try {
               await TemplateRepository.delete(templateId);
-              InteractionManager.runAfterInteractions(() => navigation.goBack());
+              safeCloseAfterMutation(navigation, closeAfterDeleteRef);
             } catch (error) {
+              isDeletingRef.current = false;
+              closeAfterDeleteRef.current = false;
+              setIsDeleting(false);
               console.error('Error deleting template:', error);
               Alert.alert('Error', 'Failed to delete template');
             }
@@ -189,7 +208,7 @@ export function EditTemplateScreen() {
   if (isLoadingData) {
     return (
       <Screen>
-        <Header title="Edit Template" showBack />
+        <Header title="Edit Template" showBack disableBack={isLoading || isDeleting} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -199,7 +218,7 @@ export function EditTemplateScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Edit Template" showBack />
+      <Header title="Edit Template" showBack disableBack={isLoading || isDeleting} />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Usage Stats */}
@@ -425,13 +444,13 @@ export function EditTemplateScreen() {
         </View>
 
         {/* Submit */}
-        <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
+        <Button onPress={handleSubmit(onSubmit)} loading={isLoading} disabled={isDeleting}>
           Save Changes
         </Button>
 
         {/* Delete */}
         <View className="mt-4">
-          <Button variant="destructive" onPress={handleDelete}>
+          <Button variant="destructive" onPress={handleDelete} loading={isDeleting} disabled={isLoading}>
             Delete Template
           </Button>
         </View>

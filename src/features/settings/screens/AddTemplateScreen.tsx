@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,6 +15,7 @@ import { CATEGORY_COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -42,6 +43,8 @@ export function AddTemplateScreen() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const isSubmittingRef = useRef(false);
+  const closeAfterSaveRef = useRef(false);
 
   const {
     control,
@@ -87,7 +90,10 @@ export function AddTemplateScreen() {
 
   const onSubmit = async (data: TemplateFormSchema) => {
     if (!activeLedgerId) return;
+    if (isSubmittingRef.current) return;
 
+    isSubmittingRef.current = true;
+    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await TemplateRepository.create(activeLedgerId, {
@@ -102,9 +108,10 @@ export function AddTemplateScreen() {
         color: data.color,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, closeAfterSaveRef);
     } catch (error) {
+      isSubmittingRef.current = false;
+      closeAfterSaveRef.current = false;
       setIsLoading(false);
       console.error('Error creating template:', error);
       Alert.alert('Error', 'Failed to create template');
@@ -135,7 +142,7 @@ export function AddTemplateScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Add Template" showClose />
+      <Header title="Add Template" showClose disableClose={isLoading} />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Name */}

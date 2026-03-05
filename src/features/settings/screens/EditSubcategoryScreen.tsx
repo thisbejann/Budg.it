@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +14,7 @@ import { CategoryRepository } from '../../../database/repositories';
 import { CATEGORY_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type EditSubcategoryRouteProp = RouteProp<RootStackParamList, 'EditSubcategory'>;
@@ -35,8 +36,13 @@ export function EditSubcategoryScreen() {
   const [category, setCategory] = useState<Category | null>(null);
   
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const isSubmittingRef = useRef(false);
+  const closeAfterSaveRef = useRef(false);
+  const isDeletingRef = useRef(false);
+  const closeAfterDeleteRef = useRef(false);
 
   const {
     control,
@@ -66,7 +72,7 @@ export function EditSubcategoryScreen() {
 
       if (!sub) {
         Alert.alert('Error', 'Subcategory not found');
-        InteractionManager.runAfterInteractions(() => navigation.goBack());
+        safeCloseAfterMutation(navigation);
         return;
       }
 
@@ -88,6 +94,10 @@ export function EditSubcategoryScreen() {
   };
 
   const onSubmit = async (data: SubcategoryFormSchema) => {
+    if (isSubmittingRef.current) return;
+
+    isSubmittingRef.current = true;
+    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await CategoryRepository.updateSubcategory(subcategoryId, {
@@ -95,9 +105,10 @@ export function EditSubcategoryScreen() {
         icon: data.icon || undefined,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, closeAfterSaveRef);
     } catch (error) {
+      isSubmittingRef.current = false;
+      closeAfterSaveRef.current = false;
       setIsLoading(false);
       console.error('Error updating subcategory:', error);
       Alert.alert('Error', 'Failed to update subcategory');
@@ -114,10 +125,18 @@ export function EditSubcategoryScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            if (isDeletingRef.current) return;
+
+            isDeletingRef.current = true;
+            closeAfterDeleteRef.current = false;
+            setIsDeleting(true);
             try {
               await CategoryRepository.deleteSubcategory(subcategoryId);
-              InteractionManager.runAfterInteractions(() => navigation.goBack());
+              safeCloseAfterMutation(navigation, closeAfterDeleteRef);
             } catch (error) {
+              isDeletingRef.current = false;
+              closeAfterDeleteRef.current = false;
+              setIsDeleting(false);
               console.error('Error deleting subcategory:', error);
               Alert.alert('Error', 'Failed to delete subcategory');
             }
@@ -136,7 +155,7 @@ export function EditSubcategoryScreen() {
   if (isLoadingData) {
     return (
       <Screen>
-        <Header title="Edit Subcategory" showBack />
+        <Header title="Edit Subcategory" showBack disableBack={isLoading || isDeleting} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -146,7 +165,7 @@ export function EditSubcategoryScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Edit Subcategory" showBack />
+      <Header title="Edit Subcategory" showBack disableBack={isLoading || isDeleting} />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Parent Category Info */}
@@ -256,14 +275,14 @@ export function EditSubcategoryScreen() {
 
         {/* Submit Button */}
         <View className="mt-2">
-          <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
+          <Button onPress={handleSubmit(onSubmit)} loading={isLoading} disabled={isDeleting}>
             Save Changes
           </Button>
         </View>
 
         {/* Delete Button */}
         <View className="mt-4">
-          <Button variant="destructive" onPress={handleDelete}>
+          <Button variant="destructive" onPress={handleDelete} loading={isDeleting} disabled={isLoading}>
             Delete Subcategory
           </Button>
         </View>
