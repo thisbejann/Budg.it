@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
+import { View, Text, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +14,8 @@ import { TransferRepository, AccountRepository } from '../../../database/reposit
 import { getToday, getCurrentTime } from '../../../shared/utils/date';
 import { ArrowDown } from 'lucide-react-native';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard } from '../../../shared/hooks';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -40,6 +42,7 @@ export function TransferScreen() {
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
   
   const [isLoading, setIsLoading] = useState(false);
+  const submissionGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -86,6 +89,8 @@ export function TransferScreen() {
       return;
     }
 
+    if (!submissionGuard.start()) return;
+
     setIsLoading(true);
     try {
       await TransferRepository.create(activeLedgerId, {
@@ -98,9 +103,9 @@ export function TransferScreen() {
         notes: data.notes,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, submissionGuard.closeAfterRef);
     } catch (error) {
+      submissionGuard.finish();
       setIsLoading(false);
       console.error('Error creating transfer:', error);
       Alert.alert('Error', 'Failed to create transfer');
@@ -122,7 +127,7 @@ export function TransferScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Transfer Funds" showClose />
+      <Header title="Transfer Funds" showClose disableClose={isLoading} />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* From Account */}

@@ -9,6 +9,7 @@
     "ios": "expo run:ios",
     "lint": "eslint .",
     "test": "jest",
+    "verify:save-guardrails": "node scripts/verify-save-guardrails.js",
     "build:dev": "eas build --profile development --platform android",
     "build:beta": "eas build --profile beta --platform android",
     "build:beta-debug": "eas build --profile beta-debug --platform android"

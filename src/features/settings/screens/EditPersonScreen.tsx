@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
+import { View, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,6 +12,8 @@ import { Screen, Header } from '../../../shared/components/layout';
 import { Button, Input } from '../../../shared/components/ui';
 import { PersonRepository } from '../../../database/repositories';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard } from '../../../shared/hooks';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type EditPersonRouteProp = RouteProp<RootStackParamList, 'EditPerson'>;
@@ -34,7 +36,10 @@ export function EditPersonScreen() {
   const [person, setPerson] = useState<Person | null>(null);
   
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const saveGuard = useMutationCloseGuard();
+  const deleteGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -62,7 +67,7 @@ export function EditPersonScreen() {
 
       if (!data) {
         Alert.alert('Error', 'Person not found');
-        InteractionManager.runAfterInteractions(() => navigation.goBack());
+        safeCloseAfterMutation(navigation);
         return;
       }
 
@@ -82,6 +87,8 @@ export function EditPersonScreen() {
   };
 
   const onSubmit = async (data: PersonFormSchema) => {
+    if (!saveGuard.start()) return;
+
     setIsLoading(true);
     try {
       await PersonRepository.update(personId, {
@@ -91,9 +98,9 @@ export function EditPersonScreen() {
         notes: data.notes || undefined,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, saveGuard.closeAfterRef);
     } catch (error) {
+      saveGuard.finish();
       setIsLoading(false);
       console.error('Error updating person:', error);
       Alert.alert('Error', 'Failed to update person');
@@ -110,10 +117,15 @@ export function EditPersonScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            if (!deleteGuard.start()) return;
+
+            setIsDeleting(true);
             try {
               await PersonRepository.delete(personId);
-              InteractionManager.runAfterInteractions(() => navigation.goBack());
+              safeCloseAfterMutation(navigation, deleteGuard.closeAfterRef);
             } catch (error) {
+              deleteGuard.finish();
+              setIsDeleting(false);
               console.error('Error deleting person:', error);
               Alert.alert('Error', 'Failed to delete person');
             }
@@ -126,7 +138,7 @@ export function EditPersonScreen() {
   if (isLoadingData) {
     return (
       <Screen>
-        <Header title="Edit Person" showBack />
+        <Header title="Edit Person" showBack disableBack={isLoading || isDeleting} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -136,7 +148,7 @@ export function EditPersonScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Edit Person" showBack />
+      <Header title="Edit Person" showBack disableBack={isLoading || isDeleting} />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Name */}
@@ -212,14 +224,14 @@ export function EditPersonScreen() {
 
         {/* Submit */}
         <View className="mt-2">
-          <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
+          <Button onPress={handleSubmit(onSubmit)} loading={isLoading} disabled={isDeleting}>
             Save Changes
           </Button>
         </View>
 
         {/* Delete */}
         <View className="mt-4">
-          <Button variant="destructive" onPress={handleDelete}>
+          <Button variant="destructive" onPress={handleDelete} loading={isDeleting} disabled={isLoading}>
             Delete Person
           </Button>
         </View>

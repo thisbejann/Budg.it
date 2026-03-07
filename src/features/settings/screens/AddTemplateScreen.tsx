@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,7 +14,9 @@ import { TemplateRepository, AccountRepository, CategoryRepository } from '../..
 import { CATEGORY_COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard, usePreventNavigationWhilePending } from '../../../shared/hooks';
 import * as LucideIcons from 'lucide-react-native';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -42,6 +44,7 @@ export function AddTemplateScreen() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const submissionGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -66,6 +69,8 @@ export function AddTemplateScreen() {
   const selectedIcon = watch('icon');
   const selectedColor = watch('color');
 
+  usePreventNavigationWhilePending(isLoading, submissionGuard.closeAfterRef);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -87,6 +92,7 @@ export function AddTemplateScreen() {
 
   const onSubmit = async (data: TemplateFormSchema) => {
     if (!activeLedgerId) return;
+    if (!submissionGuard.start()) return;
 
     setIsLoading(true);
     try {
@@ -102,9 +108,9 @@ export function AddTemplateScreen() {
         color: data.color,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, submissionGuard.closeAfterRef);
     } catch (error) {
+      submissionGuard.finish();
       setIsLoading(false);
       console.error('Error creating template:', error);
       Alert.alert('Error', 'Failed to create template');
@@ -135,7 +141,7 @@ export function AddTemplateScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Add Template" showClose />
+      <Header title="Add Template" showClose disableClose={isLoading} />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Name */}

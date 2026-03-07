@@ -9,6 +9,8 @@ interface HeaderProps {
   subtitle?: string;
   showBack?: boolean;
   showClose?: boolean;
+  disableBack?: boolean;
+  disableClose?: boolean;
   onBack?: () => void;
   onClose?: () => void;
   leftAction?: React.ReactNode;
@@ -20,6 +22,8 @@ export function Header({
   subtitle,
   showBack = false,
   showClose = false,
+  disableBack = false,
+  disableClose = false,
   onBack,
   onClose,
   leftAction,
@@ -29,6 +33,10 @@ export function Header({
   const { colors } = useTheme();
 
   const handleBack = () => {
+    if (disableBack) {
+      return;
+    }
+
     if (onBack) {
       onBack();
     } else {
@@ -37,6 +45,10 @@ export function Header({
   };
 
   const handleClose = () => {
+    if (disableClose) {
+      return;
+    }
+
     if (onClose) {
       onClose();
     } else {
@@ -49,12 +61,20 @@ export function Header({
       {/* Left section */}
       <View className="w-12">
         {showBack && (
-          <TouchableOpacity onPress={handleBack} className="p-1">
+          <TouchableOpacity
+            onPress={handleBack}
+            disabled={disableBack}
+            className={`p-1 ${disableBack ? 'opacity-40' : ''}`}
+          >
             <ArrowLeft size={24} color={colors.foreground} />
           </TouchableOpacity>
         )}
         {showClose && (
-          <TouchableOpacity onPress={handleClose} className="p-1">
+          <TouchableOpacity
+            onPress={handleClose}
+            disabled={disableClose}
+            className={`p-1 ${disableClose ? 'opacity-40' : ''}`}
+          >
             <X size={24} color={colors.foreground} />
           </TouchableOpacity>
         )}

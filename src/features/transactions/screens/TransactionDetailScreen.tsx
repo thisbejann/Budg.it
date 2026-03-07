@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, InteractionManager } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
@@ -10,8 +10,10 @@ import { Button, Card, CardContent, ExpenseBadge, IncomeBadge } from '../../../s
 import { TransactionRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard } from '../../../shared/hooks';
 import * as LucideIcons from 'lucide-react-native';
 import { Pencil, Trash2, Calendar, Clock, Wallet, Tag, FileText, Receipt } from 'lucide-react-native';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type TransactionDetailRouteProp = RouteProp<RootStackParamList, 'TransactionDetail'>;
@@ -24,6 +26,8 @@ export function TransactionDetailScreen() {
 
   const [transaction, setTransaction] = useState<TransactionWithDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const deleteGuard = useMutationCloseGuard();
 
   const loadTransaction = useCallback(async () => {
     try {
@@ -53,10 +57,15 @@ export function TransactionDetailScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            if (!deleteGuard.start()) return;
+
+            setIsDeleting(true);
             try {
               await TransactionRepository.delete(transactionId);
-              InteractionManager.runAfterInteractions(() => navigation.goBack());
+              safeCloseAfterMutation(navigation, deleteGuard.closeAfterRef);
             } catch (error) {
+              deleteGuard.finish();
+              setIsDeleting(false);
               console.error('Error deleting transaction:', error);
               Alert.alert('Error', 'Failed to delete transaction');
             }
@@ -69,7 +78,7 @@ export function TransactionDetailScreen() {
   if (isLoading) {
     return (
       <Screen>
-        <Header title="Transaction Details" showBack />
+        <Header title="Transaction Details" showBack disableBack={isDeleting} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -80,7 +89,7 @@ export function TransactionDetailScreen() {
   if (!transaction) {
     return (
       <Screen>
-        <Header title="Transaction Details" showBack />
+        <Header title="Transaction Details" showBack disableBack={isDeleting} />
         <View className="flex-1 items-center justify-center p-4">
           <Text style={{ color: colors.mutedForeground }}>Transaction not found</Text>
         </View>
@@ -108,9 +117,11 @@ export function TransactionDetailScreen() {
       <Header
         title="Transaction Details"
         showBack
+        disableBack={isDeleting}
         rightAction={
           <TouchableOpacity
             onPress={() => navigation.navigate('EditTransaction', { transactionId })}
+            disabled={isDeleting}
             className="p-2"
           >
             <Pencil size={20} color={colors.foreground} />
@@ -225,7 +236,7 @@ export function TransactionDetailScreen() {
 
         {/* Delete Button */}
         <View className="px-4 pb-8">
-          <Button variant="destructive" onPress={handleDelete}>
+          <Button variant="destructive" onPress={handleDelete} loading={isDeleting} disabled={isDeleting}>
             <Trash2 size={18} color={colors.destructiveForeground} />
             <Text className="ml-2 font-medium" style={{ color: colors.destructiveForeground }}>Delete Transaction</Text>
           </Button>

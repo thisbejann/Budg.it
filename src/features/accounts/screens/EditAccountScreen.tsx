@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, InteractionManager, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,7 +14,9 @@ import { AccountRepository, PersonRepository } from '../../../database/repositor
 import { ACCOUNT_COLORS } from '../../../constants/colors';
 import { ACCOUNT_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard } from '../../../shared/hooks';
 import * as LucideIcons from 'lucide-react-native';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type EditAccountRouteProp = RouteProp<RootStackParamList, 'EditAccount'>;
@@ -60,8 +62,11 @@ export function EditAccountScreen() {
   const [persons, setPersons] = useState<Person[]>([]);
   
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const saveGuard = useMutationCloseGuard();
+  const deleteGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -100,7 +105,7 @@ export function EditAccountScreen() {
 
       if (!acct) {
         Alert.alert('Error', 'Account not found');
-        InteractionManager.runAfterInteractions(() => navigation.goBack());
+        safeCloseAfterMutation(navigation);
         return;
       }
 
@@ -128,6 +133,8 @@ export function EditAccountScreen() {
   };
 
   const onSubmit = async (data: AccountFormSchema) => {
+    if (!saveGuard.start()) return;
+
     setIsLoading(true);
     try {
       await AccountRepository.update(accountId, {
@@ -143,9 +150,9 @@ export function EditAccountScreen() {
         notes: data.notes,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, saveGuard.closeAfterRef);
     } catch (error) {
+      saveGuard.finish();
       setIsLoading(false);
       console.error('Error updating account:', error);
       Alert.alert('Error', 'Failed to update account');
@@ -162,10 +169,15 @@ export function EditAccountScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            if (!deleteGuard.start()) return;
+
+            setIsDeleting(true);
             try {
               await AccountRepository.delete(accountId);
-              InteractionManager.runAfterInteractions(() => navigation.goBack());
+              safeCloseAfterMutation(navigation, deleteGuard.closeAfterRef);
             } catch (error) {
+              deleteGuard.finish();
+              setIsDeleting(false);
               console.error('Error deleting account:', error);
               Alert.alert('Error', 'Failed to delete account');
             }
@@ -187,7 +199,7 @@ export function EditAccountScreen() {
   if (isLoadingData) {
     return (
       <Screen>
-        <Header title="Edit Account" showBack />
+        <Header title="Edit Account" showBack disableBack={isLoading || isDeleting} />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -197,7 +209,7 @@ export function EditAccountScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Edit Account" showBack />
+      <Header title="Edit Account" showBack disableBack={isLoading || isDeleting} />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Account Type */}
@@ -409,14 +421,14 @@ export function EditAccountScreen() {
 
         {/* Submit Button */}
         <View className="mt-2">
-          <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
+          <Button onPress={handleSubmit(onSubmit)} loading={isLoading} disabled={isDeleting}>
             Save Changes
           </Button>
         </View>
 
         {/* Delete Button */}
         <View className="mt-4">
-          <Button variant="destructive" onPress={handleDelete}>
+          <Button variant="destructive" onPress={handleDelete} loading={isDeleting} disabled={isLoading}>
             Delete Account
           </Button>
         </View>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Alert, ScrollView, InteractionManager, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -31,8 +31,10 @@ import {
 } from '../../../database/repositories';
 import { getToday, getCurrentTime } from '../../../shared/utils/date';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard, usePreventNavigationWhilePending } from '../../../shared/hooks';
 import { Chip } from 'heroui-native';
 import * as LucideIcons from 'lucide-react-native';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -61,6 +63,7 @@ export function AddTransactionScreen() {
   const [appliedTemplateId, setAppliedTemplateId] = useState<number | null>(null);
   
   const [isLoading, setIsLoading] = useState(false);
+  const submissionGuard = useMutationCloseGuard();
 
   const templateId = (route.params as any)?.templateId;
 
@@ -82,6 +85,8 @@ export function AddTransactionScreen() {
 
   const selectedType = watch('type');
   const selectedCategoryId = watch('category_id');
+
+  usePreventNavigationWhilePending(isLoading, submissionGuard.closeAfterRef);
 
   useEffect(() => {
     loadData();
@@ -131,6 +136,7 @@ export function AddTransactionScreen() {
 
   const onSubmit = async (data: TransactionFormData) => {
     if (!activeLedgerId) return;
+    if (!submissionGuard.start()) return;
 
     setIsLoading(true);
     try {
@@ -149,9 +155,9 @@ export function AddTransactionScreen() {
         await TemplateRepository.incrementUsage(appliedTemplateId);
       }
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, submissionGuard.closeAfterRef);
     } catch (error) {
+      submissionGuard.finish();
       setIsLoading(false);
       console.error('Error creating transaction:', error);
       Alert.alert('Error', 'Failed to create transaction');
@@ -182,7 +188,7 @@ export function AddTransactionScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Add Transaction" showClose />
+      <Header title="Add Transaction" showClose disableClose={isLoading} />
 
       <KeyboardAwareScrollView
         className="flex-1 px-4 py-4"

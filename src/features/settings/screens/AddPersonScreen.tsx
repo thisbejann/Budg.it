@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
+import { View, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,6 +9,8 @@ import type { RootStackParamList } from '../../../types/navigation';
 import { Screen, Header } from '../../../shared/components/layout';
 import { Button, Input } from '../../../shared/components/ui';
 import { PersonRepository } from '../../../database/repositories';
+import { useMutationCloseGuard, usePreventNavigationWhilePending } from '../../../shared/hooks';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -25,6 +27,7 @@ export function AddPersonScreen() {
   const navigation = useNavigation<NavigationProp>();
   
   const [isLoading, setIsLoading] = useState(false);
+  const submissionGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -40,7 +43,11 @@ export function AddPersonScreen() {
     },
   });
 
+  usePreventNavigationWhilePending(isLoading, submissionGuard.closeAfterRef);
+
   const onSubmit = async (data: PersonFormSchema) => {
+    if (!submissionGuard.start()) return;
+
     setIsLoading(true);
     try {
       await PersonRepository.create({
@@ -50,9 +57,9 @@ export function AddPersonScreen() {
         notes: data.notes || undefined,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, submissionGuard.closeAfterRef);
     } catch (error) {
+      submissionGuard.finish();
       setIsLoading(false);
       console.error('Error creating person:', error);
       Alert.alert('Error', 'Failed to create person');
@@ -61,7 +68,7 @@ export function AddPersonScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Add Person" showClose />
+      <Header title="Add Person" showClose disableClose={isLoading} />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Name */}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, InteractionManager, Keyboard } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,7 +12,9 @@ import { LedgerRepository } from '../../../database/repositories';
 import { CATEGORY_COLORS } from '../../../constants/colors';
 import { LEDGER_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard, usePreventNavigationWhilePending } from '../../../shared/hooks';
 import * as LucideIcons from 'lucide-react-native';
+import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -31,6 +33,7 @@ export function AddLedgerScreen() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const submissionGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -51,7 +54,11 @@ export function AddLedgerScreen() {
   const selectedIcon = watch('icon');
   const selectedColor = watch('color');
 
+  usePreventNavigationWhilePending(isLoading, submissionGuard.closeAfterRef);
+
   const onSubmit = async (data: LedgerFormSchema) => {
+    if (!submissionGuard.start()) return;
+
     setIsLoading(true);
     try {
       await LedgerRepository.create({
@@ -61,9 +68,9 @@ export function AddLedgerScreen() {
         color: data.color,
       });
 
-      Keyboard.dismiss();
-      InteractionManager.runAfterInteractions(() => navigation.goBack());
+      safeCloseAfterMutation(navigation, submissionGuard.closeAfterRef);
     } catch (error) {
+      submissionGuard.finish();
       setIsLoading(false);
       console.error('Error creating ledger:', error);
       Alert.alert('Error', 'Failed to create ledger');
@@ -76,7 +83,7 @@ export function AddLedgerScreen() {
 
   return (
     <Screen scrollable={false}>
-      <Header title="Add Ledger" showClose />
+      <Header title="Add Ledger" showClose disableClose={isLoading} />
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Name */}
