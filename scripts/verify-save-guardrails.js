@@ -9,6 +9,7 @@ const featuresRoot = path.join(projectRoot, 'src', 'features');
 function listFiles(dir) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   const files = [];
+  const screenOrFormPattern = /(Form|form|Screen|screen)\.(ts|tsx|js|jsx)$/;
 
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
@@ -17,7 +18,7 @@ function listFiles(dir) {
       continue;
     }
 
-    if (entry.isFile() && fullPath.endsWith('.tsx')) {
+    if (entry.isFile() && screenOrFormPattern.test(entry.name)) {
       files.push(fullPath);
     }
   }
@@ -69,4 +70,3 @@ if (violations.length > 0) {
 }
 
 console.log('Save flow guardrails passed.');
-

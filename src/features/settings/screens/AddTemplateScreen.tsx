@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -14,6 +14,7 @@ import { TemplateRepository, AccountRepository, CategoryRepository } from '../..
 import { CATEGORY_COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard, usePreventNavigationWhilePending } from '../../../shared/hooks';
 import * as LucideIcons from 'lucide-react-native';
 import { safeCloseAfterMutation } from '../../../shared/utils';
 
@@ -43,8 +44,7 @@ export function AddTemplateScreen() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
-  const isSubmittingRef = useRef(false);
-  const closeAfterSaveRef = useRef(false);
+  const submissionGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -69,6 +69,8 @@ export function AddTemplateScreen() {
   const selectedIcon = watch('icon');
   const selectedColor = watch('color');
 
+  usePreventNavigationWhilePending(isLoading, submissionGuard.closeAfterRef);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -90,10 +92,8 @@ export function AddTemplateScreen() {
 
   const onSubmit = async (data: TemplateFormSchema) => {
     if (!activeLedgerId) return;
-    if (isSubmittingRef.current) return;
+    if (!submissionGuard.start()) return;
 
-    isSubmittingRef.current = true;
-    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await TemplateRepository.create(activeLedgerId, {
@@ -108,10 +108,9 @@ export function AddTemplateScreen() {
         color: data.color,
       });
 
-      safeCloseAfterMutation(navigation, closeAfterSaveRef);
+      safeCloseAfterMutation(navigation, submissionGuard.closeAfterRef);
     } catch (error) {
-      isSubmittingRef.current = false;
-      closeAfterSaveRef.current = false;
+      submissionGuard.finish();
       setIsLoading(false);
       console.error('Error creating template:', error);
       Alert.alert('Error', 'Failed to create template');

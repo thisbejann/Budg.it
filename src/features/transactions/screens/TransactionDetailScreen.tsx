@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,6 +10,7 @@ import { Button, Card, CardContent, ExpenseBadge, IncomeBadge } from '../../../s
 import { TransactionRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard } from '../../../shared/hooks';
 import * as LucideIcons from 'lucide-react-native';
 import { Pencil, Trash2, Calendar, Clock, Wallet, Tag, FileText, Receipt } from 'lucide-react-native';
 import { safeCloseAfterMutation } from '../../../shared/utils';
@@ -26,8 +27,7 @@ export function TransactionDetailScreen() {
   const [transaction, setTransaction] = useState<TransactionWithDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const isDeletingRef = useRef(false);
-  const closeAfterDeleteRef = useRef(false);
+  const deleteGuard = useMutationCloseGuard();
 
   const loadTransaction = useCallback(async () => {
     try {
@@ -57,17 +57,14 @@ export function TransactionDetailScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            if (isDeletingRef.current) return;
+            if (!deleteGuard.start()) return;
 
-            isDeletingRef.current = true;
-            closeAfterDeleteRef.current = false;
             setIsDeleting(true);
             try {
               await TransactionRepository.delete(transactionId);
-              safeCloseAfterMutation(navigation, closeAfterDeleteRef);
+              safeCloseAfterMutation(navigation, deleteGuard.closeAfterRef);
             } catch (error) {
-              isDeletingRef.current = false;
-              closeAfterDeleteRef.current = false;
+              deleteGuard.finish();
               setIsDeleting(false);
               console.error('Error deleting transaction:', error);
               Alert.alert('Error', 'Failed to delete transaction');

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -14,6 +14,7 @@ import { AccountRepository, PersonRepository } from '../../../database/repositor
 import { ACCOUNT_COLORS } from '../../../constants/colors';
 import { ACCOUNT_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard } from '../../../shared/hooks';
 import * as LucideIcons from 'lucide-react-native';
 import { safeCloseAfterMutation } from '../../../shared/utils';
 
@@ -64,10 +65,8 @@ export function EditAccountScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [showIconPicker, setShowIconPicker] = useState(false);
-  const isSubmittingRef = useRef(false);
-  const closeAfterSaveRef = useRef(false);
-  const isDeletingRef = useRef(false);
-  const closeAfterDeleteRef = useRef(false);
+  const saveGuard = useMutationCloseGuard();
+  const deleteGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -134,10 +133,8 @@ export function EditAccountScreen() {
   };
 
   const onSubmit = async (data: AccountFormSchema) => {
-    if (isSubmittingRef.current) return;
+    if (!saveGuard.start()) return;
 
-    isSubmittingRef.current = true;
-    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await AccountRepository.update(accountId, {
@@ -153,10 +150,9 @@ export function EditAccountScreen() {
         notes: data.notes,
       });
 
-      safeCloseAfterMutation(navigation, closeAfterSaveRef);
+      safeCloseAfterMutation(navigation, saveGuard.closeAfterRef);
     } catch (error) {
-      isSubmittingRef.current = false;
-      closeAfterSaveRef.current = false;
+      saveGuard.finish();
       setIsLoading(false);
       console.error('Error updating account:', error);
       Alert.alert('Error', 'Failed to update account');
@@ -173,17 +169,14 @@ export function EditAccountScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            if (isDeletingRef.current) return;
+            if (!deleteGuard.start()) return;
 
-            isDeletingRef.current = true;
-            closeAfterDeleteRef.current = false;
             setIsDeleting(true);
             try {
               await AccountRepository.delete(accountId);
-              safeCloseAfterMutation(navigation, closeAfterDeleteRef);
+              safeCloseAfterMutation(navigation, deleteGuard.closeAfterRef);
             } catch (error) {
-              isDeletingRef.current = false;
-              closeAfterDeleteRef.current = false;
+              deleteGuard.finish();
               setIsDeleting(false);
               console.error('Error deleting account:', error);
               Alert.alert('Error', 'Failed to delete account');

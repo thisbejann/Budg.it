@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -13,6 +13,7 @@ import { Button, Input } from '../../../shared/components/ui';
 import { CategoryRepository } from '../../../database/repositories';
 import { CATEGORY_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard } from '../../../shared/hooks';
 import * as LucideIcons from 'lucide-react-native';
 import { safeCloseAfterMutation } from '../../../shared/utils';
 
@@ -37,8 +38,7 @@ export function AddSubcategoryScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [showIconPicker, setShowIconPicker] = useState(false);
-  const isSubmittingRef = useRef(false);
-  const closeAfterSaveRef = useRef(false);
+  const submissionGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -81,10 +81,8 @@ export function AddSubcategoryScreen() {
   };
 
   const onSubmit = async (data: SubcategoryFormSchema) => {
-    if (isSubmittingRef.current) return;
+    if (!submissionGuard.start()) return;
 
-    isSubmittingRef.current = true;
-    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await CategoryRepository.createSubcategory({
@@ -93,10 +91,9 @@ export function AddSubcategoryScreen() {
         icon: data.icon || undefined,
       });
 
-      safeCloseAfterMutation(navigation, closeAfterSaveRef);
+      safeCloseAfterMutation(navigation, submissionGuard.closeAfterRef);
     } catch (error) {
-      isSubmittingRef.current = false;
-      closeAfterSaveRef.current = false;
+      submissionGuard.finish();
       setIsLoading(false);
       console.error('Error creating subcategory:', error);
       Alert.alert('Error', 'Failed to create subcategory');

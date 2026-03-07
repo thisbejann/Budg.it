@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -15,6 +15,7 @@ import { AccountRepository, PersonRepository } from '../../../database/repositor
 import { ACCOUNT_COLORS } from '../../../constants/colors';
 import { ACCOUNT_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard, usePreventNavigationWhilePending } from '../../../shared/hooks';
 import * as LucideIcons from 'lucide-react-native';
 import { safeCloseAfterMutation } from '../../../shared/utils';
 
@@ -64,8 +65,7 @@ export function AddAccountScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
-  const isSubmittingRef = useRef(false);
-  const closeAfterSaveRef = useRef(false);
+  const submissionGuard = useMutationCloseGuard();
 
   const defaultType = (route.params?.accountType as AccountType) || 'debit';
 
@@ -92,6 +92,8 @@ export function AddAccountScreen() {
   const selectedIcon = watch('icon');
   const selectedColor = watch('color');
 
+  usePreventNavigationWhilePending(isLoading, submissionGuard.closeAfterRef);
+
   useEffect(() => {
     loadPersons();
   }, []);
@@ -107,10 +109,8 @@ export function AddAccountScreen() {
 
   const onSubmit = async (data: AccountFormSchema) => {
     if (!activeLedgerId) return;
-    if (isSubmittingRef.current) return;
+    if (!submissionGuard.start()) return;
 
-    isSubmittingRef.current = true;
-    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await AccountRepository.create(activeLedgerId, {
@@ -127,10 +127,9 @@ export function AddAccountScreen() {
         notes: data.notes,
       });
 
-      safeCloseAfterMutation(navigation, closeAfterSaveRef);
+      safeCloseAfterMutation(navigation, submissionGuard.closeAfterRef);
     } catch (error) {
-      isSubmittingRef.current = false;
-      closeAfterSaveRef.current = false;
+      submissionGuard.finish();
       setIsLoading(false);
       console.error('Error creating account:', error);
       Alert.alert('Error', 'Failed to create account');

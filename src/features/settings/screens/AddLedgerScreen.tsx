@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -12,6 +12,7 @@ import { LedgerRepository } from '../../../database/repositories';
 import { CATEGORY_COLORS } from '../../../constants/colors';
 import { LEDGER_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard, usePreventNavigationWhilePending } from '../../../shared/hooks';
 import * as LucideIcons from 'lucide-react-native';
 import { safeCloseAfterMutation } from '../../../shared/utils';
 
@@ -32,8 +33,7 @@ export function AddLedgerScreen() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
-  const isSubmittingRef = useRef(false);
-  const closeAfterSaveRef = useRef(false);
+  const submissionGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -54,11 +54,11 @@ export function AddLedgerScreen() {
   const selectedIcon = watch('icon');
   const selectedColor = watch('color');
 
-  const onSubmit = async (data: LedgerFormSchema) => {
-    if (isSubmittingRef.current) return;
+  usePreventNavigationWhilePending(isLoading, submissionGuard.closeAfterRef);
 
-    isSubmittingRef.current = true;
-    closeAfterSaveRef.current = false;
+  const onSubmit = async (data: LedgerFormSchema) => {
+    if (!submissionGuard.start()) return;
+
     setIsLoading(true);
     try {
       await LedgerRepository.create({
@@ -68,10 +68,9 @@ export function AddLedgerScreen() {
         color: data.color,
       });
 
-      safeCloseAfterMutation(navigation, closeAfterSaveRef);
+      safeCloseAfterMutation(navigation, submissionGuard.closeAfterRef);
     } catch (error) {
-      isSubmittingRef.current = false;
-      closeAfterSaveRef.current = false;
+      submissionGuard.finish();
       setIsLoading(false);
       console.error('Error creating ledger:', error);
       Alert.alert('Error', 'Failed to create ledger');

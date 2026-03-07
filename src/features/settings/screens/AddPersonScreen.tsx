@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -9,6 +9,7 @@ import type { RootStackParamList } from '../../../types/navigation';
 import { Screen, Header } from '../../../shared/components/layout';
 import { Button, Input } from '../../../shared/components/ui';
 import { PersonRepository } from '../../../database/repositories';
+import { useMutationCloseGuard, usePreventNavigationWhilePending } from '../../../shared/hooks';
 import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -26,8 +27,7 @@ export function AddPersonScreen() {
   const navigation = useNavigation<NavigationProp>();
   
   const [isLoading, setIsLoading] = useState(false);
-  const isSubmittingRef = useRef(false);
-  const closeAfterSaveRef = useRef(false);
+  const submissionGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -43,11 +43,11 @@ export function AddPersonScreen() {
     },
   });
 
-  const onSubmit = async (data: PersonFormSchema) => {
-    if (isSubmittingRef.current) return;
+  usePreventNavigationWhilePending(isLoading, submissionGuard.closeAfterRef);
 
-    isSubmittingRef.current = true;
-    closeAfterSaveRef.current = false;
+  const onSubmit = async (data: PersonFormSchema) => {
+    if (!submissionGuard.start()) return;
+
     setIsLoading(true);
     try {
       await PersonRepository.create({
@@ -57,10 +57,9 @@ export function AddPersonScreen() {
         notes: data.notes || undefined,
       });
 
-      safeCloseAfterMutation(navigation, closeAfterSaveRef);
+      safeCloseAfterMutation(navigation, submissionGuard.closeAfterRef);
     } catch (error) {
-      isSubmittingRef.current = false;
-      closeAfterSaveRef.current = false;
+      submissionGuard.finish();
       setIsLoading(false);
       console.error('Error creating person:', error);
       Alert.alert('Error', 'Failed to create person');

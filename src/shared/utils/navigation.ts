@@ -27,8 +27,9 @@ export function safeCloseAfterMutation(
     requestAnimationFrame(() => {
       if (navigation.canGoBack()) {
         navigation.goBack();
+      } else if (closeRequestedRef) {
+        closeRequestedRef.current = false;
       }
     });
   });
 }
-

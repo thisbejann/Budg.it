@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -12,6 +12,7 @@ import { Screen, Header } from '../../../shared/components/layout';
 import { Button, Input } from '../../../shared/components/ui';
 import { PersonRepository } from '../../../database/repositories';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard } from '../../../shared/hooks';
 import { safeCloseAfterMutation } from '../../../shared/utils';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -37,10 +38,8 @@ export function EditPersonScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
-  const isSubmittingRef = useRef(false);
-  const closeAfterSaveRef = useRef(false);
-  const isDeletingRef = useRef(false);
-  const closeAfterDeleteRef = useRef(false);
+  const saveGuard = useMutationCloseGuard();
+  const deleteGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -88,10 +87,8 @@ export function EditPersonScreen() {
   };
 
   const onSubmit = async (data: PersonFormSchema) => {
-    if (isSubmittingRef.current) return;
+    if (!saveGuard.start()) return;
 
-    isSubmittingRef.current = true;
-    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await PersonRepository.update(personId, {
@@ -101,10 +98,9 @@ export function EditPersonScreen() {
         notes: data.notes || undefined,
       });
 
-      safeCloseAfterMutation(navigation, closeAfterSaveRef);
+      safeCloseAfterMutation(navigation, saveGuard.closeAfterRef);
     } catch (error) {
-      isSubmittingRef.current = false;
-      closeAfterSaveRef.current = false;
+      saveGuard.finish();
       setIsLoading(false);
       console.error('Error updating person:', error);
       Alert.alert('Error', 'Failed to update person');
@@ -121,17 +117,14 @@ export function EditPersonScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            if (isDeletingRef.current) return;
+            if (!deleteGuard.start()) return;
 
-            isDeletingRef.current = true;
-            closeAfterDeleteRef.current = false;
             setIsDeleting(true);
             try {
               await PersonRepository.delete(personId);
-              safeCloseAfterMutation(navigation, closeAfterDeleteRef);
+              safeCloseAfterMutation(navigation, deleteGuard.closeAfterRef);
             } catch (error) {
-              isDeletingRef.current = false;
-              closeAfterDeleteRef.current = false;
+              deleteGuard.finish();
               setIsDeleting(false);
               console.error('Error deleting person:', error);
               Alert.alert('Error', 'Failed to delete person');

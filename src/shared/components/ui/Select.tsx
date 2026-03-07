@@ -36,6 +36,29 @@ export function Select({
 
   const selectedOption = options.find((opt) => opt.value === value);
 
+  const renderOptions = () =>
+    options.map((option) => (
+      <HeroSelect.Item
+        key={String(option.value)}
+        value={String(option.value)}
+        label={option.label}
+        className="mx-3 rounded-xl px-4 py-4"
+      >
+        {({ isSelected }) => (
+          <>
+            <View className="flex-1 flex-row items-center">
+              {option.icon && <View className="mr-3">{option.icon}</View>}
+              <HeroSelect.ItemLabel
+                className={`text-base ${isSelected ? 'font-semibold' : ''}`}
+                style={{ color: isSelected ? colors.primary : colors.foreground }}
+              />
+            </View>
+            <HeroSelect.ItemIndicator iconProps={{ size: 20, color: colors.primary }} />
+          </>
+        )}
+      </HeroSelect.Item>
+    ));
+
   const handleValueChange = (selected: { value: string; label: string } | undefined) => {
     if (selected) {
       // Convert back to original type (number if it was a number)
@@ -106,29 +129,7 @@ export function Select({
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 8 }}
               >
-                {options.map((option) => (
-                  <HeroSelect.Item
-                    key={String(option.value)}
-                    value={String(option.value)}
-                    label={option.label}
-                    className="mx-3 rounded-xl px-4 py-4"
-                  >
-                    {({ isSelected }) => (
-                      <>
-                        <View className="flex-1 flex-row items-center">
-                          {option.icon && <View className="mr-3">{option.icon}</View>}
-                          <HeroSelect.ItemLabel
-                            className={`text-base ${isSelected ? 'font-semibold' : ''}`}
-                            style={{ color: isSelected ? colors.primary : colors.foreground }}
-                          />
-                        </View>
-                        <HeroSelect.ItemIndicator
-                          iconProps={{ size: 20, color: colors.primary }}
-                        />
-                      </>
-                    )}
-                  </HeroSelect.Item>
-                ))}
+                {renderOptions()}
               </ScrollView>
             </HeroSelect.Content>
           ) : (
@@ -150,29 +151,7 @@ export function Select({
                 </HeroSelect.ListLabel>
               )}
               <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-                {options.map((option) => (
-                  <HeroSelect.Item
-                    key={String(option.value)}
-                    value={String(option.value)}
-                    label={option.label}
-                    className="mx-3 rounded-xl px-4 py-4"
-                  >
-                    {({ isSelected }) => (
-                      <>
-                        <View className="flex-1 flex-row items-center">
-                          {option.icon && <View className="mr-3">{option.icon}</View>}
-                          <HeroSelect.ItemLabel
-                            className={`text-base ${isSelected ? 'font-semibold' : ''}`}
-                            style={{ color: isSelected ? colors.primary : colors.foreground }}
-                          />
-                        </View>
-                        <HeroSelect.ItemIndicator
-                          iconProps={{ size: 20, color: colors.primary }}
-                        />
-                      </>
-                    )}
-                  </HeroSelect.Item>
-                ))}
+                {renderOptions()}
               </ScrollView>
             </HeroSelect.Content>
           )}

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -15,6 +15,7 @@ import { useLedgerStore } from '../../../store';
 import { CATEGORY_COLORS } from '../../../constants/colors';
 import { LEDGER_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard } from '../../../shared/hooks';
 import * as LucideIcons from 'lucide-react-native';
 import { safeCloseAfterMutation } from '../../../shared/utils';
 
@@ -42,11 +43,10 @@ export function EditLedgerScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isSettingDefault, setIsSettingDefault] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
-  const isSubmittingRef = useRef(false);
-  const closeAfterSaveRef = useRef(false);
-  const isDeletingRef = useRef(false);
-  const closeAfterDeleteRef = useRef(false);
+  const saveGuard = useMutationCloseGuard();
+  const deleteGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -99,10 +99,8 @@ export function EditLedgerScreen() {
   };
 
   const onSubmit = async (data: LedgerFormSchema) => {
-    if (isSubmittingRef.current) return;
+    if (!saveGuard.start()) return;
 
-    isSubmittingRef.current = true;
-    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await LedgerRepository.update(ledgerId, {
@@ -112,10 +110,9 @@ export function EditLedgerScreen() {
         color: data.color,
       });
 
-      safeCloseAfterMutation(navigation, closeAfterSaveRef);
+      safeCloseAfterMutation(navigation, saveGuard.closeAfterRef);
     } catch (error) {
-      isSubmittingRef.current = false;
-      closeAfterSaveRef.current = false;
+      saveGuard.finish();
       setIsLoading(false);
       console.error('Error updating ledger:', error);
       Alert.alert('Error', 'Failed to update ledger');
@@ -123,13 +120,18 @@ export function EditLedgerScreen() {
   };
 
   const handleSetDefault = async () => {
+    if (isSettingDefault) return;
+
+    setIsSettingDefault(true);
     try {
       await LedgerRepository.setDefault(ledgerId);
       Alert.alert('Success', 'This ledger is now the default');
-      loadLedger();
+      await loadLedger();
     } catch (error) {
       console.error('Error setting default:', error);
       Alert.alert('Error', 'Failed to set as default');
+    } finally {
+      setIsSettingDefault(false);
     }
   };
 
@@ -153,17 +155,14 @@ export function EditLedgerScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            if (isDeletingRef.current) return;
+            if (!deleteGuard.start()) return;
 
-            isDeletingRef.current = true;
-            closeAfterDeleteRef.current = false;
             setIsDeleting(true);
             try {
               await LedgerRepository.delete(ledgerId);
-              safeCloseAfterMutation(navigation, closeAfterDeleteRef);
+              safeCloseAfterMutation(navigation, deleteGuard.closeAfterRef);
             } catch (error) {
-              isDeletingRef.current = false;
-              closeAfterDeleteRef.current = false;
+              deleteGuard.finish();
               setIsDeleting(false);
               console.error('Error deleting ledger:', error);
               Alert.alert('Error', 'Failed to delete ledger');
@@ -308,7 +307,12 @@ export function EditLedgerScreen() {
         {/* Set as Default */}
         {!ledger?.is_default && (
           <View className="mt-4">
-            <Button variant="outlined" onPress={handleSetDefault} disabled={isLoading || isDeleting}>
+            <Button
+              variant="outlined"
+              onPress={handleSetDefault}
+              loading={isSettingDefault}
+              disabled={isLoading || isDeleting || isSettingDefault}
+            >
               Set as Default Ledger
             </Button>
           </View>

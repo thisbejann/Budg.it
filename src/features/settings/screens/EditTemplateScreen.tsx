@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -15,6 +15,7 @@ import { TemplateRepository, AccountRepository, CategoryRepository } from '../..
 import { CATEGORY_COLORS } from '../../../constants/colors';
 import { CATEGORY_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { useMutationCloseGuard } from '../../../shared/hooks';
 import * as LucideIcons from 'lucide-react-native';
 import { safeCloseAfterMutation } from '../../../shared/utils';
 
@@ -50,10 +51,8 @@ export function EditTemplateScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [showIconPicker, setShowIconPicker] = useState(false);
-  const isSubmittingRef = useRef(false);
-  const closeAfterSaveRef = useRef(false);
-  const isDeletingRef = useRef(false);
-  const closeAfterDeleteRef = useRef(false);
+  const saveGuard = useMutationCloseGuard();
+  const deleteGuard = useMutationCloseGuard();
 
   const {
     control,
@@ -124,10 +123,8 @@ export function EditTemplateScreen() {
   };
 
   const onSubmit = async (data: TemplateFormSchema) => {
-    if (isSubmittingRef.current) return;
+    if (!saveGuard.start()) return;
 
-    isSubmittingRef.current = true;
-    closeAfterSaveRef.current = false;
     setIsLoading(true);
     try {
       await TemplateRepository.update(templateId, {
@@ -142,10 +139,9 @@ export function EditTemplateScreen() {
         color: data.color,
       });
 
-      safeCloseAfterMutation(navigation, closeAfterSaveRef);
+      safeCloseAfterMutation(navigation, saveGuard.closeAfterRef);
     } catch (error) {
-      isSubmittingRef.current = false;
-      closeAfterSaveRef.current = false;
+      saveGuard.finish();
       setIsLoading(false);
       console.error('Error updating template:', error);
       Alert.alert('Error', 'Failed to update template');
@@ -162,17 +158,14 @@ export function EditTemplateScreen() {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            if (isDeletingRef.current) return;
+            if (!deleteGuard.start()) return;
 
-            isDeletingRef.current = true;
-            closeAfterDeleteRef.current = false;
             setIsDeleting(true);
             try {
               await TemplateRepository.delete(templateId);
-              safeCloseAfterMutation(navigation, closeAfterDeleteRef);
+              safeCloseAfterMutation(navigation, deleteGuard.closeAfterRef);
             } catch (error) {
-              isDeletingRef.current = false;
-              closeAfterDeleteRef.current = false;
+              deleteGuard.finish();
               setIsDeleting(false);
               console.error('Error deleting template:', error);
               Alert.alert('Error', 'Failed to delete template');
