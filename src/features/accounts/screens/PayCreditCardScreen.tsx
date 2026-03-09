@@ -102,20 +102,21 @@ export function PayCreditCardScreen() {
 
       if (recordTransaction) {
         const paymentNote = data.notes || `Credit card payment - ${creditAccount.name}`;
-        await TransactionRepository.createRecordOnly(activeLedgerId, {
+        const debitTxnId = await TransactionRepository.createRecordOnly(activeLedgerId, {
           account_id: data.from_account_id,
           amount,
           type: 'expense',
           date: data.date,
           notes: paymentNote,
         });
-        await TransactionRepository.createRecordOnly(activeLedgerId, {
+        const creditTxnId = await TransactionRepository.createRecordOnly(activeLedgerId, {
           account_id: accountId,
           amount,
           type: 'income',
           date: data.date,
           notes: paymentNote,
         });
+        await TransactionRepository.linkTransactions(debitTxnId, creditTxnId);
       }
 
       safeCloseAfterMutation(navigation, submissionGuard.closeAfterRef);
