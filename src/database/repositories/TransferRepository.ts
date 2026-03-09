@@ -130,6 +130,32 @@ export const TransferRepository = {
     await AccountRepository.updateBalance(newToAccount, newAmount);
   },
 
+  async createCreditCardPayment(
+    ledgerId: number,
+    data: { from_account_id: number; credit_account_id: number; amount: number; date: string; notes?: string },
+  ): Promise<number> {
+    const transferId = await executeSqlInsert(
+      `INSERT INTO transfers
+       (ledger_id, from_account_id, to_account_id, amount, fee, date, time, notes)
+       VALUES (?, ?, ?, ?, 0, ?, NULL, ?)`,
+      [
+        ledgerId,
+        data.from_account_id,
+        data.credit_account_id,
+        data.amount,
+        data.date,
+        data.notes || null,
+      ],
+    );
+
+    // Deduct from debit account
+    await AccountRepository.updateBalance(data.from_account_id, -data.amount);
+    // Reduce credit card balance (decrease amount owed)
+    await AccountRepository.updateBalance(data.credit_account_id, -data.amount);
+
+    return transferId;
+  },
+
   async delete(id: number): Promise<void> {
     // Get transfer for balance adjustment
     const transfer = await this.getById(id);

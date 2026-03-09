@@ -43,6 +43,7 @@ import {
   CalendarDays,
   CalendarClock,
   Clock,
+  CreditCard,
 } from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -302,6 +303,23 @@ export function AccountDetailScreen() {
                           </Text>
                         </View>
                       )}
+                    {account.account_type === 'credit' && account.current_balance > 0 && (
+                      <TouchableOpacity
+                        onPress={() =>
+                          navigation.navigate('PayCreditCard', { accountId })
+                        }
+                        className="mt-3 flex-row items-center justify-center gap-2 rounded-xl py-2.5"
+                        style={{ backgroundColor: colors.primary + '20' }}
+                      >
+                        <CreditCard size={16} color={colors.primary} />
+                        <Text
+                          className="text-sm font-semibold"
+                          style={{ color: colors.primary }}
+                        >
+                          Pay Credit Card
+                        </Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
 
                   {/* Credit Card Dates */}
