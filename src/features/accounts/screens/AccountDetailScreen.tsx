@@ -25,6 +25,7 @@ import {
   CardContent,
   IconAvatar,
   EmptyState,
+  BalanceAdjustmentModal,
 } from '../../../shared/components/ui';
 import {
   AccountRepository,
@@ -44,6 +45,7 @@ import {
   CalendarClock,
   Clock,
   CreditCard,
+  Scale,
 } from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -62,6 +64,17 @@ export function AccountDetailScreen() {
     [],
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [showBalanceModal, setShowBalanceModal] = useState(false);
+
+  const handleAdjustBalance = async (newBalance: number) => {
+    try {
+      await AccountRepository.setBalance(accountId, newBalance);
+      setShowBalanceModal(false);
+      loadData();
+    } catch (error) {
+      console.error('Error adjusting balance:', error);
+    }
+  };
 
   const loadData = useCallback(async () => {
     if (!activeLedgerId) return;
@@ -320,6 +333,21 @@ export function AccountDetailScreen() {
                         </Text>
                       </TouchableOpacity>
                     )}
+                    {account.account_type === 'debit' && (
+                      <TouchableOpacity
+                        onPress={() => setShowBalanceModal(true)}
+                        className="mt-3 flex-row items-center justify-center gap-2 rounded-xl py-2.5"
+                        style={{ backgroundColor: colors.primary + '20' }}
+                      >
+                        <Scale size={16} color={colors.primary} />
+                        <Text
+                          className="text-sm font-semibold"
+                          style={{ color: colors.primary }}
+                        >
+                          Adjust Balance
+                        </Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
 
                   {/* Credit Card Dates */}
@@ -426,6 +454,16 @@ export function AccountDetailScreen() {
         }
         contentContainerStyle={{ flexGrow: 1 }}
       />
+
+      {account.account_type === 'debit' && (
+        <BalanceAdjustmentModal
+          visible={showBalanceModal}
+          currentBalance={account.current_balance}
+          accountName={account.name}
+          onConfirm={handleAdjustBalance}
+          onCancel={() => setShowBalanceModal(false)}
+        />
+      )}
     </Screen>
   );
 }

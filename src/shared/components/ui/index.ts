@@ -23,3 +23,4 @@ export {
 export { Avatar, IconAvatar } from './Avatar';
 export { EmptyState } from './EmptyState';
 export { Divider, VerticalDivider } from './Divider';
+export { BalanceAdjustmentModal } from './BalanceAdjustmentModal';
