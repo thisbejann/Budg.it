@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, Alert, TouchableOpacity, Switch } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,7 +11,7 @@ import type { AccountWithPerson } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
 import { Button, CurrencyInput, Input, DateInput, Select, SelectOption } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
-import { AccountRepository, TransferRepository } from '../../../database/repositories';
+import { AccountRepository, TransferRepository, TransactionRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
 import { getToday } from '../../../shared/utils/date';
 import { useTheme } from '../../../hooks/useColorScheme';
@@ -41,6 +41,7 @@ export function PayCreditCardScreen() {
   const [creditAccount, setCreditAccount] = useState<AccountWithPerson | null>(null);
   const [debitAccounts, setDebitAccounts] = useState<AccountWithPerson[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [recordTransaction, setRecordTransaction] = useState(false);
   const submissionGuard = useMutationCloseGuard();
 
   const {
@@ -98,6 +99,16 @@ export function PayCreditCardScreen() {
         date: data.date,
         notes: data.notes,
       });
+
+      if (recordTransaction) {
+        await TransactionRepository.createRecordOnly(activeLedgerId, {
+          account_id: data.from_account_id,
+          amount,
+          type: 'expense',
+          date: data.date,
+          notes: data.notes || `Credit card payment - ${creditAccount.name}`,
+        });
+      }
 
       safeCloseAfterMutation(navigation, submissionGuard.closeAfterRef);
     } catch (error) {
@@ -264,6 +275,27 @@ export function PayCreditCardScreen() {
                 numberOfLines={2}
               />
             )}
+          />
+        </View>
+
+        {/* Record in Transaction History */}
+        <View
+          className="mb-6 flex-row items-center justify-between rounded-xl px-4 py-3"
+          style={{ backgroundColor: colors.surfaceVariant }}
+        >
+          <View className="flex-1 mr-3">
+            <Text className="text-sm font-medium" style={{ color: colors.foreground }}>
+              Record in transaction history
+            </Text>
+            <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+              Creates an expense transaction for this payment
+            </Text>
+          </View>
+          <Switch
+            value={recordTransaction}
+            onValueChange={setRecordTransaction}
+            trackColor={{ false: colors.muted, true: colors.primary + '60' }}
+            thumbColor={recordTransaction ? colors.primary : colors.mutedForeground}
           />
         </View>
 

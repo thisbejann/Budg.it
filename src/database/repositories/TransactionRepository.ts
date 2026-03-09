@@ -127,6 +127,26 @@ export const TransactionRepository = {
     return transactionId;
   },
 
+  async createRecordOnly(ledgerId: number, data: TransactionFormData): Promise<number> {
+    return executeSqlInsert(
+      `INSERT INTO transactions
+       (ledger_id, account_id, category_id, subcategory_id, amount, type, date, time, notes, receipt_image_path)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        ledgerId,
+        data.account_id,
+        data.category_id || null,
+        data.subcategory_id || null,
+        data.amount,
+        data.type,
+        data.date,
+        data.time || null,
+        data.notes || null,
+        data.receipt_image_path || null,
+      ]
+    );
+  },
+
   async update(id: number, data: Partial<TransactionFormData>): Promise<void> {
     // Get original transaction for balance adjustment
     const original = await this.getById(id);

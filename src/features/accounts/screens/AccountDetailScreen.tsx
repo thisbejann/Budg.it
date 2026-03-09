@@ -66,9 +66,23 @@ export function AccountDetailScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [showBalanceModal, setShowBalanceModal] = useState(false);
 
-  const handleAdjustBalance = async (newBalance: number) => {
+  const handleAdjustBalance = async (newBalance: number, recordTxn: boolean) => {
+    if (!activeLedgerId || !account) return;
     try {
+      const difference = newBalance - account.current_balance;
       await AccountRepository.setBalance(accountId, newBalance);
+
+      if (recordTxn && difference !== 0) {
+        const today = new Date().toISOString().split('T')[0];
+        await TransactionRepository.createRecordOnly(activeLedgerId, {
+          account_id: accountId,
+          amount: Math.abs(difference),
+          type: difference > 0 ? 'income' : 'expense',
+          date: today,
+          notes: `Balance adjustment for ${account.name}`,
+        });
+      }
+
       setShowBalanceModal(false);
       loadData();
     } catch (error) {

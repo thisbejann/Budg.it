@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, Modal } from 'react-native';
+import { View, Text, Pressable, Modal, Switch } from 'react-native';
 import { useTheme } from '../../../hooks/useColorScheme';
 import { CurrencyInput } from './Input';
 import { formatPHP } from '../../utils/currency';
@@ -8,7 +8,7 @@ interface BalanceAdjustmentModalProps {
   visible: boolean;
   currentBalance: number;
   accountName: string;
-  onConfirm: (newBalance: number) => void;
+  onConfirm: (newBalance: number, recordTransaction: boolean) => void;
   onCancel: () => void;
 }
 
@@ -21,10 +21,12 @@ export function BalanceAdjustmentModal({
 }: BalanceAdjustmentModalProps) {
   const { colors } = useTheme();
   const [newBalanceStr, setNewBalanceStr] = useState('');
+  const [recordTxn, setRecordTxn] = useState(false);
 
   useEffect(() => {
     if (visible) {
       setNewBalanceStr(currentBalance.toString());
+      setRecordTxn(false);
     }
   }, [visible, currentBalance]);
 
@@ -34,7 +36,7 @@ export function BalanceAdjustmentModal({
   const handleConfirm = () => {
     const parsed = parseFloat(newBalanceStr);
     if (!isNaN(parsed)) {
-      onConfirm(parsed);
+      onConfirm(parsed, recordTxn);
     }
   };
 
@@ -173,6 +175,35 @@ export function BalanceAdjustmentModal({
                 </Text>
               </View>
             )}
+
+            {/* Record in Transaction History */}
+            <View
+              style={{
+                marginTop: 12,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                borderRadius: 8,
+                backgroundColor: colors.surfaceVariant,
+              }}
+            >
+              <View style={{ flex: 1, marginRight: 12 }}>
+                <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: '500' }}>
+                  Record in transaction history
+                </Text>
+                <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>
+                  {difference >= 0 ? 'Creates an income' : 'Creates an expense'} transaction
+                </Text>
+              </View>
+              <Switch
+                value={recordTxn}
+                onValueChange={setRecordTxn}
+                trackColor={{ false: colors.muted, true: colors.primary + '60' }}
+                thumbColor={recordTxn ? colors.primary : colors.mutedForeground}
+              />
+            </View>
           </View>
         </Pressable>
       </Pressable>
