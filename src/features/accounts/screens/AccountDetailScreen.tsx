@@ -46,6 +46,7 @@ import {
   Clock,
   CreditCard,
   Scale,
+  Plus,
 } from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -454,6 +455,21 @@ export function AccountDetailScreen() {
               >
                 Transactions ({transactions.length})
               </Text>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('AddTransaction', { accountId })
+                }
+                className="flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
+                style={{ backgroundColor: colors.primary + '15' }}
+              >
+                <Plus size={14} color={colors.primary} />
+                <Text
+                  className="text-xs font-semibold"
+                  style={{ color: colors.primary }}
+                >
+                  Add
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         }

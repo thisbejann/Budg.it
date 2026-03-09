@@ -67,6 +67,7 @@ export function AddTransactionScreen() {
   const submissionGuard = useMutationCloseGuard();
 
   const templateId = (route.params as any)?.templateId;
+  const initialAccountId = (route.params as any)?.accountId;
 
   const {
     control,
@@ -106,6 +107,11 @@ export function AddTransactionScreen() {
       setAccounts(accts);
       setCategories(cats);
       setTemplates(tmpls);
+
+      // Pre-select account if provided (and no template)
+      if (initialAccountId && !templateId) {
+        setValue('account_id', initialAccountId);
+      }
 
       // Load template if provided
       if (templateId) {
