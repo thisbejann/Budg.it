@@ -9,7 +9,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { AccountWithPerson, CategoryWithSubcategories, TransactionWithDetails } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
-import { Button, CurrencyInput, Input, DateInput, TimeInput, Select, SelectOption } from '../../../shared/components/ui';
+import { Button, CurrencyInput, Input, DateInput, TimeInput, Select, SelectOption, CategoryPicker } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository, AccountRepository, CategoryRepository } from '../../../database/repositories';
 import { useTheme } from '../../../hooks/useColorScheme';
@@ -252,11 +252,11 @@ export function EditTransactionScreen() {
             control={control}
             name="category_id"
             render={({ field: { onChange, value } }) => (
-              <Select
+              <CategoryPicker
                 label="Category"
                 placeholder="Select category"
                 value={value}
-                options={categoryOptions}
+                categories={filteredCategories}
                 onValueChange={(v) => {
                   onChange(v);
                   setValue('subcategory_id', undefined);
