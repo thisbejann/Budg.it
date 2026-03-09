@@ -5,7 +5,7 @@ import type { CompositeScreenProps, NavigatorScreenParams } from '@react-navigat
 // Root Stack Navigator params
 export type RootStackParamList = {
   Main: NavigatorScreenParams<MainTabParamList>;
-  AddTransaction: { templateId?: number } | undefined;
+  AddTransaction: { templateId?: number; accountId?: number } | undefined;
   EditTransaction: { transactionId: number };
   TransactionDetail: { transactionId: number };
   AddAccount: { accountType?: string } | undefined;
