@@ -101,12 +101,20 @@ export function PayCreditCardScreen() {
       });
 
       if (recordTransaction) {
+        const paymentNote = data.notes || `Credit card payment - ${creditAccount.name}`;
         await TransactionRepository.createRecordOnly(activeLedgerId, {
           account_id: data.from_account_id,
           amount,
           type: 'expense',
           date: data.date,
-          notes: data.notes || `Credit card payment - ${creditAccount.name}`,
+          notes: paymentNote,
+        });
+        await TransactionRepository.createRecordOnly(activeLedgerId, {
+          account_id: accountId,
+          amount,
+          type: 'income',
+          date: data.date,
+          notes: paymentNote,
         });
       }
 
