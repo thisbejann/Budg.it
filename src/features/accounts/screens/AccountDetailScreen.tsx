@@ -25,6 +25,7 @@ import {
   CardContent,
   IconAvatar,
   EmptyState,
+  BalanceAdjustmentModal,
 } from '../../../shared/components/ui';
 import {
   AccountRepository,
@@ -43,6 +44,8 @@ import {
   CalendarDays,
   CalendarClock,
   Clock,
+  CreditCard,
+  Scale,
   Plus,
 } from 'lucide-react-native';
 
@@ -62,6 +65,31 @@ export function AccountDetailScreen() {
     [],
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [showBalanceModal, setShowBalanceModal] = useState(false);
+
+  const handleAdjustBalance = async (newBalance: number, recordTxn: boolean) => {
+    if (!activeLedgerId || !account) return;
+    try {
+      const difference = newBalance - account.current_balance;
+      await AccountRepository.setBalance(accountId, newBalance);
+
+      if (recordTxn && difference !== 0) {
+        const today = new Date().toISOString().split('T')[0];
+        await TransactionRepository.createRecordOnly(activeLedgerId, {
+          account_id: accountId,
+          amount: Math.abs(difference),
+          type: difference > 0 ? 'income' : 'expense',
+          date: today,
+          notes: `Balance adjustment for ${account.name}`,
+        });
+      }
+
+      setShowBalanceModal(false);
+      loadData();
+    } catch (error) {
+      console.error('Error adjusting balance:', error);
+    }
+  };
 
   const loadData = useCallback(async () => {
     if (!activeLedgerId) return;
@@ -303,6 +331,38 @@ export function AccountDetailScreen() {
                           </Text>
                         </View>
                       )}
+                    {account.account_type === 'credit' && account.current_balance > 0 && (
+                      <TouchableOpacity
+                        onPress={() =>
+                          navigation.navigate('PayCreditCard', { accountId })
+                        }
+                        className="mt-3 flex-row items-center justify-center gap-2 rounded-xl py-2.5"
+                        style={{ backgroundColor: colors.primary + '20' }}
+                      >
+                        <CreditCard size={16} color={colors.primary} />
+                        <Text
+                          className="text-sm font-semibold"
+                          style={{ color: colors.primary }}
+                        >
+                          Pay Credit Card
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    {account.account_type === 'debit' && (
+                      <TouchableOpacity
+                        onPress={() => setShowBalanceModal(true)}
+                        className="mt-3 flex-row items-center justify-center gap-2 rounded-xl py-2.5"
+                        style={{ backgroundColor: colors.primary + '20' }}
+                      >
+                        <Scale size={16} color={colors.primary} />
+                        <Text
+                          className="text-sm font-semibold"
+                          style={{ color: colors.primary }}
+                        >
+                          Adjust Balance
+                        </Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
 
                   {/* Credit Card Dates */}
@@ -424,6 +484,16 @@ export function AccountDetailScreen() {
         }
         contentContainerStyle={{ flexGrow: 1 }}
       />
+
+      {account.account_type === 'debit' && (
+        <BalanceAdjustmentModal
+          visible={showBalanceModal}
+          currentBalance={account.current_balance}
+          accountName={account.name}
+          onConfirm={handleAdjustBalance}
+          onCancel={() => setShowBalanceModal(false)}
+        />
+      )}
     </Screen>
   );
 }

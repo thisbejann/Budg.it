@@ -13,6 +13,7 @@ export { DateInput } from './DateInput';
 export { TimeInput } from './TimeInput';
 export { DayOfMonthPicker } from './DayOfMonthPicker';
 export { Select, type SelectOption } from './Select';
+export { CategoryPicker } from './CategoryPicker';
 export {
   Badge,
   ExpenseBadge,
@@ -22,3 +23,4 @@ export {
 export { Avatar, IconAvatar } from './Avatar';
 export { EmptyState } from './EmptyState';
 export { Divider, VerticalDivider } from './Divider';
+export { BalanceAdjustmentModal } from './BalanceAdjustmentModal';

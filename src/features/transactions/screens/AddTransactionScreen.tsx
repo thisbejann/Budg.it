@@ -21,6 +21,7 @@ import {
   TimeInput,
   Select,
   SelectOption,
+  CategoryPicker,
 } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import {
@@ -313,11 +314,11 @@ export function AddTransactionScreen() {
             control={control}
             name="category_id"
             render={({ field: { onChange, value } }) => (
-              <Select
+              <CategoryPicker
                 label="Category"
                 placeholder="Select category"
                 value={value}
-                options={categoryOptions}
+                categories={filteredCategories}
                 onValueChange={v => {
                   onChange(v);
                   setValue('subcategory_id', undefined);

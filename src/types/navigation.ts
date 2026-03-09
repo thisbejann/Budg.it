@@ -12,6 +12,7 @@ export type RootStackParamList = {
   EditAccount: { accountId: number };
   AccountDetail: { accountId: number };
   Transfer: undefined;
+  PayCreditCard: { accountId: number };
   AddCategory: { type: 'expense' | 'income' };
   EditCategory: { categoryId: number };
   AddSubcategory: { categoryId: number };

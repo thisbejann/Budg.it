@@ -11,6 +11,7 @@ import { TransactionDetailScreen } from '../../features/transactions/screens/Tra
 import { AddAccountScreen } from '../../features/accounts/screens/AddAccountScreen';
 import { EditAccountScreen } from '../../features/accounts/screens/EditAccountScreen';
 import { AccountDetailScreen } from '../../features/accounts/screens/AccountDetailScreen';
+import { PayCreditCardScreen } from '../../features/accounts/screens/PayCreditCardScreen';
 import { TransferScreen } from '../../features/transfers/screens/TransferScreen';
 import { CategoriesScreen } from '../../features/settings/screens/CategoriesScreen';
 import { AddCategoryScreen } from '../../features/settings/screens/AddCategoryScreen';
@@ -63,6 +64,11 @@ export function RootNavigator() {
       />
       <Stack.Screen name="EditAccount" component={EditAccountScreen} />
       <Stack.Screen name="AccountDetail" component={AccountDetailScreen} />
+      <Stack.Screen
+        name="PayCreditCard"
+        component={PayCreditCardScreen}
+        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+      />
 
       {/* Transfer Screen */}
       <Stack.Screen

@@ -135,6 +135,37 @@ export const TransactionRepository = {
     return transactionId;
   },
 
+  async createRecordOnly(ledgerId: number, data: TransactionFormData): Promise<number> {
+    return executeSqlInsert(
+      `INSERT INTO transactions
+       (ledger_id, account_id, category_id, subcategory_id, amount, type, date, time, notes, receipt_image_path)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        ledgerId,
+        data.account_id,
+        data.category_id || null,
+        data.subcategory_id || null,
+        data.amount,
+        data.type,
+        data.date,
+        data.time || null,
+        data.notes || null,
+        data.receipt_image_path || null,
+      ]
+    );
+  },
+
+  async linkTransactions(id1: number, id2: number): Promise<void> {
+    await executeSqlUpdate(
+      `UPDATE transactions SET linked_transaction_id = ? WHERE id = ?`,
+      [id2, id1]
+    );
+    await executeSqlUpdate(
+      `UPDATE transactions SET linked_transaction_id = ? WHERE id = ?`,
+      [id1, id2]
+    );
+  },
+
   async update(id: number, data: Partial<TransactionFormData>): Promise<void> {
     // Get original transaction for balance adjustment
     const original = await this.getById(id);
@@ -211,12 +242,30 @@ export const TransactionRepository = {
     const transaction = await this.getById(id);
     if (!transaction) throw new Error('Transaction not found');
 
+    // Check for linked transaction
+    const rows = await executeSql<{ linked_transaction_id: number | null }>(
+      'SELECT linked_transaction_id FROM transactions WHERE id = ?',
+      [id]
+    );
+    const linkedId = rows[0]?.linked_transaction_id;
+
     // Reverse the balance effect
     const account = await AccountRepository.getById(transaction.account_id);
     const balanceChange = -calcBalanceChange(account?.account_type || 'debit', transaction.type, transaction.amount);
     await AccountRepository.updateBalance(transaction.account_id, balanceChange);
 
     await executeSqlUpdate('DELETE FROM transactions WHERE id = ?', [id]);
+
+    // Delete linked transaction and reverse its balance too
+    if (linkedId) {
+      const linked = await this.getById(linkedId);
+      if (linked) {
+        const linkedAccount = await AccountRepository.getById(linked.account_id);
+        const linkedBalanceChange = -calcBalanceChange(linkedAccount?.account_type || 'debit', linked.type, linked.amount);
+        await AccountRepository.updateBalance(linked.account_id, linkedBalanceChange);
+        await executeSqlUpdate('DELETE FROM transactions WHERE id = ?', [linkedId]);
+      }
+    }
   },
 
   // Aggregation queries for dashboard and charts
