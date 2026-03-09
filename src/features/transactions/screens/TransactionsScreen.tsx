@@ -258,6 +258,7 @@ export function TransactionsScreen() {
       {/* Calendar View */}
       {viewMode === 'calendar' && (
         <Calendar
+          key={isDark ? 'dark' : 'light'}
           current={selectedDate}
           onDayPress={(day) => setSelectedDate(day.dateString)}
           markedDates={markedDates}
