@@ -3,6 +3,14 @@ import { AccountRepository } from './AccountRepository';
 import type { Transaction, TransactionWithDetails, TransactionType, DailyTotal, CategorySpending } from '../../types/database';
 import type { TransactionFormData, TransactionFilters } from '../../types/forms';
 
+function calcBalanceChange(accountType: string, txnType: string, amount: number): number {
+  const isLiability = accountType === 'credit' || accountType === 'debt';
+  if (txnType === 'expense') {
+    return isLiability ? amount : -amount;
+  }
+  return isLiability ? -amount : amount;
+}
+
 export const TransactionRepository = {
   async getByLedger(
     ledgerId: number,
@@ -119,9 +127,9 @@ export const TransactionRepository = {
       ]
     );
 
-    // Update account balance
-    // For expenses: decrease balance; for income: increase balance
-    const balanceChange = data.type === 'expense' ? -data.amount : data.amount;
+    // Update account balance (credit/debt accounts have inverted logic)
+    const account = await AccountRepository.getById(data.account_id);
+    const balanceChange = calcBalanceChange(account?.account_type || 'debit', data.type, data.amount);
     await AccountRepository.updateBalance(data.account_id, balanceChange);
 
     return transactionId;
@@ -188,11 +196,13 @@ export const TransactionRepository = {
     const newAccountId = data.account_id ?? original.account_id;
 
     // Reverse original transaction effect on original account
-    const originalBalanceChange = original.type === 'expense' ? original.amount : -original.amount;
-    await AccountRepository.updateBalance(original.account_id, originalBalanceChange);
+    const originalAccount = await AccountRepository.getById(original.account_id);
+    const originalReverse = -calcBalanceChange(originalAccount?.account_type || 'debit', original.type, original.amount);
+    await AccountRepository.updateBalance(original.account_id, originalReverse);
 
     // Apply new transaction effect on new account
-    const newBalanceChange = newType === 'expense' ? -newAmount : newAmount;
+    const newAccount = newAccountId === original.account_id ? originalAccount : await AccountRepository.getById(newAccountId);
+    const newBalanceChange = calcBalanceChange(newAccount?.account_type || 'debit', newType, newAmount);
     await AccountRepository.updateBalance(newAccountId, newBalanceChange);
   },
 
@@ -202,7 +212,8 @@ export const TransactionRepository = {
     if (!transaction) throw new Error('Transaction not found');
 
     // Reverse the balance effect
-    const balanceChange = transaction.type === 'expense' ? transaction.amount : -transaction.amount;
+    const account = await AccountRepository.getById(transaction.account_id);
+    const balanceChange = -calcBalanceChange(account?.account_type || 'debit', transaction.type, transaction.amount);
     await AccountRepository.updateBalance(transaction.account_id, balanceChange);
 
     await executeSqlUpdate('DELETE FROM transactions WHERE id = ?', [id]);
