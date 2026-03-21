@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, SectionList, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, SectionList } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Plus, Wallet, CreditCard, Users, HandCoins, AlertTriangle } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -7,7 +7,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { AccountWithPerson, AccountType } from '../../../types/database';
 import { Screen, SimpleHeader } from '../../../shared/components/layout';
-import { Card, IconAvatar, EmptyState, AccountTypeBadge } from '../../../shared/components/ui';
+import { Card, IconAvatar, EmptyState, AccountTypeBadge, AccountsScreenSkeleton } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { AccountRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
@@ -186,9 +186,7 @@ export function AccountsScreen() {
       </View>
 
       {isLoading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
+        <AccountsScreenSkeleton />
       ) : error ? (
         <EmptyState
           icon={<AlertTriangle size={48} color={colors.mutedForeground} />}

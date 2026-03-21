@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Plus, Calendar as CalendarIcon, List } from 'lucide-react-native';
 import { Calendar } from 'react-native-calendars';
@@ -8,7 +8,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList, MainTabScreenProps } from '../../../types/navigation';
 import type { TransactionWithDetails, DailyTotal } from '../../../types/database';
 import { Screen, SimpleHeader } from '../../../shared/components/layout';
-import { IconAvatar, EmptyState } from '../../../shared/components/ui';
+import { IconAvatar, EmptyState, TransactionsScreenSkeleton } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
@@ -309,9 +309,7 @@ export function TransactionsScreen() {
 
       {/* Transaction List */}
       {isLoading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
+        <TransactionsScreenSkeleton />
       ) : error ? (
         <EmptyState
           icon={<LucideIcons.AlertTriangle size={48} color={colors.mutedForeground} />}

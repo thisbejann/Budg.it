@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { VictoryPie, VictoryBar, VictoryChart, VictoryAxis, VictoryTheme } from 'victory-native';
 import type { CategorySpending } from '../../../types/database';
 import { Screen, SimpleHeader } from '../../../shared/components/layout';
-import { Card, CardHeader, CardTitle, CardContent, EmptyState } from '../../../shared/components/ui';
+import { Card, CardHeader, CardTitle, CardContent, EmptyState, ChartsScreenSkeleton } from '../../../shared/components/ui';
 import { AlertTriangle } from 'lucide-react-native';
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository } from '../../../database/repositories';
@@ -91,9 +91,7 @@ export function ChartsScreen() {
       <SimpleHeader title="Charts & Insights" />
 
       {isLoading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
+        <ChartsScreenSkeleton />
       ) : error ? (
         <EmptyState
           icon={<AlertTriangle size={48} color={colors.mutedForeground} />}
