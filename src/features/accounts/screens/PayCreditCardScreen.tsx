@@ -18,6 +18,7 @@ import { useTheme } from '../../../hooks/useColorScheme';
 import { useMutationCloseGuard } from '../../../shared/hooks';
 import { safeCloseAfterMutation } from '../../../shared/utils';
 import * as LucideIcons from 'lucide-react-native';
+import { getIconComponent } from '../../../shared/utils/icon';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type PayCreditCardRouteProp = RouteProp<RootStackParamList, 'PayCreditCard'>;
@@ -136,12 +137,7 @@ export function PayCreditCardScreen() {
   const fromAccount = debitAccounts.find((a) => a.id === fromAccountId);
 
   const IconComponent = creditAccount
-    ? (LucideIcons as any)[
-        creditAccount.icon
-          .split('-')
-          .map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)))
-          .join('')
-      ] || LucideIcons.CreditCard
+    ? getIconComponent(creditAccount.icon, 'CreditCard')
     : LucideIcons.CreditCard;
 
   return (

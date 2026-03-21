@@ -36,7 +36,7 @@ import { formatPHP } from '../../../shared/utils/currency';
 import { withOpacity } from '../../../shared/utils/color';
 import { getOrdinalSuffix } from '../../../shared/utils/date';
 import { useTheme } from '../../../hooks/useColorScheme';
-import * as LucideIcons from 'lucide-react-native';
+import { getIconComponent } from '../../../shared/utils/icon';
 import {
   Pencil,
   ArrowUpRight,
@@ -48,6 +48,7 @@ import {
   CreditCard,
   Scale,
   Plus,
+  Wallet,
 } from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -133,25 +134,13 @@ export function AccountDetailScreen() {
   };
 
   const IconComponent = account
-    ? (LucideIcons as any)[
-        account.icon
-          .split('-')
-          .map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)))
-          .join('')
-      ] || LucideIcons.Wallet
-    : LucideIcons.Wallet;
+    ? getIconComponent(account.icon, 'Wallet')
+    : Wallet;
 
   const renderTransaction = ({ item }: { item: TransactionWithDetails }) => {
     const isExpense = item.type === 'expense';
     const CategoryIcon = item.category_icon
-      ? (LucideIcons as any)[
-          item.category_icon
-            .split('-')
-            .map((s, i) =>
-              i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1),
-            )
-            .join('')
-        ]
+      ? getIconComponent(item.category_icon)
       : null;
 
     return (
@@ -167,11 +156,11 @@ export function AccountDetailScreen() {
             style={{ backgroundColor: item.category_color || colors.muted }}
           >
             {CategoryIcon ? (
-              <CategoryIcon size={18} color="#ffffff" />
+              <CategoryIcon size={18} color={colors.onPrimary} />
             ) : isExpense ? (
-              <ArrowUpRight size={18} color="#ffffff" />
+              <ArrowUpRight size={18} color={colors.onPrimary} />
             ) : (
-              <ArrowDownLeft size={18} color="#ffffff" />
+              <ArrowDownLeft size={18} color={colors.onPrimary} />
             )}
           </View>
           <View>
@@ -249,7 +238,7 @@ export function AccountDetailScreen() {
                   <View className="flex-row items-center gap-4">
                     <IconAvatar
                       size="xl"
-                      icon={<IconComponent size={28} color="#ffffff" />}
+                      icon={<IconComponent size={28} color={colors.onPrimary} />}
                       backgroundColor={account.color}
                     />
                     <View className="flex-1">
