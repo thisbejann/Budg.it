@@ -119,30 +119,26 @@ export function TransactionsScreen() {
             {date.day}
           </Text>
           {dayData && !isDisabled && (
-            <View style={{ alignItems: 'center', marginTop: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 2 }}>
               {dayData.expense > 0 && (
-                <Text
+                <View
                   style={{
-                    fontSize: 7,
-                    color: isSelected ? colors.onPrimary : colors.expense,
-                    lineHeight: 9,
+                    width: 5,
+                    height: 5,
+                    borderRadius: 2.5,
+                    backgroundColor: isSelected ? colors.onPrimary : colors.expense,
                   }}
-                  numberOfLines={1}
-                >
-                  {formatCompact(dayData.expense)}
-                </Text>
+                />
               )}
               {dayData.income > 0 && (
-                <Text
+                <View
                   style={{
-                    fontSize: 7,
-                    color: isSelected ? colors.onPrimary : colors.income,
-                    lineHeight: 9,
+                    width: 5,
+                    height: 5,
+                    borderRadius: 2.5,
+                    backgroundColor: isSelected ? colors.onPrimary : colors.income,
                   }}
-                  numberOfLines={1}
-                >
-                  {formatCompact(dayData.income)}
-                </Text>
+                />
               )}
             </View>
           )}
