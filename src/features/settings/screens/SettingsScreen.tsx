@@ -15,70 +15,83 @@ import {
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import { Screen, SimpleHeader } from '../../../shared/components/layout';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from '../../../shared/components/ui';
+import { Card, CardContent } from '../../../shared/components/ui';
 import { useLedgerStore, useThemeStore, ThemeMode } from '../../../store';
 import { useTheme } from '../../../hooks/useColorScheme';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-interface SettingItemProps {
-  icon: React.ReactNode;
-  title: string;
-  description?: string;
-  onPress: () => void;
-  colors: ReturnType<typeof useTheme>['colors'];
-  isDark: boolean;
-}
 
 function SettingItem({
   icon,
   title,
   description,
   onPress,
-  colors,
-  isDark,
-}: SettingItemProps) {
+  showDivider = true,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description?: string;
+  onPress: () => void;
+  showDivider?: boolean;
+}) {
+  const { colors, isDark } = useTheme();
+
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`${title}${description ? `, ${description}` : ''}`}
-      className="flex-row items-center justify-between py-3"
-      activeOpacity={0.7}
-    >
-      <View className="flex-row items-center gap-3">
-        <View
-          className="h-10 w-10 items-center justify-center"
-          style={{
-            backgroundColor: isDark ? colors.surfaceContainer : colors.surfaceVariant,
-            borderRadius: 12,
-            borderWidth: isDark ? 1 : 0,
-            borderColor: colors.borderSubtle,
-          }}
-        >
-          {icon}
-        </View>
-        <View>
-          <Text
-            className="text-base font-medium"
-            style={{ color: colors.foreground }}
+    <>
+      <TouchableOpacity
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={`${title}${description ? `, ${description}` : ''}`}
+        className="flex-row items-center justify-between px-4 py-3"
+        activeOpacity={0.7}
+      >
+        <View className="flex-row items-center gap-3">
+          <View
+            className="h-10 w-10 items-center justify-center"
+            style={{
+              backgroundColor: isDark ? colors.surfaceContainer : colors.surfaceVariant,
+              borderRadius: 12,
+              borderWidth: isDark ? 1 : 0,
+              borderColor: colors.borderSubtle,
+            }}
           >
-            {title}
-          </Text>
-          {description && (
-            <Text className="text-xs" style={{ color: colors.mutedForeground }}>
-              {description}
+            {icon}
+          </View>
+          <View className="flex-1">
+            <Text
+              className="text-base font-medium"
+              style={{ color: colors.foreground }}
+            >
+              {title}
             </Text>
-          )}
+            {description && (
+              <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                {description}
+              </Text>
+            )}
+          </View>
+          <ChevronRight size={20} color={colors.mutedForeground} />
         </View>
-      </View>
-      <ChevronRight size={20} color={colors.mutedForeground} />
-    </TouchableOpacity>
+      </TouchableOpacity>
+      {showDivider && (
+        <View
+          className="ml-16"
+          style={{ height: 1, backgroundColor: isDark ? colors.dividerSubtle : colors.border }}
+        />
+      )}
+    </>
+  );
+}
+
+function SectionHeader({ title }: { title: string }) {
+  const { colors } = useTheme();
+  return (
+    <Text
+      className="mb-1 mt-6 px-4 text-xs font-semibold uppercase"
+      style={{ color: colors.mutedForeground, letterSpacing: 0.5 }}
+    >
+      {title}
+    </Text>
   );
 }
 
@@ -98,156 +111,128 @@ export function SettingsScreen() {
     <Screen hasTabBar>
       <SimpleHeader title="Settings" />
 
-      <ScrollView className="flex-1 px-4 py-4">
-        {/* Current Ledger Info */}
-        <Card variant={isDark ? 'glass' : 'default'} className="mb-4">
-          <CardContent>
-            <Text className="text-xs" style={{ color: colors.mutedForeground }}>
-              Current Ledger
-            </Text>
-            <Text
-              className="text-lg font-semibold"
-              style={{ color: colors.foreground }}
-            >
-              {activeLedger?.name || 'No ledger selected'}
-            </Text>
-          </CardContent>
-        </Card>
+      <ScrollView className="flex-1">
+        {/* Current Ledger — kept as card since it displays data */}
+        <View className="px-4 pt-4">
+          <Card variant={isDark ? 'glass' : 'default'}>
+            <CardContent>
+              <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                Current Ledger
+              </Text>
+              <Text
+                className="text-lg font-semibold"
+                style={{ color: colors.foreground }}
+              >
+                {activeLedger?.name || 'No ledger selected'}
+              </Text>
+            </CardContent>
+          </Card>
+        </View>
 
-        {/* Theme Selection */}
-        <Card variant={isDark ? 'glass' : 'default'} className="mb-4">
-          <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <View className="flex-row gap-2 py-3">
-              {themeModes.map(({ mode, label, icon: Icon }) => {
-                const isActive = themeMode === mode;
-                return (
-                  <TouchableOpacity
-                    key={mode}
-                    onPress={() => setThemeMode(mode)}
-                    accessibilityRole="radio"
-                    accessibilityLabel={`${label} theme`}
-                    accessibilityState={{ selected: isActive }}
-                    className="flex-1 items-center py-3"
-                    style={{
-                      backgroundColor: isActive
-                        ? colors.primary
-                        : isDark
-                          ? colors.surfaceContainer
-                          : colors.surfaceVariant,
-                      borderRadius: 16,
-                      borderWidth: isActive && isDark ? 1 : 0,
-                      borderColor: colors.borderSubtle,
-                    }}
-                  >
-                    <Icon
-                      size={20}
-                      color={isActive ? colors.onPrimary : colors.foreground}
-                    />
-                    <Text
-                      className="mt-1 text-sm font-medium"
-                      style={{
-                        color: isActive ? colors.onPrimary : colors.foreground,
-                      }}
-                    >
-                      {label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </CardContent>
-        </Card>
-
-        {/* Data Management */}
-        <Card variant={isDark ? 'glass' : 'default'} className="mb-4">
-          <CardHeader>
-            <CardTitle>Data Management</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SettingItem
-              icon={<Tags size={20} color={colors.primary} />}
-              title="Categories"
-              description="Manage expense and income categories"
-              onPress={() => navigation.navigate('Categories')}
-              colors={colors}
-              isDark={isDark}
-            />
-            <View style={{ height: 1, backgroundColor: isDark ? colors.dividerSubtle : colors.border }} />
-            <SettingItem
-              icon={<Bookmark size={20} color={colors.primary} />}
-              title="Quick Add Templates"
-              description="Save frequent transactions for quick entry"
-              onPress={() => navigation.navigate('Templates')}
-              colors={colors}
-              isDark={isDark}
-            />
-            <View style={{ height: 1, backgroundColor: isDark ? colors.dividerSubtle : colors.border }} />
-            <SettingItem
-              icon={<BookOpen size={20} color={colors.primary} />}
-              title="Ledgers"
-              description="Manage multiple ledgers (personal, business)"
-              onPress={() => navigation.navigate('Ledgers')}
-              colors={colors}
-              isDark={isDark}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Export */}
-        <Card variant={isDark ? 'glass' : 'default'} className="mb-4">
-          <CardHeader>
-            <CardTitle>Backup & Export</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SettingItem
-              icon={<Download size={20} color={colors.primary} />}
-              title="Export Data"
-              description="Export transactions to CSV"
-              onPress={() => navigation.navigate('Export')}
-              colors={colors}
-              isDark={isDark}
-            />
-          </CardContent>
-        </Card>
-
-        {/* About */}
-        <Card variant={isDark ? 'glass' : 'default'} className="mb-6">
-          <CardHeader>
-            <CardTitle>About</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <View className="flex-row items-center gap-3 py-3">
-              <View
-                className="h-10 w-10 items-center justify-center"
+        {/* Appearance */}
+        <SectionHeader title="Appearance" />
+        <View className="flex-row gap-2 px-4 py-2">
+          {themeModes.map(({ mode, label, icon: Icon }) => {
+            const isActive = themeMode === mode;
+            return (
+              <TouchableOpacity
+                key={mode}
+                onPress={() => setThemeMode(mode)}
+                accessibilityRole="radio"
+                accessibilityLabel={`${label} theme`}
+                accessibilityState={{ selected: isActive }}
+                className="flex-1 items-center py-3"
                 style={{
-                  backgroundColor: isDark ? colors.surfaceContainer : colors.surfaceVariant,
-                  borderRadius: 12,
-                  borderWidth: isDark ? 1 : 0,
+                  backgroundColor: isActive
+                    ? colors.primary
+                    : isDark
+                      ? colors.surfaceContainer
+                      : colors.surfaceVariant,
+                  borderRadius: 16,
+                  borderWidth: isActive && isDark ? 1 : 0,
                   borderColor: colors.borderSubtle,
                 }}
               >
-                <Info size={20} color={colors.primary} />
-              </View>
-              <View>
+                <Icon
+                  size={20}
+                  color={isActive ? colors.onPrimary : colors.foreground}
+                />
                 <Text
-                  className="text-base font-medium"
-                  style={{ color: colors.foreground }}
+                  className="mt-1 text-sm font-medium"
+                  style={{
+                    color: isActive ? colors.onPrimary : colors.foreground,
+                  }}
                 >
-                  Budget Tracker
+                  {label}
                 </Text>
-                <Text
-                  className="text-xs"
-                  style={{ color: colors.mutedForeground }}
-                >
-                  Version 1.0.0
-                </Text>
-              </View>
-            </View>
-          </CardContent>
-        </Card>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* Data Management */}
+        <SectionHeader title="Data Management" />
+        <SettingItem
+          icon={<Tags size={20} color={colors.primary} />}
+          title="Categories"
+          description="Manage expense and income categories"
+          onPress={() => navigation.navigate('Categories')}
+        />
+        <SettingItem
+          icon={<Bookmark size={20} color={colors.primary} />}
+          title="Quick Add Templates"
+          description="Save frequent transactions for quick entry"
+          onPress={() => navigation.navigate('Templates')}
+        />
+        <SettingItem
+          icon={<BookOpen size={20} color={colors.primary} />}
+          title="Ledgers"
+          description="Manage multiple ledgers (personal, business)"
+          onPress={() => navigation.navigate('Ledgers')}
+          showDivider={false}
+        />
+
+        {/* Backup & Export */}
+        <SectionHeader title="Backup & Export" />
+        <SettingItem
+          icon={<Download size={20} color={colors.primary} />}
+          title="Export Data"
+          description="Export transactions to CSV"
+          onPress={() => navigation.navigate('Export')}
+          showDivider={false}
+        />
+
+        {/* About */}
+        <SectionHeader title="About" />
+        <View className="flex-row items-center gap-3 px-4 py-3">
+          <View
+            className="h-10 w-10 items-center justify-center"
+            style={{
+              backgroundColor: isDark ? colors.surfaceContainer : colors.surfaceVariant,
+              borderRadius: 12,
+              borderWidth: isDark ? 1 : 0,
+              borderColor: colors.borderSubtle,
+            }}
+          >
+            <Info size={20} color={colors.primary} />
+          </View>
+          <View>
+            <Text
+              className="text-base font-medium"
+              style={{ color: colors.foreground }}
+            >
+              Budget Tracker
+            </Text>
+            <Text
+              className="text-xs"
+              style={{ color: colors.mutedForeground }}
+            >
+              Version 1.0.0
+            </Text>
+          </View>
+        </View>
+
+        <View className="h-8" />
       </ScrollView>
     </Screen>
   );
