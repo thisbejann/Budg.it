@@ -13,7 +13,7 @@ import { AccountRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
 import { useTheme } from '../../../hooks/useColorScheme';
 import { FLOATING_TAB_BAR_TOTAL_HEIGHT } from '../../../shared/components/navigation/FloatingTabBar';
-import * as LucideIcons from 'lucide-react-native';
+import { getIconComponent } from '../../../shared/utils/icon';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -101,9 +101,7 @@ export function AccountsScreen() {
   );
 
   const getIcon = (iconName: string, color: string = colors.onPrimary) => {
-    const IconComponent = (LucideIcons as any)[
-      iconName.split('-').map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1))).join('')
-    ] || LucideIcons.Circle;
+    const IconComponent = getIconComponent(iconName);
     return <IconComponent size={18} color={color} />;
   };
 

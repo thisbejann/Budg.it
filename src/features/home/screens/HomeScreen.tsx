@@ -16,7 +16,7 @@ import { formatPHP, formatPHPCompact } from '../../../shared/utils/currency';
 import { getMonthStart, getMonthEnd, formatDate, formatMonthYear, getToday } from '../../../shared/utils/date';
 import { useTheme } from '../../../hooks/useColorScheme';
 import { FLOATING_TAB_BAR_TOTAL_HEIGHT } from '../../../shared/components/navigation/FloatingTabBar';
-import * as LucideIcons from 'lucide-react-native';
+import { getIconComponent } from '../../../shared/utils/icon';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -85,9 +85,7 @@ export function HomeScreen() {
   };
 
   const getIcon = (iconName: string, color: string = colors.foreground) => {
-    const IconComponent = (LucideIcons as any)[
-      iconName.split('-').map((s, i) => i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)).join('')
-    ] || LucideIcons.Circle;
+    const IconComponent = getIconComponent(iconName);
     return <IconComponent size={16} color={color} />;
   };
 
