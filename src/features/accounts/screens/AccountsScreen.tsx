@@ -112,7 +112,7 @@ export function AccountsScreen() {
         accessibilityRole="button"
         accessibilityLabel={`${item.name}, balance ${formatPHP(item.current_balance)}`}
         className="flex-row items-center justify-between px-4 py-3"
-        style={{ borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border }}
+        style={{ borderBottomWidth: 1, borderBottomColor: isDark ? colors.dividerSubtle : colors.border }}
       >
         <View className="flex-row items-center gap-3">
           <IconAvatar

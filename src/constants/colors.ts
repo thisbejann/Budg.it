@@ -43,6 +43,17 @@ export const COLORS = {
   income: '#1A9956',
   expense: '#CD2B31',
 
+  // Semantic opacity tokens
+  primarySoft: 'rgba(156, 112, 64, 0.12)',   // primary at ~12% — soft tonal backgrounds
+  primaryMuted: 'rgba(156, 112, 64, 0.20)',  // primary at ~20% — buttons, active states
+  incomeSoft: 'rgba(26, 153, 86, 0.12)',     // income at ~12%
+  expenseSoft: 'rgba(205, 43, 49, 0.12)',    // expense at ~12%
+  creditSoft: 'rgba(212, 138, 44, 0.12)',    // accountCredit at ~12%
+  borderSubtle: 'rgba(0, 0, 0, 0.06)',       // subtle borders
+  dividerSubtle: 'rgba(0, 0, 0, 0.06)',      // dividers between items
+  backdrop: 'rgba(0, 0, 0, 0.4)',            // modal backdrops
+  switchTrack: 'rgba(156, 112, 64, 0.40)',   // switch track active
+
   // Status colors
   warning: '#D4960C',
 
@@ -103,6 +114,17 @@ export const COLORS_DARK = {
   // Transaction type colors (brighter for dark mode)
   income: '#3DD68C',
   expense: '#F07178',
+
+  // Semantic opacity tokens (dark mode)
+  primarySoft: 'rgba(212, 165, 116, 0.15)',   // primary at ~15%
+  primaryMuted: 'rgba(212, 165, 116, 0.20)',  // primary at ~20%
+  incomeSoft: 'rgba(61, 214, 140, 0.15)',     // income at ~15%
+  expenseSoft: 'rgba(240, 113, 120, 0.15)',   // expense at ~15%
+  creditSoft: 'rgba(240, 168, 72, 0.15)',     // accountCredit at ~15%
+  borderSubtle: 'rgba(255, 255, 255, 0.06)',  // subtle borders
+  dividerSubtle: 'rgba(255, 255, 255, 0.04)', // dividers between items
+  backdrop: 'rgba(0, 0, 0, 0.4)',             // modal backdrops
+  switchTrack: 'rgba(212, 165, 116, 0.40)',   // switch track active
 
   // Status colors (brighter for dark mode)
   warning: '#F0C050',

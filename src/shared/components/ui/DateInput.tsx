@@ -94,7 +94,7 @@ export function DateInput({ label, value, onChangeValue, error, disabled }: Date
         >
           <Pressable
             className="flex-1 justify-end"
-            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+            style={{ backgroundColor: colors.backdrop }}
             onPress={() => setShowPicker(false)}
           >
             <Pressable

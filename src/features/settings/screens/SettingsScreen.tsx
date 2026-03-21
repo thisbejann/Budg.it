@@ -58,7 +58,7 @@ function SettingItem({
             backgroundColor: isDark ? colors.surfaceContainer : colors.surfaceVariant,
             borderRadius: 12,
             borderWidth: isDark ? 1 : 0,
-            borderColor: 'rgba(255, 255, 255, 0.06)',
+            borderColor: colors.borderSubtle,
           }}
         >
           {icon}
@@ -139,7 +139,7 @@ export function SettingsScreen() {
                           : colors.surfaceVariant,
                       borderRadius: 16,
                       borderWidth: isActive && isDark ? 1 : 0,
-                      borderColor: 'rgba(255, 255, 255, 0.15)',
+                      borderColor: colors.borderSubtle,
                     }}
                   >
                     <Icon
@@ -175,7 +175,7 @@ export function SettingsScreen() {
               colors={colors}
               isDark={isDark}
             />
-            <View style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border }} />
+            <View style={{ height: 1, backgroundColor: isDark ? colors.dividerSubtle : colors.border }} />
             <SettingItem
               icon={<Bookmark size={20} color={colors.primary} />}
               title="Quick Add Templates"
@@ -184,7 +184,7 @@ export function SettingsScreen() {
               colors={colors}
               isDark={isDark}
             />
-            <View style={{ height: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border }} />
+            <View style={{ height: 1, backgroundColor: isDark ? colors.dividerSubtle : colors.border }} />
             <SettingItem
               icon={<BookOpen size={20} color={colors.primary} />}
               title="Ledgers"
@@ -226,7 +226,7 @@ export function SettingsScreen() {
                   backgroundColor: isDark ? colors.surfaceContainer : colors.surfaceVariant,
                   borderRadius: 12,
                   borderWidth: isDark ? 1 : 0,
-                  borderColor: 'rgba(255, 255, 255, 0.06)',
+                  borderColor: colors.borderSubtle,
                 }}
               >
                 <Info size={20} color={colors.primary} />

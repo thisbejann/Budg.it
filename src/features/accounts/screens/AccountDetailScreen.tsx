@@ -33,6 +33,7 @@ import {
 } from '../../../database/repositories';
 import { useLedgerStore } from '../../../store';
 import { formatPHP } from '../../../shared/utils/currency';
+import { withOpacity } from '../../../shared/utils/color';
 import { getOrdinalSuffix } from '../../../shared/utils/date';
 import { useTheme } from '../../../hooks/useColorScheme';
 import * as LucideIcons from 'lucide-react-native';
@@ -275,7 +276,7 @@ export function AccountDetailScreen() {
                   {/* Balance */}
                   <View
                     className="mt-4 rounded-xl p-4"
-                    style={{ backgroundColor: typeColor + '15' }}
+                    style={{ backgroundColor: withOpacity(typeColor, 0.12) }}
                   >
                     <Text
                       className="text-sm"
@@ -337,7 +338,7 @@ export function AccountDetailScreen() {
                           navigation.navigate('PayCreditCard', { accountId })
                         }
                         className="mt-3 flex-row items-center justify-center gap-2 rounded-xl py-2.5"
-                        style={{ backgroundColor: colors.primary + '20' }}
+                        style={{ backgroundColor: colors.primaryMuted }}
                       >
                         <CreditCard size={16} color={colors.primary} />
                         <Text
@@ -352,7 +353,7 @@ export function AccountDetailScreen() {
                       <TouchableOpacity
                         onPress={() => setShowBalanceModal(true)}
                         className="mt-3 flex-row items-center justify-center gap-2 rounded-xl py-2.5"
-                        style={{ backgroundColor: colors.primary + '20' }}
+                        style={{ backgroundColor: colors.primaryMuted }}
                       >
                         <Scale size={16} color={colors.primary} />
                         <Text
@@ -460,7 +461,7 @@ export function AccountDetailScreen() {
                   navigation.navigate('AddTransaction', { accountId })
                 }
                 className="flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
-                style={{ backgroundColor: colors.primary + '15' }}
+                style={{ backgroundColor: colors.primarySoft }}
               >
                 <Plus size={14} color={colors.primary} />
                 <Text

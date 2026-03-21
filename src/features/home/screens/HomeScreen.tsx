@@ -134,7 +134,7 @@ export function HomeScreen() {
               backgroundColor: isDark ? colors.surfaceContainer : colors.secondaryContainer,
               borderRadius: 16,
               borderWidth: isDark ? 1 : 0,
-              borderColor: 'rgba(255, 255, 255, 0.06)',
+              borderColor: colors.borderSubtle,
             }}
           >
             <ArrowLeftRight size={20} color={colors.primary} />
@@ -226,7 +226,7 @@ export function HomeScreen() {
               </View>
               <View
                 className="mt-3 pt-3"
-                style={{ borderTopWidth: 1, borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : colors.border }}
+                style={{ borderTopWidth: 1, borderTopColor: isDark ? colors.borderSubtle : colors.border }}
               >
                 <Text className="text-xs" style={{ color: colors.mutedForeground }}>Net Worth</Text>
                 <Text
@@ -265,7 +265,7 @@ export function HomeScreen() {
                   <View
                     key={cat.category_id}
                     className="flex-row items-center justify-between py-2"
-                    style={index < categorySpending.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border } : undefined}
+                    style={index < categorySpending.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? colors.dividerSubtle : colors.border } : undefined}
                   >
                     <View className="flex-row items-center gap-3">
                       <IconAvatar
@@ -320,7 +320,7 @@ export function HomeScreen() {
                     accessibilityRole="button"
                     accessibilityLabel={`${transaction.category_name || 'Uncategorized'}, ${transaction.type === 'expense' ? 'expense' : 'income'} ${formatPHP(transaction.amount)}`}
                     className="flex-row items-center justify-between py-3"
-                    style={index < recentTransactions.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border } : undefined}
+                    style={index < recentTransactions.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? colors.dividerSubtle : colors.border } : undefined}
                   >
                     <View className="flex-row items-center gap-3">
                       <IconAvatar

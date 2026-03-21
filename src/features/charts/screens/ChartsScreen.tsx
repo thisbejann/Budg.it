@@ -198,7 +198,7 @@ export function ChartsScreen() {
                   tickFormat={(t) => t}
                   style={{
                     tickLabels: { fontSize: 10, fill: colors.mutedForeground },
-                    axis: { stroke: isDark ? 'rgba(255,255,255,0.1)' : colors.border },
+                    axis: { stroke: isDark ? colors.borderSubtle : colors.border },
                   }}
                 />
                 <VictoryAxis
@@ -206,8 +206,8 @@ export function ChartsScreen() {
                   tickFormat={(t) => formatPHPCompact(t)}
                   style={{
                     tickLabels: { fontSize: 10, fill: colors.mutedForeground },
-                    axis: { stroke: isDark ? 'rgba(255,255,255,0.1)' : colors.border },
-                    grid: { stroke: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)' },
+                    axis: { stroke: isDark ? colors.borderSubtle : colors.border },
+                    grid: { stroke: isDark ? colors.dividerSubtle : colors.dividerSubtle },
                   }}
                 />
                 <VictoryBar
@@ -251,7 +251,7 @@ export function ChartsScreen() {
               <View
                 key={cat.category_id}
                 className="flex-row items-center justify-between py-2"
-                style={index < categoryData.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border } : undefined}
+                style={index < categoryData.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? colors.dividerSubtle : colors.border } : undefined}
               >
                 <View className="flex-row items-center gap-2">
                   <View

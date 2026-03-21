@@ -91,7 +91,7 @@ export function IconAvatar({
           shadowRadius: 4,
           elevation: 2,
         },
-        isDark && { borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.08)' },
+        isDark && { borderWidth: 1, borderColor: colors.borderSubtle },
       ]}
     >
       {icon}

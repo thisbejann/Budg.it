@@ -174,7 +174,7 @@ export function EditCategoryScreen() {
               className="rounded-full px-3 py-1"
               style={{
                 backgroundColor:
-                  category.type === 'expense' ? colors.expense + '20' : colors.income + '20',
+                  category.type === 'expense' ? colors.expenseSoft : colors.incomeSoft,
               }}
             >
               <Text

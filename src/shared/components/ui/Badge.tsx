@@ -60,7 +60,7 @@ export function Badge({ variant = 'default', children, className, style, ...prop
       style={[
         { backgroundColor: getBackgroundColor() },
         variant === 'outline' && { borderColor: colors.border },
-        isDark && variant !== 'outline' && { borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.1)' },
+        isDark && variant !== 'outline' && { borderWidth: 1, borderColor: colors.borderSubtle },
         style,
       ]}
       {...props}
@@ -113,7 +113,7 @@ export function AccountTypeBadge({ type }: AccountTypeBadgeProps) {
       className="inline-flex items-center rounded-full px-3 py-1"
       style={[
         { backgroundColor: bgColor },
-        isDark && { borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.1)' },
+        isDark && { borderWidth: 1, borderColor: colors.borderSubtle },
       ]}
     >
       <Text

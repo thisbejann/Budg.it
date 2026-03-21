@@ -97,7 +97,7 @@ const TabItem = React.memo(function TabItem({
                 width: 40,
                 height: 32,
                 borderRadius: 16,
-                backgroundColor: isDark ? 'rgba(212, 165, 116, 0.2)' : 'rgba(156, 112, 64, 0.15)',
+                backgroundColor: colors.primaryMuted,
               },
             ]}
           />
@@ -142,7 +142,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
         borderRadius: TAB_BAR_HEIGHT / 2,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+        borderColor: colors.borderSubtle,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: isDark ? 0.5 : 0.15,
@@ -171,7 +171,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: isDark ? 'rgba(20, 20, 28, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+          backgroundColor: isDark ? 'rgba(20, 20, 28, 0.85)' : 'rgba(250, 250, 248, 0.85)',
         }}
       />
 

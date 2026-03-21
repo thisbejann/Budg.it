@@ -175,7 +175,7 @@ export function TransactionsScreen() {
         accessibilityRole="button"
         accessibilityLabel={`${item.category_name || 'Uncategorized'}, ${item.type === 'expense' ? 'expense' : 'income'} ${formatPHP(item.amount)}`}
         className="flex-row items-center justify-between px-4 py-3"
-        style={{ borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border }}
+        style={{ borderBottomWidth: 1, borderBottomColor: isDark ? colors.dividerSubtle : colors.border }}
       >
         <View className="flex-row items-center gap-3">
           <IconAvatar
@@ -290,7 +290,7 @@ export function TransactionsScreen() {
       {viewMode === 'calendar' && dailyTotals[selectedDate] && (
         <View
           className="flex-row justify-around py-2"
-          style={{ borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border }}
+          style={{ borderBottomWidth: 1, borderBottomColor: isDark ? colors.dividerSubtle : colors.border }}
         >
           <View className="items-center">
             <Text className="text-xs" style={{ color: colors.mutedForeground }}>Income</Text>

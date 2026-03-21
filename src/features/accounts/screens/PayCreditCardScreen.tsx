@@ -162,7 +162,7 @@ export function PayCreditCardScreen() {
         {creditAccount && (
           <View
             className="mb-4 rounded-xl p-4"
-            style={{ backgroundColor: colors.accountCredit + '15' }}
+            style={{ backgroundColor: colors.creditSoft }}
           >
             <View className="flex-row items-center gap-3">
               <View
@@ -258,7 +258,7 @@ export function PayCreditCardScreen() {
                 setValue('amount', creditAccount.current_balance.toString())
               }
               className="mt-2 self-start rounded-full px-3 py-1"
-              style={{ backgroundColor: colors.primary + '20' }}
+              style={{ backgroundColor: colors.primaryMuted }}
             >
               <Text className="text-sm font-medium" style={{ color: colors.primary }}>
                 Pay Full Balance ({formatPHP(creditAccount.current_balance)})
@@ -312,7 +312,7 @@ export function PayCreditCardScreen() {
           <Switch
             value={recordTransaction}
             onValueChange={setRecordTransaction}
-            trackColor={{ false: colors.muted, true: colors.primary + '60' }}
+            trackColor={{ false: colors.muted, true: colors.switchTrack }}
             thumbColor={recordTransaction ? colors.primary : colors.mutedForeground}
           />
         </View>
