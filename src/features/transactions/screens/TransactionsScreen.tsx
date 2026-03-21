@@ -70,7 +70,7 @@ export function TransactionsScreen() {
     }, [loadTransactions])
   );
 
-  const getIcon = (iconName: string, color: string = '#fff') => {
+  const getIcon = (iconName: string, color: string = colors.onPrimary) => {
     const IconComponent = (LucideIcons as any)[
       iconName.split('-').map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1))).join('')
     ] || LucideIcons.Circle;

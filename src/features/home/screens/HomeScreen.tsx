@@ -272,7 +272,7 @@ export function HomeScreen() {
                     <View className="flex-row items-center gap-3">
                       <IconAvatar
                         size="sm"
-                        icon={getIcon(cat.category_icon, '#fff')}
+                        icon={getIcon(cat.category_icon, colors.onPrimary)}
                         backgroundColor={cat.category_color}
                       />
                       <Text className="text-sm font-medium" style={{ color: colors.foreground }}>
@@ -327,7 +327,7 @@ export function HomeScreen() {
                     <View className="flex-row items-center gap-3">
                       <IconAvatar
                         size="sm"
-                        icon={getIcon(transaction.category_icon || 'circle', '#fff')}
+                        icon={getIcon(transaction.category_icon || 'circle', colors.onPrimary)}
                         backgroundColor={transaction.category_color || colors.mutedForeground}
                       />
                       <View>

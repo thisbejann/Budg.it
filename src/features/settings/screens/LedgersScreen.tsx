@@ -9,6 +9,7 @@ import { EmptyState, Badge } from '../../../shared/components/ui';
 import { LedgerRepository } from '../../../database/repositories';
 import { useLedgerStore } from '../../../store';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { FLOATING_TAB_BAR_TOTAL_HEIGHT } from '../../../shared/components/navigation/FloatingTabBar';
 import * as LucideIcons from 'lucide-react-native';
 import { Plus, Book, Check, ChevronRight, AlertTriangle } from 'lucide-react-native';
 
@@ -75,7 +76,7 @@ export function LedgersScreen() {
             className="h-12 w-12 items-center justify-center rounded-xl"
             style={{ backgroundColor: item.color }}
           >
-            <IconComponent size={22} color="#ffffff" />
+            <IconComponent size={22} color={colors.onPrimary} />
           </View>
           <View className="shrink">
             <View className="flex-row items-center gap-2">
@@ -158,7 +159,7 @@ export function LedgersScreen() {
             data={ledgers}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderLedger}
-            contentContainerStyle={{ paddingBottom: 100 }}
+            contentContainerStyle={{ paddingBottom: FLOATING_TAB_BAR_TOTAL_HEIGHT }}
           />
         </>
       )}

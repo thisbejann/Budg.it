@@ -166,9 +166,9 @@ export function TransactionDetailScreen() {
                   style={{ backgroundColor: transaction.category_color || colors.muted }}
                 >
                   {CategoryIcon ? (
-                    <CategoryIcon size={18} color="#ffffff" />
+                    <CategoryIcon size={18} color={colors.onPrimary} />
                   ) : (
-                    <Tag size={18} color="#ffffff" />
+                    <Tag size={18} color={colors.onPrimary} />
                   )}
                 </View>
                 <View className="flex-1">
@@ -186,7 +186,7 @@ export function TransactionDetailScreen() {
                   className="h-10 w-10 items-center justify-center rounded-full"
                   style={{ backgroundColor: transaction.account_color || colors.primary }}
                 >
-                  <AccountIcon size={18} color="#ffffff" />
+                  <AccountIcon size={18} color={colors.onPrimary} />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs" style={{ color: colors.mutedForeground }}>Account</Text>

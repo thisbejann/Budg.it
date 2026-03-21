@@ -8,6 +8,7 @@ import { Screen, Header } from '../../../shared/components/layout';
 import { Button, EmptyState } from '../../../shared/components/ui';
 import { CategoryRepository } from '../../../database/repositories';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { FLOATING_TAB_BAR_TOTAL_HEIGHT } from '../../../shared/components/navigation/FloatingTabBar';
 import * as LucideIcons from 'lucide-react-native';
 import { Plus, ChevronRight, FolderOpen, AlertTriangle } from 'lucide-react-native';
 
@@ -69,7 +70,7 @@ export function CategoriesScreen() {
               className="h-10 w-10 items-center justify-center rounded-full"
               style={{ backgroundColor: item.color }}
             >
-              <IconComponent size={18} color="#ffffff" />
+              <IconComponent size={18} color={colors.onPrimary} />
             </View>
             <View>
               <Text className="font-medium" style={{ color: colors.foreground }}>{item.name}</Text>
@@ -209,7 +210,7 @@ export function CategoriesScreen() {
           renderItem={renderCategory}
           renderSectionHeader={renderSectionHeader}
           stickySectionHeadersEnabled={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: FLOATING_TAB_BAR_TOTAL_HEIGHT }}
         />
       )}
     </Screen>
