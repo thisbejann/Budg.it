@@ -49,6 +49,7 @@ import {
   Scale,
   Plus,
   Wallet,
+  AlertTriangle,
 } from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -67,6 +68,7 @@ export function AccountDetailScreen() {
     [],
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showBalanceModal, setShowBalanceModal] = useState(false);
 
   const handleAdjustBalance = async (newBalance: number, recordTxn: boolean) => {
@@ -98,6 +100,7 @@ export function AccountDetailScreen() {
 
     try {
       setIsLoading(true);
+      setError(null);
       const [acct, txns] = await Promise.all([
         AccountRepository.getById(accountId),
         TransactionRepository.getByLedger(activeLedgerId, { accountId }),
@@ -105,8 +108,9 @@ export function AccountDetailScreen() {
 
       setAccount(acct);
       setTransactions(txns);
-    } catch (error) {
-      console.error('Error loading account details:', error);
+    } catch (err) {
+      console.error('Error loading account details:', err);
+      setError('Failed to load account details');
     } finally {
       setIsLoading(false);
     }
@@ -195,15 +199,30 @@ export function AccountDetailScreen() {
     );
   }
 
+  if (error) {
+    return (
+      <Screen>
+        <Header title="Account Details" showBack />
+        <EmptyState
+          icon={<AlertTriangle size={48} color={colors.mutedForeground} />}
+          title="Something went wrong"
+          description={error}
+          actionLabel="Try Again"
+          onAction={loadData}
+        />
+      </Screen>
+    );
+  }
+
   if (!account) {
     return (
       <Screen>
         <Header title="Account Details" showBack />
-        <View className="flex-1 items-center justify-center p-4">
-          <Text style={{ color: colors.mutedForeground }}>
-            Account not found
-          </Text>
-        </View>
+        <EmptyState
+          icon={<Wallet size={48} color={colors.mutedForeground} />}
+          title="Account not found"
+          description="This account may have been deleted"
+        />
       </Screen>
     );
   }
