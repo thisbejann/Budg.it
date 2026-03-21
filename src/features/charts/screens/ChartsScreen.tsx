@@ -4,7 +4,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { VictoryPie, VictoryBar, VictoryChart, VictoryAxis, VictoryTheme } from 'victory-native';
 import type { CategorySpending } from '../../../types/database';
 import { Screen, SimpleHeader } from '../../../shared/components/layout';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../shared/components/ui';
+import { Card, CardHeader, CardTitle, CardContent, EmptyState, ChartsScreenSkeleton } from '../../../shared/components/ui';
+import { AlertTriangle } from 'lucide-react-native';
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository } from '../../../database/repositories';
 import { formatPHP, formatPHPCompact } from '../../../shared/utils/currency';
@@ -24,11 +25,15 @@ export function ChartsScreen() {
   const [monthlyData, setMonthlyData] = useState<{ month: string; income: number; expense: number }[]>([]);
   const [totalExpense, setTotalExpense] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     if (!activeLedgerId) return;
 
     try {
+      setIsLoading(true);
+      setError(null);
       const today = getToday();
       const monthStart = getMonthStart(today);
       const monthEnd = getMonthEnd(today);
@@ -46,8 +51,11 @@ export function ChartsScreen() {
 
       const incomeTotal = monthly.reduce((sum, m) => sum + m.income, 0);
       setTotalIncome(incomeTotal);
-    } catch (error) {
-      console.error('Error loading chart data:', error);
+    } catch (err) {
+      console.error('Error loading chart data:', err);
+      setError('Failed to load chart data');
+    } finally {
+      setIsLoading(false);
     }
   }, [activeLedgerId]);
 
@@ -82,6 +90,17 @@ export function ChartsScreen() {
     <Screen hasTabBar>
       <SimpleHeader title="Charts & Insights" />
 
+      {isLoading ? (
+        <ChartsScreenSkeleton />
+      ) : error ? (
+        <EmptyState
+          icon={<AlertTriangle size={48} color={colors.mutedForeground} />}
+          title="Something went wrong"
+          description={error}
+          actionLabel="Try Again"
+          onAction={loadData}
+        />
+      ) : (
       <ScrollView className="flex-1 px-4 py-4">
         {/* Period Selector */}
         <View className="mb-4 flex-row gap-2">
@@ -89,7 +108,10 @@ export function ChartsScreen() {
             <TouchableOpacity
               key={p}
               onPress={() => setPeriod(p)}
-              className="px-4 py-1.5"
+              accessibilityRole="radio"
+              accessibilityLabel={p === 'month' ? 'This Month' : p === '3months' ? '3 Months' : '6 Months'}
+              accessibilityState={{ selected: period === p }}
+              className="px-4 py-2.5"
               style={pillStyle(period === p)}
             >
               <Text
@@ -176,7 +198,7 @@ export function ChartsScreen() {
                   tickFormat={(t) => t}
                   style={{
                     tickLabels: { fontSize: 10, fill: colors.mutedForeground },
-                    axis: { stroke: isDark ? 'rgba(255,255,255,0.1)' : colors.border },
+                    axis: { stroke: isDark ? colors.borderSubtle : colors.border },
                   }}
                 />
                 <VictoryAxis
@@ -184,8 +206,8 @@ export function ChartsScreen() {
                   tickFormat={(t) => formatPHPCompact(t)}
                   style={{
                     tickLabels: { fontSize: 10, fill: colors.mutedForeground },
-                    axis: { stroke: isDark ? 'rgba(255,255,255,0.1)' : colors.border },
-                    grid: { stroke: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.06)' },
+                    axis: { stroke: isDark ? colors.borderSubtle : colors.border },
+                    grid: { stroke: isDark ? colors.dividerSubtle : colors.dividerSubtle },
                   }}
                 />
                 <VictoryBar
@@ -229,7 +251,7 @@ export function ChartsScreen() {
               <View
                 key={cat.category_id}
                 className="flex-row items-center justify-between py-2"
-                style={index < categoryData.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border } : undefined}
+                style={index < categoryData.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? colors.dividerSubtle : colors.border } : undefined}
               >
                 <View className="flex-row items-center gap-2">
                   <View
@@ -256,6 +278,7 @@ export function ChartsScreen() {
           </CardContent>
         </Card>
       </ScrollView>
+      )}
     </Screen>
   );
 }

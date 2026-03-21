@@ -8,8 +8,9 @@ import { Screen, Header } from '../../../shared/components/layout';
 import { Button, EmptyState } from '../../../shared/components/ui';
 import { CategoryRepository } from '../../../database/repositories';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { FLOATING_TAB_BAR_TOTAL_HEIGHT } from '../../../shared/components/navigation/FloatingTabBar';
 import * as LucideIcons from 'lucide-react-native';
-import { Plus, ChevronRight, FolderOpen } from 'lucide-react-native';
+import { Plus, ChevronRight, FolderOpen, AlertTriangle } from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -24,14 +25,17 @@ export function CategoriesScreen() {
   const [activeTab, setActiveTab] = useState<CategoryType>('expense');
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadCategories = useCallback(async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const data = await CategoryRepository.getByTypeWithSubcategories(activeTab);
       setCategories(data);
-    } catch (error) {
-      console.error('Error loading categories:', error);
+    } catch (err) {
+      console.error('Error loading categories:', err);
+      setError('Failed to load categories');
     } finally {
       setIsLoading(false);
     }
@@ -57,6 +61,8 @@ export function CategoriesScreen() {
         {/* Category Row */}
         <TouchableOpacity
           onPress={() => navigation.navigate('EditCategory', { categoryId: item.id })}
+          accessibilityRole="button"
+          accessibilityLabel={`${item.name}, ${item.subcategories.length} subcategories`}
           className="flex-row items-center justify-between px-4 py-3"
         >
           <View className="flex-row items-center gap-3">
@@ -64,7 +70,7 @@ export function CategoriesScreen() {
               className="h-10 w-10 items-center justify-center rounded-full"
               style={{ backgroundColor: item.color }}
             >
-              <IconComponent size={18} color="#ffffff" />
+              <IconComponent size={18} color={colors.onPrimary} />
             </View>
             <View>
               <Text className="font-medium" style={{ color: colors.foreground }}>{item.name}</Text>
@@ -145,6 +151,9 @@ export function CategoriesScreen() {
       <View className="flex-row" style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}>
         <TouchableOpacity
           onPress={() => setActiveTab('expense')}
+          accessibilityRole="tab"
+          accessibilityLabel="Expenses"
+          accessibilityState={{ selected: activeTab === 'expense' }}
           className="flex-1 items-center py-3"
           style={activeTab === 'expense' ? { borderBottomWidth: 2, borderBottomColor: colors.primary } : {}}
         >
@@ -157,6 +166,9 @@ export function CategoriesScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setActiveTab('income')}
+          accessibilityRole="tab"
+          accessibilityLabel="Income"
+          accessibilityState={{ selected: activeTab === 'income' }}
           className="flex-1 items-center py-3"
           style={activeTab === 'income' ? { borderBottomWidth: 2, borderBottomColor: colors.primary } : {}}
         >
@@ -173,6 +185,14 @@ export function CategoriesScreen() {
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
+      ) : error ? (
+        <EmptyState
+          icon={<AlertTriangle size={48} color={colors.mutedForeground} />}
+          title="Something went wrong"
+          description={error}
+          actionLabel="Try Again"
+          onAction={loadCategories}
+        />
       ) : categories.length === 0 ? (
         <View className="flex-1 items-center justify-center p-4">
           <EmptyState
@@ -190,7 +210,7 @@ export function CategoriesScreen() {
           renderItem={renderCategory}
           renderSectionHeader={renderSectionHeader}
           stickySectionHeadersEnabled={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: FLOATING_TAB_BAR_TOTAL_HEIGHT }}
         />
       )}
     </Screen>

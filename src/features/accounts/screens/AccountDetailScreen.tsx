@@ -33,9 +33,10 @@ import {
 } from '../../../database/repositories';
 import { useLedgerStore } from '../../../store';
 import { formatPHP } from '../../../shared/utils/currency';
+import { withOpacity } from '../../../shared/utils/color';
 import { getOrdinalSuffix } from '../../../shared/utils/date';
 import { useTheme } from '../../../hooks/useColorScheme';
-import * as LucideIcons from 'lucide-react-native';
+import { getIconComponent } from '../../../shared/utils/icon';
 import {
   Pencil,
   ArrowUpRight,
@@ -47,6 +48,8 @@ import {
   CreditCard,
   Scale,
   Plus,
+  Wallet,
+  AlertTriangle,
 } from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -65,6 +68,7 @@ export function AccountDetailScreen() {
     [],
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showBalanceModal, setShowBalanceModal] = useState(false);
 
   const handleAdjustBalance = async (newBalance: number, recordTxn: boolean) => {
@@ -96,6 +100,7 @@ export function AccountDetailScreen() {
 
     try {
       setIsLoading(true);
+      setError(null);
       const [acct, txns] = await Promise.all([
         AccountRepository.getById(accountId),
         TransactionRepository.getByLedger(activeLedgerId, { accountId }),
@@ -103,8 +108,9 @@ export function AccountDetailScreen() {
 
       setAccount(acct);
       setTransactions(txns);
-    } catch (error) {
-      console.error('Error loading account details:', error);
+    } catch (err) {
+      console.error('Error loading account details:', err);
+      setError('Failed to load account details');
     } finally {
       setIsLoading(false);
     }
@@ -132,25 +138,13 @@ export function AccountDetailScreen() {
   };
 
   const IconComponent = account
-    ? (LucideIcons as any)[
-        account.icon
-          .split('-')
-          .map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)))
-          .join('')
-      ] || LucideIcons.Wallet
-    : LucideIcons.Wallet;
+    ? getIconComponent(account.icon, 'Wallet')
+    : Wallet;
 
   const renderTransaction = ({ item }: { item: TransactionWithDetails }) => {
     const isExpense = item.type === 'expense';
     const CategoryIcon = item.category_icon
-      ? (LucideIcons as any)[
-          item.category_icon
-            .split('-')
-            .map((s, i) =>
-              i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1),
-            )
-            .join('')
-        ]
+      ? getIconComponent(item.category_icon)
       : null;
 
     return (
@@ -166,11 +160,11 @@ export function AccountDetailScreen() {
             style={{ backgroundColor: item.category_color || colors.muted }}
           >
             {CategoryIcon ? (
-              <CategoryIcon size={18} color="#ffffff" />
+              <CategoryIcon size={18} color={colors.onPrimary} />
             ) : isExpense ? (
-              <ArrowUpRight size={18} color="#ffffff" />
+              <ArrowUpRight size={18} color={colors.onPrimary} />
             ) : (
-              <ArrowDownLeft size={18} color="#ffffff" />
+              <ArrowDownLeft size={18} color={colors.onPrimary} />
             )}
           </View>
           <View>
@@ -205,15 +199,30 @@ export function AccountDetailScreen() {
     );
   }
 
+  if (error) {
+    return (
+      <Screen>
+        <Header title="Account Details" showBack />
+        <EmptyState
+          icon={<AlertTriangle size={48} color={colors.mutedForeground} />}
+          title="Something went wrong"
+          description={error}
+          actionLabel="Try Again"
+          onAction={loadData}
+        />
+      </Screen>
+    );
+  }
+
   if (!account) {
     return (
       <Screen>
         <Header title="Account Details" showBack />
-        <View className="flex-1 items-center justify-center p-4">
-          <Text style={{ color: colors.mutedForeground }}>
-            Account not found
-          </Text>
-        </View>
+        <EmptyState
+          icon={<Wallet size={48} color={colors.mutedForeground} />}
+          title="Account not found"
+          description="This account may have been deleted"
+        />
       </Screen>
     );
   }
@@ -248,7 +257,7 @@ export function AccountDetailScreen() {
                   <View className="flex-row items-center gap-4">
                     <IconAvatar
                       size="xl"
-                      icon={<IconComponent size={28} color="#ffffff" />}
+                      icon={<IconComponent size={28} color={colors.onPrimary} />}
                       backgroundColor={account.color}
                     />
                     <View className="flex-1">
@@ -275,7 +284,7 @@ export function AccountDetailScreen() {
                   {/* Balance */}
                   <View
                     className="mt-4 rounded-xl p-4"
-                    style={{ backgroundColor: typeColor + '15' }}
+                    style={{ backgroundColor: withOpacity(typeColor, 0.12) }}
                   >
                     <Text
                       className="text-sm"
@@ -337,7 +346,7 @@ export function AccountDetailScreen() {
                           navigation.navigate('PayCreditCard', { accountId })
                         }
                         className="mt-3 flex-row items-center justify-center gap-2 rounded-xl py-2.5"
-                        style={{ backgroundColor: colors.primary + '20' }}
+                        style={{ backgroundColor: colors.primaryMuted }}
                       >
                         <CreditCard size={16} color={colors.primary} />
                         <Text
@@ -352,7 +361,7 @@ export function AccountDetailScreen() {
                       <TouchableOpacity
                         onPress={() => setShowBalanceModal(true)}
                         className="mt-3 flex-row items-center justify-center gap-2 rounded-xl py-2.5"
-                        style={{ backgroundColor: colors.primary + '20' }}
+                        style={{ backgroundColor: colors.primaryMuted }}
                       >
                         <Scale size={16} color={colors.primary} />
                         <Text
@@ -460,7 +469,7 @@ export function AccountDetailScreen() {
                   navigation.navigate('AddTransaction', { accountId })
                 }
                 className="flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
-                style={{ backgroundColor: colors.primary + '15' }}
+                style={{ backgroundColor: colors.primarySoft }}
               >
                 <Plus size={14} color={colors.primary} />
                 <Text

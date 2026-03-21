@@ -4,9 +4,9 @@ import { Calendar } from 'lucide-react-native';
 import { useTheme } from '../../../hooks/useColorScheme';
 import { getOrdinalSuffix } from '../../../shared/utils/date';
 
-const ITEM_HEIGHT = 44;
+const ITEM_HEIGHT = 44; // Touch-target-compliant row height
 const VISIBLE_ITEMS = 5;
-const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
+const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS; // 44 × 5 = 220
 
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
@@ -117,7 +117,7 @@ export function DayOfMonthPicker({
           style={{
             flex: 1,
             justifyContent: 'flex-end',
-            backgroundColor: 'rgba(0,0,0,0.4)',
+            backgroundColor: colors.backdrop,
           }}
           onPress={handleCancel}
         >

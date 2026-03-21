@@ -9,8 +9,9 @@ import { EmptyState, Badge } from '../../../shared/components/ui';
 import { LedgerRepository } from '../../../database/repositories';
 import { useLedgerStore } from '../../../store';
 import { useTheme } from '../../../hooks/useColorScheme';
+import { FLOATING_TAB_BAR_TOTAL_HEIGHT } from '../../../shared/components/navigation/FloatingTabBar';
 import * as LucideIcons from 'lucide-react-native';
-import { Plus, Book, Check, ChevronRight } from 'lucide-react-native';
+import { Plus, Book, Check, ChevronRight, AlertTriangle } from 'lucide-react-native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -20,14 +21,17 @@ export function LedgersScreen() {
   const { activeLedgerId, setActiveLedger } = useLedgerStore();
   const [ledgers, setLedgers] = useState<Ledger[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadLedgers = useCallback(async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const data = await LedgerRepository.getAll();
       setLedgers(data);
-    } catch (error) {
-      console.error('Error loading ledgers:', error);
+    } catch (err) {
+      console.error('Error loading ledgers:', err);
+      setError('Failed to load ledgers');
     } finally {
       setIsLoading(false);
     }
@@ -59,6 +63,10 @@ export function LedgersScreen() {
     return (
       <TouchableOpacity
         onPress={() => handleSelectLedger(item)}
+        accessibilityRole="radio"
+        accessibilityLabel={`${item.name}${item.is_default ? ', default' : ''}`}
+        accessibilityState={{ selected: isActive }}
+        accessibilityHint="Double tap to switch to this ledger"
         className={`flex-row items-center justify-between border-b border-border px-4 py-3 ${
           isActive ? 'bg-primary/5' : ''
         }`}
@@ -68,7 +76,7 @@ export function LedgersScreen() {
             className="h-12 w-12 items-center justify-center rounded-xl"
             style={{ backgroundColor: item.color }}
           >
-            <IconComponent size={22} color="#ffffff" />
+            <IconComponent size={22} color={colors.onPrimary} />
           </View>
           <View className="shrink">
             <View className="flex-row items-center gap-2">
@@ -92,6 +100,8 @@ export function LedgersScreen() {
           )}
           <TouchableOpacity
             onPress={() => navigation.navigate('EditLedger', { ledgerId: item.id })}
+            accessibilityRole="button"
+            accessibilityLabel={`Edit ${item.name}`}
             className="p-2"
           >
             <ChevronRight size={20} color={colors.mutedForeground} />
@@ -120,6 +130,14 @@ export function LedgersScreen() {
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
+      ) : error ? (
+        <EmptyState
+          icon={<AlertTriangle size={48} color={colors.mutedForeground} />}
+          title="Something went wrong"
+          description={error}
+          actionLabel="Try Again"
+          onAction={loadLedgers}
+        />
       ) : ledgers.length === 0 ? (
         <View className="flex-1 items-center justify-center p-4">
           <EmptyState
@@ -141,7 +159,7 @@ export function LedgersScreen() {
             data={ledgers}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderLedger}
-            contentContainerStyle={{ paddingBottom: 100 }}
+            contentContainerStyle={{ paddingBottom: FLOATING_TAB_BAR_TOTAL_HEIGHT }}
           />
         </>
       )}

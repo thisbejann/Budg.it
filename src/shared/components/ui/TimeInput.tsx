@@ -99,7 +99,7 @@ export function TimeInput({ label, value, onChangeValue, error }: TimeInputProps
         >
           <Pressable
             className="flex-1 justify-end"
-            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+            style={{ backgroundColor: colors.backdrop }}
             onPress={() => setShowPicker(false)}
           >
             <Pressable

@@ -2,21 +2,21 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { Plus, ArrowUpRight, ArrowDownLeft, ArrowLeftRight, ChevronRight } from 'lucide-react-native';
+import { Plus, ArrowUpRight, ArrowDownLeft, ArrowLeftRight, ChevronRight, AlertTriangle } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { TransactionWithDetails, CategorySpending } from '../../../types/database';
 import { Screen } from '../../../shared/components/layout';
-import { Card, CardHeader, CardTitle, CardContent, FAB, IconAvatar } from '../../../shared/components/ui';
+import { Card, CardHeader, CardTitle, CardContent, FAB, IconAvatar, EmptyState } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository, AccountRepository } from '../../../database/repositories';
 import { formatPHP, formatPHPCompact } from '../../../shared/utils/currency';
 import { getMonthStart, getMonthEnd, formatDate, formatMonthYear, getToday } from '../../../shared/utils/date';
 import { useTheme } from '../../../hooks/useColorScheme';
 import { FLOATING_TAB_BAR_TOTAL_HEIGHT } from '../../../shared/components/navigation/FloatingTabBar';
-import * as LucideIcons from 'lucide-react-native';
+import { getIconComponent } from '../../../shared/utils/icon';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -29,6 +29,7 @@ export function HomeScreen() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [monthlySpending, setMonthlySpending] = useState(0);
   const [monthlyIncome, setMonthlyIncome] = useState(0);
   const [categorySpending, setCategorySpending] = useState<CategorySpending[]>([]);
@@ -45,6 +46,7 @@ export function HomeScreen() {
     if (!activeLedgerId) return;
 
     try {
+      setError(null);
       const today = getToday();
       const monthStart = getMonthStart(today);
       const monthEnd = getMonthEnd(today);
@@ -62,8 +64,9 @@ export function HomeScreen() {
       setCategorySpending(categories.slice(0, 5));
       setRecentTransactions(transactions);
       setBalanceSummary(summary);
-    } catch (error) {
-      console.error('Error loading home data:', error);
+    } catch (err) {
+      console.error('Error loading home data:', err);
+      setError('Failed to load data');
     } finally {
       setIsLoading(false);
       setRefreshing(false);
@@ -82,9 +85,7 @@ export function HomeScreen() {
   };
 
   const getIcon = (iconName: string, color: string = colors.foreground) => {
-    const IconComponent = (LucideIcons as any)[
-      iconName.split('-').map((s, i) => i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)).join('')
-    ] || LucideIcons.Circle;
+    const IconComponent = getIconComponent(iconName);
     return <IconComponent size={16} color={color} />;
   };
 
@@ -96,6 +97,15 @@ export function HomeScreen() {
   return (
     <View style={{ flex: 1 }}>
       <Screen refreshing={refreshing} onRefresh={onRefresh} hasTabBar>
+        {error && !isLoading ? (
+          <EmptyState
+            icon={<AlertTriangle size={48} color={colors.mutedForeground} />}
+            title="Something went wrong"
+            description={error}
+            actionLabel="Try Again"
+            onAction={loadData}
+          />
+        ) : (
         <View className="px-4 py-6">
         {/* Hero Header */}
         <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(0).springify() : undefined} className="mb-6">
@@ -117,12 +127,14 @@ export function HomeScreen() {
         <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(80).springify() : undefined} className="mb-6">
           <TouchableOpacity
             onPress={() => navigation.navigate('Transfer')}
+            accessibilityRole="button"
+            accessibilityLabel="Transfer between accounts"
             className="flex-row items-center justify-center gap-2 px-4 py-3"
             style={{
               backgroundColor: isDark ? colors.surfaceContainer : colors.secondaryContainer,
               borderRadius: 16,
               borderWidth: isDark ? 1 : 0,
-              borderColor: 'rgba(255, 255, 255, 0.06)',
+              borderColor: colors.borderSubtle,
             }}
           >
             <ArrowLeftRight size={20} color={colors.primary} />
@@ -176,7 +188,11 @@ export function HomeScreen() {
             <CardHeader>
               <View className="flex-row items-center justify-between">
                 <CardTitle>Accounts</CardTitle>
-                <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Accounts' })}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Main', { screen: 'Accounts' })}
+                  accessibilityRole="button"
+                  accessibilityLabel="View all accounts"
+                >
                   <ChevronRight size={20} color={colors.mutedForeground} />
                 </TouchableOpacity>
               </View>
@@ -210,7 +226,7 @@ export function HomeScreen() {
               </View>
               <View
                 className="mt-3 pt-3"
-                style={{ borderTopWidth: 1, borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : colors.border }}
+                style={{ borderTopWidth: 1, borderTopColor: isDark ? colors.borderSubtle : colors.border }}
               >
                 <Text className="text-xs" style={{ color: colors.mutedForeground }}>Net Worth</Text>
                 <Text
@@ -235,7 +251,11 @@ export function HomeScreen() {
               <CardHeader>
                 <View className="flex-row items-center justify-between">
                   <CardTitle>Top Spending</CardTitle>
-                  <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Charts' })}>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('Main', { screen: 'Charts' })}
+                    accessibilityRole="button"
+                    accessibilityLabel="View all spending charts"
+                  >
                     <ChevronRight size={20} color={colors.mutedForeground} />
                   </TouchableOpacity>
                 </View>
@@ -245,12 +265,12 @@ export function HomeScreen() {
                   <View
                     key={cat.category_id}
                     className="flex-row items-center justify-between py-2"
-                    style={index < categorySpending.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border } : undefined}
+                    style={index < categorySpending.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? colors.dividerSubtle : colors.border } : undefined}
                   >
                     <View className="flex-row items-center gap-3">
                       <IconAvatar
                         size="sm"
-                        icon={getIcon(cat.category_icon, '#fff')}
+                        icon={getIcon(cat.category_icon, colors.onPrimary)}
                         backgroundColor={cat.category_color}
                       />
                       <Text className="text-sm font-medium" style={{ color: colors.foreground }}>
@@ -278,7 +298,11 @@ export function HomeScreen() {
             <CardHeader>
               <View className="flex-row items-center justify-between">
                 <CardTitle>Recent Transactions</CardTitle>
-                <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Transactions' })}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Main', { screen: 'Transactions' })}
+                  accessibilityRole="button"
+                  accessibilityLabel="View all transactions"
+                >
                   <ChevronRight size={20} color={colors.mutedForeground} />
                 </TouchableOpacity>
               </View>
@@ -293,13 +317,15 @@ export function HomeScreen() {
                   <TouchableOpacity
                     key={transaction.id}
                     onPress={() => navigation.navigate('TransactionDetail', { transactionId: transaction.id })}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${transaction.category_name || 'Uncategorized'}, ${transaction.type === 'expense' ? 'expense' : 'income'} ${formatPHP(transaction.amount)}`}
                     className="flex-row items-center justify-between py-3"
-                    style={index < recentTransactions.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border } : undefined}
+                    style={index < recentTransactions.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? colors.dividerSubtle : colors.border } : undefined}
                   >
                     <View className="flex-row items-center gap-3">
                       <IconAvatar
                         size="sm"
-                        icon={getIcon(transaction.category_icon || 'circle', '#fff')}
+                        icon={getIcon(transaction.category_icon || 'circle', colors.onPrimary)}
                         backgroundColor={transaction.category_color || colors.mutedForeground}
                       />
                       <View>
@@ -325,6 +351,7 @@ export function HomeScreen() {
           </Card>
         </Animated.View>
         </View>
+        )}
       </Screen>
 
       {/* Floating Action Button */}
@@ -336,7 +363,7 @@ export function HomeScreen() {
         }}
       >
         <View style={{ padding: 16 }}>
-          <FAB onPress={handleFABPress}>
+          <FAB onPress={handleFABPress} accessibilityLabel="Add transaction">
             <Plus size={24} color={colors.onPrimary} />
           </FAB>
         </View>

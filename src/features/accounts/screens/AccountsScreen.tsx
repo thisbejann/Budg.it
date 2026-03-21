@@ -1,19 +1,19 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, SectionList, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, SectionList } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { Plus, Wallet, CreditCard, Users, HandCoins } from 'lucide-react-native';
+import { Plus, Wallet, CreditCard, Users, HandCoins, AlertTriangle } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { AccountWithPerson, AccountType } from '../../../types/database';
 import { Screen, SimpleHeader } from '../../../shared/components/layout';
-import { Card, IconAvatar, EmptyState, AccountTypeBadge } from '../../../shared/components/ui';
+import { Card, IconAvatar, EmptyState, AccountTypeBadge, AccountsScreenSkeleton } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { AccountRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
 import { useTheme } from '../../../hooks/useColorScheme';
 import { FLOATING_TAB_BAR_TOTAL_HEIGHT } from '../../../shared/components/navigation/FloatingTabBar';
-import * as LucideIcons from 'lucide-react-native';
+import { getIconComponent } from '../../../shared/utils/icon';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -33,12 +33,14 @@ export function AccountsScreen() {
 
   const [sections, setSections] = useState<AccountSection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadAccounts = useCallback(async () => {
     if (!activeLedgerId) return;
 
     try {
       setIsLoading(true);
+      setError(null);
       const accounts = await AccountRepository.getAllByLedger(activeLedgerId);
 
       const grouped: Record<AccountType, AccountWithPerson[]> = {
@@ -84,8 +86,9 @@ export function AccountsScreen() {
       ];
 
       setSections(sectionData.filter((s) => s.data.length > 0));
-    } catch (error) {
-      console.error('Error loading accounts:', error);
+    } catch (err) {
+      console.error('Error loading accounts:', err);
+      setError('Failed to load accounts');
     } finally {
       setIsLoading(false);
     }
@@ -98,9 +101,7 @@ export function AccountsScreen() {
   );
 
   const getIcon = (iconName: string, color: string = colors.onPrimary) => {
-    const IconComponent = (LucideIcons as any)[
-      iconName.split('-').map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1))).join('')
-    ] || LucideIcons.Circle;
+    const IconComponent = getIconComponent(iconName);
     return <IconComponent size={18} color={color} />;
   };
 
@@ -108,8 +109,10 @@ export function AccountsScreen() {
     <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(index * 50).springify() : undefined}>
       <TouchableOpacity
         onPress={() => navigation.navigate('AccountDetail', { accountId: item.id })}
+        accessibilityRole="button"
+        accessibilityLabel={`${item.name}, balance ${formatPHP(item.current_balance)}`}
         className="flex-row items-center justify-between px-4 py-3"
-        style={{ borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border }}
+        style={{ borderBottomWidth: 1, borderBottomColor: isDark ? colors.dividerSubtle : colors.border }}
       >
         <View className="flex-row items-center gap-3">
           <IconAvatar
@@ -172,7 +175,9 @@ export function AccountsScreen() {
       <View className="flex-row justify-end px-4 py-2">
         <TouchableOpacity
           onPress={() => navigation.navigate('AddAccount')}
-          className="flex-row items-center gap-1 px-4 py-1.5"
+          accessibilityRole="button"
+          accessibilityLabel="Add account"
+          className="flex-row items-center gap-1 px-4 py-2.5"
           style={{ backgroundColor: colors.primary, borderRadius: 20 }}
         >
           <Plus size={16} color={colors.onPrimary} />
@@ -181,9 +186,15 @@ export function AccountsScreen() {
       </View>
 
       {isLoading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
+        <AccountsScreenSkeleton />
+      ) : error ? (
+        <EmptyState
+          icon={<AlertTriangle size={48} color={colors.mutedForeground} />}
+          title="Something went wrong"
+          description={error}
+          actionLabel="Try Again"
+          onAction={loadAccounts}
+        />
       ) : sections.length === 0 ? (
         <EmptyState
           icon={<Wallet size={48} color={colors.mutedForeground} />}

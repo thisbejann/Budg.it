@@ -51,7 +51,7 @@ export function BalanceAdjustmentModal({
         style={{
           flex: 1,
           justifyContent: 'flex-end',
-          backgroundColor: 'rgba(0,0,0,0.4)',
+          backgroundColor: colors.backdrop,
         }}
         onPress={onCancel}
       >
@@ -156,8 +156,8 @@ export function BalanceAdjustmentModal({
                   borderRadius: 8,
                   backgroundColor:
                     difference > 0
-                      ? colors.income + '15'
-                      : colors.expense + '15',
+                      ? colors.incomeSoft
+                      : colors.expenseSoft,
                 }}
               >
                 <Text style={{ color: colors.mutedForeground, fontSize: 13 }}>
@@ -200,7 +200,7 @@ export function BalanceAdjustmentModal({
               <Switch
                 value={recordTxn}
                 onValueChange={setRecordTxn}
-                trackColor={{ false: colors.muted, true: colors.primary + '60' }}
+                trackColor={{ false: colors.muted, true: colors.switchTrack }}
                 thumbColor={recordTxn ? colors.primary : colors.mutedForeground}
               />
             </View>

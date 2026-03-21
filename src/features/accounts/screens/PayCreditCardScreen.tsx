@@ -9,7 +9,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { AccountWithPerson } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
-import { Button, CurrencyInput, Input, DateInput, Select, SelectOption } from '../../../shared/components/ui';
+import { Button, CurrencyInput, Input, DateInput, Select, SelectOption, EmptyState } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { AccountRepository, TransferRepository, TransactionRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
@@ -18,6 +18,7 @@ import { useTheme } from '../../../hooks/useColorScheme';
 import { useMutationCloseGuard } from '../../../shared/hooks';
 import { safeCloseAfterMutation } from '../../../shared/utils';
 import * as LucideIcons from 'lucide-react-native';
+import { getIconComponent } from '../../../shared/utils/icon';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type PayCreditCardRouteProp = RouteProp<RootStackParamList, 'PayCreditCard'>;
@@ -63,7 +64,7 @@ export function PayCreditCardScreen() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [activeLedgerId, accountId]);
 
   const loadData = async () => {
     if (!activeLedgerId) return;
@@ -136,24 +137,28 @@ export function PayCreditCardScreen() {
   const fromAccount = debitAccounts.find((a) => a.id === fromAccountId);
 
   const IconComponent = creditAccount
-    ? (LucideIcons as any)[
-        creditAccount.icon
-          .split('-')
-          .map((s, i) => (i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)))
-          .join('')
-      ] || LucideIcons.CreditCard
+    ? getIconComponent(creditAccount.icon, 'CreditCard')
     : LucideIcons.CreditCard;
 
   return (
     <Screen scrollable={false}>
       <Header title="Pay Credit Card" showClose disableClose={isLoading} />
 
+      {debitAccounts.length === 0 && !isLoading ? (
+        <EmptyState
+          icon={<LucideIcons.Wallet size={48} color={colors.mutedForeground} />}
+          title="No payment source"
+          description="Add a cash or bank account to make credit card payments"
+          actionLabel="Add Account"
+          onAction={() => navigation.navigate('AddAccount')}
+        />
+      ) : (
       <ScrollView className="flex-1 px-4 py-4" keyboardShouldPersistTaps="handled">
         {/* Credit Card Info */}
         {creditAccount && (
           <View
             className="mb-4 rounded-xl p-4"
-            style={{ backgroundColor: colors.accountCredit + '15' }}
+            style={{ backgroundColor: colors.creditSoft }}
           >
             <View className="flex-row items-center gap-3">
               <View
@@ -249,7 +254,7 @@ export function PayCreditCardScreen() {
                 setValue('amount', creditAccount.current_balance.toString())
               }
               className="mt-2 self-start rounded-full px-3 py-1"
-              style={{ backgroundColor: colors.primary + '20' }}
+              style={{ backgroundColor: colors.primaryMuted }}
             >
               <Text className="text-sm font-medium" style={{ color: colors.primary }}>
                 Pay Full Balance ({formatPHP(creditAccount.current_balance)})
@@ -303,7 +308,7 @@ export function PayCreditCardScreen() {
           <Switch
             value={recordTransaction}
             onValueChange={setRecordTransaction}
-            trackColor={{ false: colors.muted, true: colors.primary + '60' }}
+            trackColor={{ false: colors.muted, true: colors.switchTrack }}
             thumbColor={recordTransaction ? colors.primary : colors.mutedForeground}
           />
         </View>
@@ -315,6 +320,7 @@ export function PayCreditCardScreen() {
 
         <View className="h-8" />
       </ScrollView>
+      )}
     </Screen>
   );
 }

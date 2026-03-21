@@ -13,9 +13,10 @@ interface DateInputProps {
   value: string; // YYYY-MM-DD
   onChangeValue: (value: string) => void;
   error?: string;
+  disabled?: boolean;
 }
 
-export function DateInput({ label, value, onChangeValue, error }: DateInputProps) {
+export function DateInput({ label, value, onChangeValue, error, disabled }: DateInputProps) {
   const { colors } = useTheme();
   const [showPicker, setShowPicker] = useState(false);
 
@@ -50,8 +51,11 @@ export function DateInput({ label, value, onChangeValue, error }: DateInputProps
         </Text>
       )}
       <Pressable
-        onPress={() => setShowPicker(true)}
-        className="flex-row items-center px-3"
+        onPress={() => !disabled && setShowPicker(true)}
+        disabled={disabled}
+        accessibilityRole="button"
+        accessibilityLabel={label ? `${label}: ${displayText}` : displayText}
+        className={`flex-row items-center px-3 ${disabled ? 'opacity-50' : ''}`}
         style={containerStyle}
       >
         <Text
@@ -90,7 +94,7 @@ export function DateInput({ label, value, onChangeValue, error }: DateInputProps
         >
           <Pressable
             className="flex-1 justify-end"
-            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+            style={{ backgroundColor: colors.backdrop }}
             onPress={() => setShowPicker(false)}
           >
             <Pressable

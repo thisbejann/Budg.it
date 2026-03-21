@@ -25,12 +25,14 @@ const TAB_BAR_MARGIN_HORIZONTAL = 48;
 export const FLOATING_TAB_BAR_TOTAL_HEIGHT = TAB_BAR_HEIGHT + TAB_BAR_MARGIN_BOTTOM + 16;
 
 const TAB_ICONS = [Home, Receipt, Wallet, BarChart3, Settings];
+const TAB_LABELS = ['Home', 'Transactions', 'Accounts', 'Charts', 'Settings'];
 
-function TabItem({
+const TabItem = React.memo(function TabItem({
   isFocused,
   onPress,
   onLongPress,
   Icon,
+  label,
   colors,
   isDark,
 }: {
@@ -38,6 +40,7 @@ function TabItem({
   onPress: () => void;
   onLongPress: () => void;
   Icon: typeof Home;
+  label: string;
   colors: ReturnType<typeof useTheme>['colors'];
   isDark: boolean;
 }) {
@@ -78,6 +81,9 @@ function TabItem({
       onPress={handlePress}
       onLongPress={onLongPress}
       activeOpacity={1}
+      accessibilityRole="tab"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: isFocused }}
       style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
     >
       <Animated.View style={[containerStyle, { alignItems: 'center' }]}>
@@ -91,7 +97,7 @@ function TabItem({
                 width: 40,
                 height: 32,
                 borderRadius: 16,
-                backgroundColor: isDark ? 'rgba(212, 165, 116, 0.2)' : 'rgba(156, 112, 64, 0.15)',
+                backgroundColor: colors.primaryMuted,
               },
             ]}
           />
@@ -117,7 +123,7 @@ function TabItem({
       </Animated.View>
     </TouchableOpacity>
   );
-}
+});
 
 export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { colors, isDark } = useTheme();
@@ -136,7 +142,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
         borderRadius: TAB_BAR_HEIGHT / 2,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+        borderColor: colors.borderSubtle,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: isDark ? 0.5 : 0.15,
@@ -165,7 +171,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: isDark ? 'rgba(20, 20, 28, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+          backgroundColor: isDark ? 'rgba(20, 20, 28, 0.85)' : 'rgba(250, 250, 248, 0.85)',
         }}
       />
 
@@ -209,6 +215,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
               onPress={onPress}
               onLongPress={onLongPress}
               Icon={Icon}
+              label={TAB_LABELS[index] || route.name}
               colors={colors}
               isDark={isDark}
             />

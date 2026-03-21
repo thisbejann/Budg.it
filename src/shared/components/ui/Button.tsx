@@ -174,7 +174,7 @@ export function Button({
     ? {
         shadowColor: colors.primary,
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: isDark ? 0.5 : 0.3,
+        shadowOpacity: isDark ? 0.25 : 0.3,
         shadowRadius: 12,
         elevation: 8,
       }
@@ -187,6 +187,8 @@ export function Button({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       disabled={isDisabled}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: isDisabled, busy: loading }}
     >
       <Animated.View
         className={`
