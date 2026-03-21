@@ -22,6 +22,7 @@ export {
 } from './Badge';
 export { Avatar, IconAvatar } from './Avatar';
 export { EmptyState } from './EmptyState';
+export { TransactionTypeToggle } from './TransactionTypeToggle';
 export {
   Skeleton,
   SkeletonListItem,

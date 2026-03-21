@@ -22,6 +22,7 @@ import {
   Select,
   SelectOption,
   CategoryPicker,
+  TransactionTypeToggle,
 } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import {
@@ -243,38 +244,10 @@ export function AddTransactionScreen() {
         )}
 
         {/* Type Toggle */}
-        <View className="mb-4 flex-row gap-2">
-          <TouchableOpacity
-            onPress={() => setValue('type', 'expense')}
-            className={`flex-1 items-center rounded-lg py-3 ${
-              selectedType === 'expense' ? '' : 'bg-secondary'
-            }`}
-            style={selectedType === 'expense' ? { backgroundColor: colors.expense } : undefined}
-          >
-            <Text
-              className={`font-semibold ${
-                selectedType === 'expense' ? 'text-white' : 'text-foreground'
-              }`}
-            >
-              Expense
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setValue('type', 'income')}
-            className={`flex-1 items-center rounded-lg py-3 ${
-              selectedType === 'income' ? '' : 'bg-secondary'
-            }`}
-            style={selectedType === 'income' ? { backgroundColor: colors.income } : undefined}
-          >
-            <Text
-              className={`font-semibold ${
-                selectedType === 'income' ? 'text-white' : 'text-foreground'
-              }`}
-            >
-              Income
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <TransactionTypeToggle
+          value={selectedType}
+          onChange={(type) => setValue('type', type)}
+        />
 
         {/* Amount */}
         <View className="mb-4">

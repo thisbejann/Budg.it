@@ -9,7 +9,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { AccountWithPerson, CategoryWithSubcategories, TransactionWithDetails } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
-import { Button, CurrencyInput, Input, DateInput, TimeInput, Select, SelectOption, CategoryPicker } from '../../../shared/components/ui';
+import { Button, CurrencyInput, Input, DateInput, TimeInput, Select, SelectOption, CategoryPicker, TransactionTypeToggle } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository, AccountRepository, CategoryRepository } from '../../../database/repositories';
 import { useTheme } from '../../../hooks/useColorScheme';
@@ -170,46 +170,14 @@ export function EditTransactionScreen() {
 
       <ScrollView className="flex-1 px-4 py-4">
         {/* Type Toggle */}
-        <View className="mb-4 flex-row gap-2">
-          <TouchableOpacity
-            onPress={() => {
-              setValue('type', 'expense');
-              setValue('category_id', undefined);
-              setValue('subcategory_id', undefined);
-            }}
-            className={`flex-1 items-center rounded-lg py-3 ${
-              selectedType === 'expense' ? '' : 'bg-secondary'
-            }`}
-            style={selectedType === 'expense' ? { backgroundColor: colors.expense } : undefined}
-          >
-            <Text
-              className={`font-semibold ${
-                selectedType === 'expense' ? 'text-white' : 'text-foreground'
-              }`}
-            >
-              Expense
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setValue('type', 'income');
-              setValue('category_id', undefined);
-              setValue('subcategory_id', undefined);
-            }}
-            className={`flex-1 items-center rounded-lg py-3 ${
-              selectedType === 'income' ? '' : 'bg-secondary'
-            }`}
-            style={selectedType === 'income' ? { backgroundColor: colors.income } : undefined}
-          >
-            <Text
-              className={`font-semibold ${
-                selectedType === 'income' ? 'text-white' : 'text-foreground'
-              }`}
-            >
-              Income
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <TransactionTypeToggle
+          value={selectedType}
+          onChange={(type) => {
+            setValue('type', type);
+            setValue('category_id', undefined);
+            setValue('subcategory_id', undefined);
+          }}
+        />
 
         {/* Amount */}
         <View className="mb-4">
