@@ -46,6 +46,8 @@ function SettingItem({
   return (
     <TouchableOpacity
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${title}${description ? `, ${description}` : ''}`}
       className="flex-row items-center justify-between py-3"
       activeOpacity={0.7}
     >
@@ -125,6 +127,9 @@ export function SettingsScreen() {
                   <TouchableOpacity
                     key={mode}
                     onPress={() => setThemeMode(mode)}
+                    accessibilityRole="radio"
+                    accessibilityLabel={`${label} theme`}
+                    accessibilityState={{ selected: isActive }}
                     className="flex-1 items-center py-3"
                     style={{
                       backgroundColor: isActive

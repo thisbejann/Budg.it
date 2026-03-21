@@ -25,12 +25,14 @@ const TAB_BAR_MARGIN_HORIZONTAL = 48;
 export const FLOATING_TAB_BAR_TOTAL_HEIGHT = TAB_BAR_HEIGHT + TAB_BAR_MARGIN_BOTTOM + 16;
 
 const TAB_ICONS = [Home, Receipt, Wallet, BarChart3, Settings];
+const TAB_LABELS = ['Home', 'Transactions', 'Accounts', 'Charts', 'Settings'];
 
 function TabItem({
   isFocused,
   onPress,
   onLongPress,
   Icon,
+  label,
   colors,
   isDark,
 }: {
@@ -38,6 +40,7 @@ function TabItem({
   onPress: () => void;
   onLongPress: () => void;
   Icon: typeof Home;
+  label: string;
   colors: ReturnType<typeof useTheme>['colors'];
   isDark: boolean;
 }) {
@@ -78,6 +81,9 @@ function TabItem({
       onPress={handlePress}
       onLongPress={onLongPress}
       activeOpacity={1}
+      accessibilityRole="tab"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: isFocused }}
       style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
     >
       <Animated.View style={[containerStyle, { alignItems: 'center' }]}>
@@ -209,6 +215,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
               onPress={onPress}
               onLongPress={onLongPress}
               Icon={Icon}
+              label={TAB_LABELS[index] || route.name}
               colors={colors}
               isDark={isDark}
             />

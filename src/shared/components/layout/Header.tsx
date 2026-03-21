@@ -64,6 +64,8 @@ export function Header({
           <TouchableOpacity
             onPress={handleBack}
             disabled={disableBack}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
             className={`p-1 ${disableBack ? 'opacity-40' : ''}`}
           >
             <ArrowLeft size={24} color={colors.foreground} />
@@ -73,6 +75,8 @@ export function Header({
           <TouchableOpacity
             onPress={handleClose}
             disabled={disableClose}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
             className={`p-1 ${disableClose ? 'opacity-40' : ''}`}
           >
             <X size={24} color={colors.foreground} />

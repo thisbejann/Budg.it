@@ -30,12 +30,14 @@ export function TransactionsScreen() {
   const [transactions, setTransactions] = useState<TransactionWithDetails[]>([]);
   const [dailyTotals, setDailyTotals] = useState<Record<string, DailyTotal>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const loadTransactions = useCallback(async () => {
     if (!activeLedgerId) return;
 
     try {
       setIsLoading(true);
+      setError(null);
       const monthStart = getMonthStart(selectedDate);
       const monthEnd = getMonthEnd(selectedDate);
 
@@ -54,8 +56,9 @@ export function TransactionsScreen() {
         totalsMap[t.date] = t;
       });
       setDailyTotals(totalsMap);
-    } catch (error) {
-      console.error('Error loading transactions:', error);
+    } catch (err) {
+      console.error('Error loading transactions:', err);
+      setError('Failed to load transactions');
     } finally {
       setIsLoading(false);
     }
@@ -174,6 +177,8 @@ export function TransactionsScreen() {
     <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(index * 40).springify() : undefined}>
       <TouchableOpacity
         onPress={() => navigation.navigate('TransactionDetail', { transactionId: item.id })}
+        accessibilityRole="button"
+        accessibilityLabel={`${item.category_name || 'Uncategorized'}, ${item.type === 'expense' ? 'expense' : 'income'} ${formatPHP(item.amount)}`}
         className="flex-row items-center justify-between px-4 py-3"
         style={{ borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : colors.border }}
       >
@@ -227,7 +232,10 @@ export function TransactionsScreen() {
         <View className="flex-row gap-2">
           <TouchableOpacity
             onPress={() => setViewMode('list')}
-            className="flex-row items-center gap-1 px-4 py-1.5"
+            accessibilityRole="radio"
+            accessibilityLabel="List view"
+            accessibilityState={{ selected: viewMode === 'list' }}
+            className="flex-row items-center gap-1 px-4 py-2.5"
             style={pillStyle(viewMode === 'list')}
           >
             <List size={16} color={pillTextColor(viewMode === 'list')} />
@@ -237,7 +245,10 @@ export function TransactionsScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setViewMode('calendar')}
-            className="flex-row items-center gap-1 px-4 py-1.5"
+            accessibilityRole="radio"
+            accessibilityLabel="Calendar view"
+            accessibilityState={{ selected: viewMode === 'calendar' }}
+            className="flex-row items-center gap-1 px-4 py-2.5"
             style={pillStyle(viewMode === 'calendar')}
           >
             <CalendarIcon size={16} color={pillTextColor(viewMode === 'calendar')} />
@@ -248,7 +259,9 @@ export function TransactionsScreen() {
         </View>
         <TouchableOpacity
           onPress={() => navigation.navigate('AddTransaction')}
-          className="rounded-full p-2"
+          accessibilityRole="button"
+          accessibilityLabel="Add transaction"
+          className="rounded-full p-3"
           style={{ backgroundColor: colors.primary }}
         >
           <Plus size={20} color={colors.onPrimary} />
@@ -304,6 +317,14 @@ export function TransactionsScreen() {
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
+      ) : error ? (
+        <EmptyState
+          icon={<LucideIcons.AlertTriangle size={48} color={colors.mutedForeground} />}
+          title="Something went wrong"
+          description={error}
+          actionLabel="Try Again"
+          onAction={loadTransactions}
+        />
       ) : (
         <FlatList
           data={filteredTransactions}
