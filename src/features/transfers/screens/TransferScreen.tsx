@@ -8,11 +8,11 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { AccountWithPerson } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
-import { Button, CurrencyInput, Input, Select, SelectOption } from '../../../shared/components/ui';
+import { Button, CurrencyInput, Input, Select, SelectOption, EmptyState } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransferRepository, AccountRepository } from '../../../database/repositories';
 import { getToday, getCurrentTime } from '../../../shared/utils/date';
-import { ArrowDown } from 'lucide-react-native';
+import { ArrowDown, Wallet } from 'lucide-react-native';
 import { useTheme } from '../../../hooks/useColorScheme';
 import { useMutationCloseGuard } from '../../../shared/hooks';
 import { safeCloseAfterMutation } from '../../../shared/utils';
@@ -129,6 +129,15 @@ export function TransferScreen() {
     <Screen scrollable={false}>
       <Header title="Transfer Funds" showClose disableClose={isLoading} />
 
+      {accounts.length < 2 ? (
+        <EmptyState
+          icon={<Wallet size={48} color={colors.mutedForeground} />}
+          title="Not enough accounts"
+          description="You need at least two accounts to make a transfer"
+          actionLabel="Add Account"
+          onAction={() => navigation.navigate('AddAccount')}
+        />
+      ) : (
       <ScrollView className="flex-1 px-4 py-4">
         {/* From Account */}
         <View className="mb-4">
@@ -260,6 +269,7 @@ export function TransferScreen() {
 
         <View className="h-8" />
       </ScrollView>
+      )}
     </Screen>
   );
 }

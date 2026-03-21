@@ -9,7 +9,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { AccountWithPerson } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
-import { Button, CurrencyInput, Input, DateInput, Select, SelectOption } from '../../../shared/components/ui';
+import { Button, CurrencyInput, Input, DateInput, Select, SelectOption, EmptyState } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { AccountRepository, TransferRepository, TransactionRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
@@ -148,6 +148,15 @@ export function PayCreditCardScreen() {
     <Screen scrollable={false}>
       <Header title="Pay Credit Card" showClose disableClose={isLoading} />
 
+      {debitAccounts.length === 0 && !isLoading ? (
+        <EmptyState
+          icon={<LucideIcons.Wallet size={48} color={colors.mutedForeground} />}
+          title="No payment source"
+          description="Add a cash or bank account to make credit card payments"
+          actionLabel="Add Account"
+          onAction={() => navigation.navigate('AddAccount')}
+        />
+      ) : (
       <ScrollView className="flex-1 px-4 py-4" keyboardShouldPersistTaps="handled">
         {/* Credit Card Info */}
         {creditAccount && (
@@ -315,6 +324,7 @@ export function PayCreditCardScreen() {
 
         <View className="h-8" />
       </ScrollView>
+      )}
     </Screen>
   );
 }
