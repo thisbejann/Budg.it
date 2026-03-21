@@ -8,7 +8,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { AccountWithPerson } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
-import { Button, CurrencyInput, Input, Select, SelectOption, EmptyState } from '../../../shared/components/ui';
+import { Button, CurrencyInput, Input, DateInput, Select, SelectOption, EmptyState } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransferRepository, AccountRepository } from '../../../database/repositories';
 import { getToday, getCurrentTime } from '../../../shared/utils/date';
@@ -234,12 +234,7 @@ export function TransferScreen() {
             control={control}
             name="date"
             render={({ field: { onChange, value } }) => (
-              <Input
-                label="Date"
-                value={value}
-                onChangeText={onChange}
-                placeholder="YYYY-MM-DD"
-              />
+              <DateInput label="Date" value={value} onChangeValue={onChange} />
             )}
           />
         </View>
