@@ -1,9 +1,24 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { Plus, Calendar as CalendarIcon, List } from 'lucide-react-native';
-import { Calendar } from 'react-native-calendars';
+import {
+  Plus,
+  Calendar as CalendarIcon,
+  List,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import {
+  format,
+  parseISO,
+  startOfMonth,
+  endOfMonth,
+  addDays,
+  addMonths,
+  subMonths,
+  getDay,
+} from 'date-fns';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList, MainTabScreenProps } from '../../../types/navigation';
 import type { TransactionWithDetails, DailyTotal } from '../../../types/database';
@@ -14,11 +29,46 @@ import { TransactionRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
 import { formatDate, getMonthStart, getMonthEnd, getToday } from '../../../shared/utils/date';
 import { useTheme } from '../../../hooks/useColorScheme';
-import { FLOATING_TAB_BAR_TOTAL_HEIGHT } from '../../../shared/components/navigation/FloatingTabBar';
 import * as LucideIcons from 'lucide-react-native';
 import { getIconComponent } from '../../../shared/utils/icon';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+/** Compact currency format for day tiles: 1.2K, 500, 2.3M */
+function formatCompact(amount: number): string {
+  if (amount >= 1000000) return `${(amount / 1000000).toFixed(1)}M`;
+  if (amount >= 1000) return `${(amount / 1000).toFixed(1)}K`;
+  return amount.toFixed(0);
+}
+
+/** Returns a 2D grid of dates for the month (Mon-start), with nulls for padding. */
+function getMonthGridDates(dateStr: string): (string | null)[][] {
+  const date = parseISO(dateStr);
+  const mStart = startOfMonth(date);
+  const mEnd = endOfMonth(date);
+  const firstDayIndex = (getDay(mStart) + 6) % 7; // Mon=0 … Sun=6
+
+  const weeks: (string | null)[][] = [];
+  let week: (string | null)[] = Array(firstDayIndex).fill(null);
+
+  let current = new Date(mStart);
+  while (current <= mEnd) {
+    week.push(format(current, 'yyyy-MM-dd'));
+    if (week.length === 7) {
+      weeks.push(week);
+      week = [];
+    }
+    current = addDays(current, 1);
+  }
+  if (week.length > 0) {
+    while (week.length < 7) week.push(null);
+    weeks.push(week);
+  }
+
+  return weeks;
+}
 
 export function TransactionsScreen() {
   const navigation = useNavigation<NavigationProp>();
@@ -32,10 +82,10 @@ export function TransactionsScreen() {
   const [dailyTotals, setDailyTotals] = useState<Record<string, DailyTotal>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // ---------- Data loading ----------
 
   const loadTransactions = useCallback(async () => {
     if (!activeLedgerId) return;
-
     try {
       setIsLoading(true);
       setError(null);
@@ -51,7 +101,6 @@ export function TransactionsScreen() {
       ]);
 
       setTransactions(txns);
-
       const totalsMap: Record<string, DailyTotal> = {};
       totals.forEach((t) => {
         totalsMap[t.date] = t;
@@ -71,102 +120,134 @@ export function TransactionsScreen() {
     }, [loadTransactions])
   );
 
+  // ---------- Calendar computations ----------
+
+  const today = getToday();
+  const monthGrid = useMemo(() => getMonthGridDates(selectedDate), [selectedDate]);
+  const monthLabel = useMemo(
+    () => format(parseISO(selectedDate), 'MMMM yyyy'),
+    [selectedDate]
+  );
+  const currentMonth = selectedDate.substring(0, 7);
+
+  const goToPrevMonth = () => {
+    setSelectedDate(
+      format(startOfMonth(subMonths(parseISO(selectedDate), 1)), 'yyyy-MM-dd')
+    );
+  };
+
+  const goToNextMonth = () => {
+    setSelectedDate(
+      format(startOfMonth(addMonths(parseISO(selectedDate), 1)), 'yyyy-MM-dd')
+    );
+  };
+
+  const handleDayPress = (dateStr: string) => {
+    setSelectedDate(dateStr);
+  };
+
+  // ---------- Rendering helpers ----------
+
   const getIcon = (iconName: string, color: string = colors.onPrimary) => {
     const IconComponent = getIconComponent(iconName);
     return <IconComponent size={16} color={color} />;
   };
 
-  const formatCompact = (amount: number): string => {
-    if (amount >= 1000000) return `${(amount / 1000000).toFixed(1)}M`;
-    if (amount >= 1000) return `${(amount / 1000).toFixed(1)}K`;
-    return amount.toFixed(0);
-  };
+  const renderDayCell = (dateStr: string | null, index: number) => {
+    if (!dateStr) {
+      return <View key={`empty-${index}`} style={{ flex: 1, height: 62 }} />;
+    }
 
-  const renderDayComponent = useMemo(() => {
-    return ({ date, state }: { date?: { dateString: string; day: number }; state?: string }) => {
-      if (!date) return null;
-      const isSelected = date.dateString === selectedDate;
-      const isToday = date.dateString === getToday();
-      const dayData = dailyTotals[date.dateString];
-      const isDisabled = state === 'disabled';
+    const isSelected = dateStr === selectedDate;
+    const isToday = dateStr === today;
+    const dayData = dailyTotals[dateStr];
+    const dayNum = parseInt(dateStr.split('-')[2], 10);
+    const inMonth = dateStr.startsWith(currentMonth);
+    const hasData = dayData && inMonth;
 
-      return (
-        <TouchableOpacity
-          onPress={() => setSelectedDate(date.dateString)}
+    return (
+      <TouchableOpacity
+        key={dateStr}
+        onPress={() => handleDayPress(dateStr)}
+        style={{
+          flex: 1,
+          height: 62,
+          alignItems: 'center',
+          paddingTop: 4,
+        }}
+        accessibilityRole="button"
+        accessibilityLabel={`${formatDate(dateStr)}${isSelected ? ', selected' : ''}${isToday ? ', today' : ''}`}
+      >
+        <View
           style={{
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            borderCurve: 'continuous',
             alignItems: 'center',
             justifyContent: 'center',
-            width: 44,
-            height: 50,
-            borderRadius: 12,
-            ...(isSelected ? { backgroundColor: colors.primary } : {}),
+            backgroundColor: isSelected ? colors.primary : 'transparent',
+            ...(isToday && !isSelected
+              ? { borderWidth: 1.5, borderColor: colors.primary }
+              : {}),
           }}
         >
           <Text
             style={{
               fontSize: 14,
-              fontWeight: isToday ? '700' : '400',
+              fontWeight: isToday || isSelected ? '600' : '400',
               color: isSelected
                 ? colors.onPrimary
-                : isDisabled
-                  ? colors.mutedForeground
-                  : isToday
-                    ? colors.primary
-                    : colors.foreground,
+                : isToday
+                  ? colors.primary
+                  : inMonth
+                    ? colors.foreground
+                    : colors.mutedForeground,
             }}
           >
-            {date.day}
+            {dayNum}
           </Text>
-          {dayData && !isDisabled && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 2 }}>
-              {dayData.expense > 0 && (
-                <View
-                  style={{
-                    width: 5,
-                    height: 5,
-                    borderRadius: 2.5,
-                    backgroundColor: isSelected ? colors.onPrimary : colors.expense,
-                  }}
-                />
-              )}
-              {dayData.income > 0 && (
-                <View
-                  style={{
-                    width: 5,
-                    height: 5,
-                    borderRadius: 2.5,
-                    backgroundColor: isSelected ? colors.onPrimary : colors.income,
-                  }}
-                />
-              )}
-            </View>
-          )}
-        </TouchableOpacity>
-      );
-    };
-  }, [selectedDate, dailyTotals, colors]);
-
-  const markedDates = Object.entries(dailyTotals).reduce((acc, [date, total]) => {
-    acc[date] = {
-      marked: true,
-      dotColor: total.expense > total.income ? colors.expense : colors.income,
-      selected: date === selectedDate,
-      selectedColor: colors.primary,
-    };
-    return acc;
-  }, {} as Record<string, any>);
-
-  if (!markedDates[selectedDate]) {
-    markedDates[selectedDate] = {
-      selected: true,
-      selectedColor: colors.primary,
-    };
-  }
+        </View>
+        {hasData ? (
+          <View style={{ alignItems: 'center', marginTop: 1 }}>
+            {dayData.expense > 0 && (
+              <Text
+                style={{
+                  fontSize: 9,
+                  fontWeight: '600',
+                  lineHeight: 12,
+                  color: isSelected ? colors.onPrimary : colors.expense,
+                }}
+                numberOfLines={1}
+              >
+                {formatCompact(dayData.expense)}
+              </Text>
+            )}
+            {dayData.income > 0 && (
+              <Text
+                style={{
+                  fontSize: 9,
+                  fontWeight: '600',
+                  lineHeight: 12,
+                  color: isSelected ? colors.onPrimary : colors.income,
+                }}
+                numberOfLines={1}
+              >
+                {formatCompact(dayData.income)}
+              </Text>
+            )}
+          </View>
+        ) : null}
+      </TouchableOpacity>
+    );
+  };
 
   const filteredTransactions =
     viewMode === 'calendar'
       ? transactions.filter((t) => t.date === selectedDate)
       : transactions;
+
+  const selectedDayData = dailyTotals[selectedDate];
 
   const renderTransaction = ({ item, index }: { item: TransactionWithDetails; index: number }) => (
     <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(index * 40).springify() : undefined}>
@@ -209,7 +290,7 @@ export function TransactionsScreen() {
     </Animated.View>
   );
 
-  // Gold pill toggle style
+  // Toggle pill styles
   const pillStyle = (isActive: boolean) => ({
     backgroundColor: isActive ? colors.primary : (isDark ? colors.surfaceContainer : colors.secondaryContainer),
     borderRadius: 20,
@@ -219,7 +300,7 @@ export function TransactionsScreen() {
     isActive ? colors.onPrimary : (isDark ? colors.mutedForeground : colors.onSecondaryContainer);
 
   return (
-    <Screen scrollable={false}>
+    <Screen scrollable={true} hasTabBar={true}>
       <SimpleHeader title="Transactions" />
 
       {/* View Toggle */}
@@ -263,46 +344,129 @@ export function TransactionsScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Calendar View */}
+      {/* ========== Calendar View ========== */}
       {viewMode === 'calendar' && (
-        <Calendar
-          key={isDark ? 'dark' : 'light'}
-          current={selectedDate}
-          onDayPress={(day) => setSelectedDate(day.dateString)}
-          markedDates={markedDates}
-          dayComponent={renderDayComponent}
-          theme={{
-            backgroundColor: colors.background,
-            calendarBackground: colors.background,
-            textSectionTitleColor: colors.mutedForeground,
-            selectedDayBackgroundColor: colors.primary,
-            selectedDayTextColor: colors.onPrimary,
-            todayTextColor: colors.primary,
-            dayTextColor: colors.foreground,
-            textDisabledColor: colors.mutedForeground,
-            monthTextColor: colors.foreground,
-            arrowColor: colors.primary,
-          }}
-        />
-      )}
+        <View>
+          {/* Month Header */}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+            }}
+          >
+            <TouchableOpacity
+              onPress={goToPrevMonth}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={{ padding: 4 }}
+              accessibilityLabel="Previous month"
+            >
+              <ChevronLeft size={20} color={colors.foreground} />
+            </TouchableOpacity>
 
-      {/* Daily Summary for Calendar View */}
-      {viewMode === 'calendar' && dailyTotals[selectedDate] && (
-        <View
-          className="flex-row justify-around py-2"
-          style={{ borderBottomWidth: 1, borderBottomColor: isDark ? colors.dividerSubtle : colors.border }}
-        >
-          <View className="items-center">
-            <Text className="text-xs" style={{ color: colors.mutedForeground }}>Income</Text>
-            <Text className="text-sm font-semibold" style={{ color: colors.income }}>
-              {formatPHP(dailyTotals[selectedDate].income)}
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: '600',
+                color: colors.foreground,
+                letterSpacing: -0.3,
+              }}
+            >
+              {monthLabel}
             </Text>
+
+            <TouchableOpacity
+              onPress={goToNextMonth}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={{ padding: 4 }}
+              accessibilityLabel="Next month"
+            >
+              <ChevronRight size={20} color={colors.foreground} />
+            </TouchableOpacity>
           </View>
-          <View className="items-center">
-            <Text className="text-xs" style={{ color: colors.mutedForeground }}>Expense</Text>
-            <Text className="text-sm font-semibold" style={{ color: colors.expense }}>
-              {formatPHP(dailyTotals[selectedDate].expense)}
+
+          {/* Day-of-week Labels */}
+          <View style={{ flexDirection: 'row', paddingHorizontal: 8 }}>
+            {DAY_LABELS.map((label, i) => (
+              <View
+                key={i}
+                style={{ flex: 1, alignItems: 'center', paddingVertical: 4 }}
+              >
+                <Text
+                  style={{
+                    fontSize: 11,
+                    fontWeight: '600',
+                    color: colors.mutedForeground,
+                  }}
+                >
+                  {label}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Month Grid */}
+          {monthGrid.map((week, wi) => (
+            <View
+              key={`week-${wi}`}
+              style={{ flexDirection: 'row', paddingHorizontal: 8 }}
+            >
+              {week.map((d, di) => renderDayCell(d, di))}
+            </View>
+          ))}
+
+          {/* Day Summary Bar */}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingHorizontal: 16,
+              paddingVertical: 10,
+              marginTop: 4,
+              borderBottomWidth: 1,
+              borderBottomColor: isDark
+                ? colors.dividerSubtle
+                : colors.border,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: '500',
+                color: colors.foreground,
+              }}
+            >
+              {formatDate(selectedDate)}
             </Text>
+            {selectedDayData && (
+              <View style={{ flexDirection: 'row', gap: 12 }}>
+                {selectedDayData.expense > 0 && (
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: '600',
+                      color: colors.expense,
+                    }}
+                  >
+                    -{formatPHP(selectedDayData.expense)}
+                  </Text>
+                )}
+                {selectedDayData.income > 0 && (
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: '600',
+                      color: colors.income,
+                    }}
+                  >
+                    +{formatPHP(selectedDayData.income)}
+                  </Text>
+                )}
+              </View>
+            )}
           </View>
         </View>
       )}
@@ -318,26 +482,24 @@ export function TransactionsScreen() {
           actionLabel="Try Again"
           onAction={loadTransactions}
         />
-      ) : (
-        <FlatList
-          data={filteredTransactions}
-          renderItem={renderTransaction}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{ paddingBottom: FLOATING_TAB_BAR_TOTAL_HEIGHT }}
-          ListEmptyComponent={
-            <EmptyState
-              icon={<LucideIcons.Receipt size={48} color={colors.mutedForeground} />}
-              title="No transactions"
-              description={
-                viewMode === 'calendar'
-                  ? 'No transactions on this day'
-                  : 'Start tracking your expenses'
-              }
-              actionLabel="Add Transaction"
-              onAction={() => navigation.navigate('AddTransaction')}
-            />
+      ) : filteredTransactions.length === 0 ? (
+        <EmptyState
+          icon={<LucideIcons.Receipt size={48} color={colors.mutedForeground} />}
+          title="No transactions"
+          description={
+            viewMode === 'calendar'
+              ? 'No transactions on this day'
+              : 'Start tracking your expenses'
           }
+          actionLabel="Add Transaction"
+          onAction={() => navigation.navigate('AddTransaction')}
         />
+      ) : (
+        filteredTransactions.map((item, index) =>
+          <React.Fragment key={item.id}>
+            {renderTransaction({ item, index })}
+          </React.Fragment>
+        )
       )}
     </Screen>
   );
