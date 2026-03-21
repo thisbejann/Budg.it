@@ -65,7 +65,7 @@ export function TransferScreen() {
 
   useEffect(() => {
     loadAccounts();
-  }, []);
+  }, [activeLedgerId]);
 
   const loadAccounts = async () => {
     if (!activeLedgerId) return;

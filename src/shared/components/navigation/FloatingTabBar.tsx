@@ -27,7 +27,7 @@ export const FLOATING_TAB_BAR_TOTAL_HEIGHT = TAB_BAR_HEIGHT + TAB_BAR_MARGIN_BOT
 const TAB_ICONS = [Home, Receipt, Wallet, BarChart3, Settings];
 const TAB_LABELS = ['Home', 'Transactions', 'Accounts', 'Charts', 'Settings'];
 
-function TabItem({
+const TabItem = React.memo(function TabItem({
   isFocused,
   onPress,
   onLongPress,
@@ -123,7 +123,7 @@ function TabItem({
       </Animated.View>
     </TouchableOpacity>
   );
-}
+});
 
 export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const { colors, isDark } = useTheme();

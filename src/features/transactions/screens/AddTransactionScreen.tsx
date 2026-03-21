@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -171,27 +171,30 @@ export function AddTransactionScreen() {
     }
   };
 
-  const accountOptions: SelectOption[] = accounts.map(acc => ({
-    label: acc.name,
-    value: acc.id,
-  }));
-
-  const filteredCategories = categories.filter(
-    cat => cat.type === selectedType,
+  const accountOptions = useMemo<SelectOption[]>(() =>
+    accounts.map(acc => ({ label: acc.name, value: acc.id })),
+    [accounts]
   );
-  const categoryOptions: SelectOption[] = filteredCategories.map(cat => ({
-    label: cat.name,
-    value: cat.id,
-  }));
 
-  const selectedCategory = filteredCategories.find(
-    c => c.id === selectedCategoryId,
+  const filteredCategories = useMemo(() =>
+    categories.filter(cat => cat.type === selectedType),
+    [categories, selectedType]
   );
-  const subcategoryOptions: SelectOption[] =
-    selectedCategory?.subcategories.map(sub => ({
-      label: sub.name,
-      value: sub.id,
-    })) || [];
+
+  const categoryOptions = useMemo<SelectOption[]>(() =>
+    filteredCategories.map(cat => ({ label: cat.name, value: cat.id })),
+    [filteredCategories]
+  );
+
+  const selectedCategory = useMemo(() =>
+    filteredCategories.find(c => c.id === selectedCategoryId),
+    [filteredCategories, selectedCategoryId]
+  );
+
+  const subcategoryOptions = useMemo<SelectOption[]>(() =>
+    selectedCategory?.subcategories.map(sub => ({ label: sub.name, value: sub.id })) || [],
+    [selectedCategory]
+  );
 
   return (
     <Screen scrollable={false}>

@@ -63,7 +63,7 @@ export function PayCreditCardScreen() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [activeLedgerId, accountId]);
 
   const loadData = async () => {
     if (!activeLedgerId) return;
