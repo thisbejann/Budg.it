@@ -12,6 +12,7 @@ interface AvatarProps {
   className?: string;
 }
 
+// sm: 32px, md: 40px, lg: 48px, xl: 64px
 const sizeStyles: Record<AvatarSize, { container: string; text: string }> = {
   sm: { container: 'h-8 w-8', text: 'text-xs' },
   md: { container: 'h-10 w-10', text: 'text-sm' },
