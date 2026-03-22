@@ -1,17 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable, Modal, FlatList, Dimensions } from 'react-native';
-import { ChevronDown } from 'lucide-react-native';
+import React from 'react';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import * as LucideIcons from 'lucide-react-native';
 import { useTheme } from '../../../hooks/useColorScheme';
 import type { CategoryWithSubcategories } from '../../../types/database';
 
-const NUM_COLUMNS = 4;
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const TILE_SIZE = (SCREEN_WIDTH - 48 - 24) / NUM_COLUMNS; // padding 24*2, gaps
-
 interface CategoryPickerProps {
   label?: string;
-  placeholder?: string;
   value?: number | null;
   categories: CategoryWithSubcategories[];
   onValueChange: (categoryId: number) => void;
@@ -28,223 +22,108 @@ function getCategoryIcon(iconName: string) {
 
 export function CategoryPicker({
   label,
-  placeholder = 'Select category',
   value,
   categories,
   onValueChange,
   error,
 }: CategoryPickerProps) {
   const { colors } = useTheme();
-  const [visible, setVisible] = useState(false);
-
-  const selectedCategory = categories.find((c) => c.id === value);
-
-  const handleSelect = (categoryId: number) => {
-    onValueChange(categoryId);
-    setVisible(false);
-  };
-
-  const SelectedIcon = selectedCategory
-    ? getCategoryIcon(selectedCategory.icon)
-    : null;
 
   return (
-    <View style={{ width: '100%' as any }}>
+    <View>
       {label && (
         <Text
           style={{
             color: colors.foreground,
             fontSize: 14,
             fontWeight: '500',
-            marginBottom: 6,
+            marginBottom: 10,
           }}
         >
           {label}
         </Text>
       )}
 
-      {/* Trigger */}
-      <Pressable
-        onPress={() => setVisible(true)}
-        style={{
-          backgroundColor: colors.surfaceVariant,
-          borderColor: error ? colors.destructive : colors.outline,
-          borderWidth: 1,
-          borderRadius: 12,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: 12,
-        }}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ marginHorizontal: -16 }}
+        contentContainerStyle={{ paddingHorizontal: 12, gap: 2 }}
       >
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingVertical: 12,
-          }}
-        >
-          {selectedCategory && SelectedIcon ? (
-            <>
+        {categories.map((category) => {
+          const Icon = getCategoryIcon(category.icon);
+          const isSelected = category.id === value;
+
+          return (
+            <Pressable
+              key={category.id}
+              onPress={() => onValueChange(category.id)}
+              style={({ pressed }) => ({
+                alignItems: 'center',
+                paddingVertical: 10,
+                paddingHorizontal: 6,
+                borderRadius: 16,
+                backgroundColor: isSelected
+                  ? category.color + '18'
+                  : 'transparent',
+                width: 72,
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
               <View
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 14,
-                  backgroundColor: selectedCategory.color,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: 8,
-                }}
+                style={[
+                  {
+                    width: 42,
+                    height: 42,
+                    borderRadius: 21,
+                    backgroundColor: category.color,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  },
+                  isSelected
+                    ? {
+                        shadowColor: category.color,
+                        shadowOffset: { width: 0, height: 3 },
+                        shadowOpacity: 0.4,
+                        shadowRadius: 6,
+                        elevation: 4,
+                      }
+                    : { opacity: 0.55 },
+                ]}
               >
-                <SelectedIcon size={16} color="#ffffff" />
+                <Icon size={20} color="#ffffff" />
               </View>
               <Text
                 style={{
-                  fontSize: 16,
-                  color: colors.foreground,
+                  fontSize: 11,
+                  color: isSelected
+                    ? colors.foreground
+                    : colors.mutedForeground,
+                  fontWeight: isSelected ? '600' : '400',
+                  textAlign: 'center',
+                  marginTop: 6,
+                  lineHeight: 14,
                 }}
+                numberOfLines={2}
               >
-                {selectedCategory.name}
+                {category.name}
               </Text>
-            </>
-          ) : (
-            <Text
-              style={{
-                fontSize: 16,
-                color: colors.mutedForeground,
-              }}
-            >
-              {placeholder}
-            </Text>
-          )}
-        </View>
-        <ChevronDown size={20} color={colors.mutedForeground} />
-      </Pressable>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
 
       {error && (
         <Text
           style={{
             color: colors.destructive,
-            fontSize: 14,
+            fontSize: 12,
             marginTop: 4,
           }}
         >
           {error}
         </Text>
       )}
-
-      {/* Modal */}
-      <Modal
-        visible={visible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setVisible(false)}
-      >
-        <Pressable
-          style={{
-            flex: 1,
-            justifyContent: 'flex-end',
-            backgroundColor: colors.backdrop,
-          }}
-          onPress={() => setVisible(false)}
-        >
-          <Pressable
-            style={{
-              backgroundColor: colors.surface,
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
-              paddingBottom: 16,
-              paddingTop: 16,
-              maxHeight: '70%',
-            }}
-            onPress={() => {}}
-          >
-            {/* Header */}
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingHorizontal: 16,
-                paddingBottom: 12,
-              }}
-            >
-              <Text
-                style={{
-                  color: colors.foreground,
-                  fontSize: 16,
-                  fontWeight: '600',
-                }}
-              >
-                {label || 'Select Category'}
-              </Text>
-            </View>
-
-            {/* Grid */}
-            <FlatList
-              data={categories}
-              keyExtractor={(item) => item.id.toString()}
-              numColumns={NUM_COLUMNS}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: 16,
-                paddingBottom: 8,
-              }}
-              columnWrapperStyle={{
-                justifyContent: 'flex-start',
-                gap: 8,
-              }}
-              ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-              renderItem={({ item }) => {
-                const Icon = getCategoryIcon(item.icon);
-                const isSelected = item.id === value;
-
-                return (
-                  <Pressable
-                    onPress={() => handleSelect(item.id)}
-                    style={{
-                      width: TILE_SIZE,
-                      alignItems: 'center',
-                      paddingVertical: 8,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 20,
-                        backgroundColor: item.color,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderWidth: isSelected ? 3 : 0,
-                        borderColor: isSelected ? colors.primary : 'transparent',
-                      }}
-                    >
-                      <Icon size={20} color="#ffffff" />
-                    </View>
-                    <Text
-                      style={{
-                        fontSize: 11,
-                        color: isSelected
-                          ? colors.primary
-                          : colors.foreground,
-                        fontWeight: isSelected ? '600' : '400',
-                        textAlign: 'center',
-                        marginTop: 4,
-                        width: TILE_SIZE - 4,
-                      }}
-                      numberOfLines={2}
-                    >
-                      {item.name}
-                    </Text>
-                  </Pressable>
-                );
-              }}
-            />
-          </Pressable>
-        </Pressable>
-      </Modal>
     </View>
   );
 }

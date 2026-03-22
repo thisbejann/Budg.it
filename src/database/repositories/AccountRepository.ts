@@ -5,7 +5,7 @@ import type { AccountFormData } from '../../types/forms';
 export const AccountRepository = {
   async getAllByLedger(ledgerId: number): Promise<AccountWithPerson[]> {
     return executeSql<AccountWithPerson>(
-      `SELECT a.*, p.name as person_name
+      `SELECT a.*, COALESCE(a.person_name, p.name) as person_name
        FROM accounts a
        LEFT JOIN persons p ON a.person_id = p.id
        WHERE a.ledger_id = ? AND a.is_active = 1
@@ -16,7 +16,7 @@ export const AccountRepository = {
 
   async getByType(ledgerId: number, accountType: AccountType): Promise<AccountWithPerson[]> {
     return executeSql<AccountWithPerson>(
-      `SELECT a.*, p.name as person_name
+      `SELECT a.*, COALESCE(a.person_name, p.name) as person_name
        FROM accounts a
        LEFT JOIN persons p ON a.person_id = p.id
        WHERE a.ledger_id = ? AND a.account_type = ? AND a.is_active = 1
@@ -27,7 +27,7 @@ export const AccountRepository = {
 
   async getById(id: number): Promise<AccountWithPerson | null> {
     const results = await executeSql<AccountWithPerson>(
-      `SELECT a.*, p.name as person_name
+      `SELECT a.*, COALESCE(a.person_name, p.name) as person_name
        FROM accounts a
        LEFT JOIN persons p ON a.person_id = p.id
        WHERE a.id = ?`,
@@ -39,8 +39,8 @@ export const AccountRepository = {
   async create(ledgerId: number, data: AccountFormData): Promise<number> {
     const id = await executeSqlInsert(
       `INSERT INTO accounts
-       (ledger_id, name, account_type, initial_balance, current_balance, credit_limit, statement_date, due_date, payment_due_days, person_id, icon, color, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (ledger_id, name, account_type, initial_balance, current_balance, credit_limit, statement_date, due_date, payment_due_days, person_id, person_name, icon, color, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         ledgerId,
         data.name,
@@ -52,6 +52,7 @@ export const AccountRepository = {
         data.due_date || null,
         data.payment_due_days || null,
         data.person_id || null,
+        data.person_name || null,
         data.icon,
         data.color,
         data.notes || null,
@@ -83,6 +84,10 @@ export const AccountRepository = {
     if (data.person_id !== undefined) {
       fields.push('person_id = ?');
       values.push(data.person_id);
+    }
+    if (data.person_name !== undefined) {
+      fields.push('person_name = ?');
+      values.push(data.person_name);
     }
     if (data.icon !== undefined) {
       fields.push('icon = ?');

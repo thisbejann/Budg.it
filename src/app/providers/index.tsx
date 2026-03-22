@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
@@ -8,6 +9,7 @@ import { HeroUINativeProvider } from 'heroui-native';
 import { Uniwind } from 'uniwind';
 import { DatabaseProvider } from './DatabaseProvider';
 import { useThemeStore } from '../../store';
+import { useColorScheme } from '../../hooks/useColorScheme';
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -31,7 +33,14 @@ function ThemeSyncer({ children }: { children: React.ReactNode }) {
     Uniwind.setTheme(themeMode);
   }, [themeMode, hydrated]);
 
-  return children;
+  const colorScheme = useColorScheme();
+
+  return (
+    <>
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+      {children}
+    </>
+  );
 }
 
 export function AppProviders({ children }: AppProvidersProps) {

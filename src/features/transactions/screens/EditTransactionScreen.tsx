@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, Alert, ActivityIndicator } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,7 +10,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { AccountWithPerson, CategoryWithSubcategories, TransactionWithDetails } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
-import { Button, CurrencyInput, Input, DateInput, TimeInput, Select, SelectOption, CategoryPicker, TransactionTypeToggle } from '../../../shared/components/ui';
+import { Button, Input, DateInput, TimeInput, Select, SelectOption, CategoryPicker, TransactionTypeToggle, NumberPad, Card, CardContent } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository, AccountRepository, CategoryRepository } from '../../../database/repositories';
 import { useTheme } from '../../../hooks/useColorScheme';
@@ -141,10 +142,6 @@ export function EditTransactionScreen() {
   }));
 
   const filteredCategories = categories.filter((cat) => cat.type === selectedType);
-  const categoryOptions: SelectOption[] = filteredCategories.map((cat) => ({
-    label: cat.name,
-    value: cat.id,
-  }));
 
   const selectedCategory = filteredCategories.find((c) => c.id === selectedCategoryId);
   const subcategoryOptions: SelectOption[] =
@@ -152,6 +149,8 @@ export function EditTransactionScreen() {
       label: sub.name,
       value: sub.id,
     })) || [];
+
+  const amountValue = watch('amount');
 
   if (isLoadingData) {
     return (
@@ -168,123 +167,140 @@ export function EditTransactionScreen() {
     <Screen scrollable={false}>
       <Header title="Edit Transaction" showBack disableBack={isLoading} />
 
-      <ScrollView className="flex-1 px-4 py-4">
-        {/* Type Toggle */}
-        <TransactionTypeToggle
-          value={selectedType}
-          onChange={(type) => {
-            setValue('type', type);
-            setValue('category_id', undefined);
-            setValue('subcategory_id', undefined);
-          }}
-        />
-
-        {/* Amount */}
-        <View className="mb-4">
-          <Controller
-            control={control}
-            name="amount"
-            render={({ field: { onChange, value } }) => (
-              <CurrencyInput
-                label="Amount"
-                placeholder="0.00"
-                value={value}
-                onChangeValue={onChange}
-                error={errors.amount?.message}
-              />
-            )}
+      <View className="flex-1">
+        {/* Hero Amount Section */}
+        <View className="items-center px-4 pt-2 pb-3">
+          <TransactionTypeToggle
+            value={selectedType}
+            onChange={(type) => {
+              setValue('type', type);
+              setValue('category_id', undefined);
+              setValue('subcategory_id', undefined);
+            }}
           />
+          <View className="mt-2 flex-row items-baseline">
+            <Text
+              className="text-xl"
+              style={{ color: colors.mutedForeground }}
+            >
+              ₱
+            </Text>
+            <Text
+              className="font-bold"
+              style={{
+                fontSize: 48,
+                lineHeight: 56,
+                color: amountValue ? colors.foreground : colors.mutedForeground,
+              }}
+            >
+              {amountValue || '0.00'}
+            </Text>
+          </View>
+          {errors.amount && (
+            <Text className="mt-1 text-xs" style={{ color: colors.destructive }}>
+              {errors.amount.message}
+            </Text>
+          )}
         </View>
 
-        {/* Account */}
-        <View className="mb-4">
-          <Controller
-            control={control}
-            name="account_id"
-            render={({ field: { onChange, value } }) => (
-              <Select
-                label="Account"
-                placeholder="Select account"
-                value={value}
-                options={accountOptions}
-                onValueChange={onChange}
-                error={errors.account_id?.message}
-              />
-            )}
-          />
-        </View>
-
-        {/* Category */}
-        <View className="mb-4">
-          <Controller
-            control={control}
-            name="category_id"
-            render={({ field: { onChange, value } }) => (
-              <CategoryPicker
-                label="Category"
-                placeholder="Select category"
-                value={value}
-                categories={filteredCategories}
-                onValueChange={(v) => {
-                  onChange(v);
-                  setValue('subcategory_id', undefined);
-                }}
-              />
-            )}
-          />
-        </View>
-
-        {/* Subcategory */}
-        {subcategoryOptions.length > 0 && (
-          <View className="mb-4">
+        {/* Scrollable Form Fields */}
+        <KeyboardAwareScrollView
+          className="flex-1 px-4"
+          keyboardShouldPersistTaps="handled"
+          bottomOffset={20}
+          contentContainerStyle={{ paddingBottom: 16 }}
+        >
+          {/* Category */}
+          <View className="mb-3">
             <Controller
               control={control}
-              name="subcategory_id"
+              name="category_id"
               render={({ field: { onChange, value } }) => (
-                <Select
-                  label="Subcategory"
-                  placeholder="Select subcategory (optional)"
+                <CategoryPicker
+                  label="Category"
                   value={value}
-                  options={subcategoryOptions}
-                  onValueChange={onChange}
+                  categories={filteredCategories}
+                  onValueChange={(v) => {
+                    onChange(v);
+                    setValue('subcategory_id', undefined);
+                  }}
                 />
               )}
             />
+            {subcategoryOptions.length > 0 && (
+              <View className="mt-2">
+                <Controller
+                  control={control}
+                  name="subcategory_id"
+                  render={({ field: { onChange, value } }) => (
+                    <Select
+                      label="Subcategory"
+                      placeholder="Select subcategory (optional)"
+                      value={value}
+                      options={subcategoryOptions}
+                      onValueChange={onChange}
+                    />
+                  )}
+                />
+              </View>
+            )}
           </View>
-        )}
 
-        {/* Date */}
-        <View className="mb-4">
-          <Controller
-            control={control}
-            name="date"
-            render={({ field: { onChange, value } }) => (
-              <DateInput
-                label="Date"
-                value={value}
-                onChangeValue={onChange}
+          {/* Account */}
+          <Card className="mb-3">
+            <CardContent>
+              <Controller
+                control={control}
+                name="account_id"
+                render={({ field: { onChange, value } }) => (
+                  <Select
+                    label="Account"
+                    placeholder="Select account"
+                    value={value}
+                    options={accountOptions}
+                    onValueChange={onChange}
+                    error={errors.account_id?.message}
+                  />
+                )}
               />
-            )}
-          />
-        </View>
+            </CardContent>
+          </Card>
 
-        {/* Time */}
-        <View className="mb-4">
-          <Controller
-            control={control}
-            name="time"
-            render={({ field: { onChange, value } }) => (
-              <TimeInput
-                label="Time (optional)"
-                value={value}
-                onChangeValue={onChange}
-              />
-            )}
-          />
-        </View>
+          {/* Date & Time Card */}
+          <Card className="mb-3">
+            <CardContent>
+              <View className="flex-row gap-3">
+                <View className="flex-1">
+                  <Controller
+                    control={control}
+                    name="date"
+                    render={({ field: { onChange, value } }) => (
+                      <DateInput
+                        label="Date"
+                        value={value}
+                        onChangeValue={onChange}
+                      />
+                    )}
+                  />
+                </View>
+                <View className="flex-1">
+                  <Controller
+                    control={control}
+                    name="time"
+                    render={({ field: { onChange, value } }) => (
+                      <TimeInput
+                        label="Time"
+                        value={value}
+                        onChangeValue={onChange}
+                      />
+                    )}
+                  />
+                </View>
+              </View>
+            </CardContent>
+          </Card>
 
-        {/* Notes */}
-        <View className="mb-6">
+          {/* Notes */}
           <Controller
             control={control}
             name="notes"
@@ -299,17 +315,19 @@ export function EditTransactionScreen() {
               />
             )}
           />
-        </View>
+        </KeyboardAwareScrollView>
 
-        {/* Submit Button */}
-        <View className="mt-2">
+        {/* Fixed Bottom: NumberPad + Submit */}
+        <View className="px-4 pb-4 pt-2" style={{ gap: 12 }}>
+          <NumberPad
+            value={amountValue}
+            onValueChange={(v) => setValue('amount', v)}
+          />
           <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
             Save Changes
           </Button>
         </View>
-
-        <View className="h-8" />
-      </ScrollView>
+      </View>
     </Screen>
   );
 }

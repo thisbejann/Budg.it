@@ -23,6 +23,7 @@ export {
 export { Avatar, IconAvatar } from './Avatar';
 export { EmptyState } from './EmptyState';
 export { TransactionTypeToggle } from './TransactionTypeToggle';
+export { NumberPad } from './NumberPad';
 export {
   Skeleton,
   SkeletonListItem,

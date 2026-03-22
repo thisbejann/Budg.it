@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-nati
 import { useFocusEffect } from '@react-navigation/native';
 import { VictoryPie, VictoryBar, VictoryChart, VictoryAxis, VictoryTheme } from 'victory-native';
 import type { CategorySpending } from '../../../types/database';
-import { Screen, SimpleHeader } from '../../../shared/components/layout';
+import { Screen, Header } from '../../../shared/components/layout';
 import { Card, CardHeader, CardTitle, CardContent, EmptyState, ChartsScreenSkeleton } from '../../../shared/components/ui';
 import { AlertTriangle } from 'lucide-react-native';
 import { useLedgerStore } from '../../../store';
@@ -87,8 +87,8 @@ export function ChartsScreen() {
     isActive ? colors.onPrimary : (isDark ? colors.mutedForeground : colors.onSecondaryContainer);
 
   return (
-    <Screen hasTabBar>
-      <SimpleHeader title="Charts & Insights" />
+    <Screen>
+      <Header title="Charts & Insights" showBack />
 
       {isLoading ? (
         <ChartsScreenSkeleton />
@@ -154,21 +154,22 @@ export function ChartsScreen() {
                   height={250}
                   colorScale={pieData.map((d) => d.color)}
                   innerRadius={60}
-                  labelRadius={({ innerRadius }) => (innerRadius as number) + 40}
-                  style={{
-                    labels: { fill: colors.foreground, fontSize: 10 },
-                  }}
-                  labels={({ datum }) => `${datum.x}\n${formatPHPCompact(datum.y)}`}
+                  labels={() => ''}
                 />
-                {/* Legend */}
-                <View className="mt-2 flex-row flex-wrap justify-center gap-2">
+                {/* Legend with amounts */}
+                <View className="mt-3 flex-row flex-wrap justify-center" style={{ gap: 12 }}>
                   {pieData.map((item, index) => (
-                    <View key={index} className="flex-row items-center gap-1">
+                    <View key={index} className="flex-row items-center gap-1.5">
                       <View
                         className="h-3 w-3 rounded-full"
                         style={{ backgroundColor: item.color }}
                       />
-                      <Text className="text-xs" style={{ color: colors.mutedForeground }}>{item.x}</Text>
+                      <Text className="text-xs" style={{ color: colors.foreground }}>
+                        {item.x}
+                      </Text>
+                      <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                        {formatPHPCompact(item.y)}
+                      </Text>
                     </View>
                   ))}
                 </View>

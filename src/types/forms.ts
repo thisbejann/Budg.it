@@ -25,6 +25,7 @@ export interface AccountFormData {
   due_date?: number;
   payment_due_days?: number;
   person_id?: number;
+  person_name?: string;
   icon: string;
   color: string;
   notes?: string;

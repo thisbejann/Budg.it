@@ -20,6 +20,23 @@ export const TemplateRepository = {
     );
   },
 
+  async getQuickCreate(ledgerId: number): Promise<TransactionTemplateWithDetails[]> {
+    return executeSql<TransactionTemplateWithDetails>(
+      `SELECT
+        t.*,
+        a.name as account_name,
+        c.name as category_name,
+        s.name as subcategory_name
+      FROM transaction_templates t
+      LEFT JOIN accounts a ON t.account_id = a.id
+      LEFT JOIN categories c ON t.category_id = c.id
+      LEFT JOIN subcategories s ON t.subcategory_id = s.id
+      WHERE t.ledger_id = ? AND t.amount IS NOT NULL AND t.account_id IS NOT NULL
+      ORDER BY t.usage_count DESC, t.last_used_at DESC`,
+      [ledgerId]
+    );
+  },
+
   async getPopular(ledgerId: number, limit: number = 5): Promise<TransactionTemplateWithDetails[]> {
     return executeSql<TransactionTemplateWithDetails>(
       `SELECT
