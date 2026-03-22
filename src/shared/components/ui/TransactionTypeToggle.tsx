@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import Animated, {
   useAnimatedStyle,
-  withSpring,
+  withTiming,
   useSharedValue,
+  interpolateColor,
+  Easing,
 } from 'react-native-reanimated';
 import { ArrowUpRight, ArrowDownLeft } from 'lucide-react-native';
 import { useTheme } from '../../../hooks/useColorScheme';
@@ -15,50 +17,60 @@ interface TransactionTypeToggleProps {
   onChange: (type: TransactionType) => void;
 }
 
+const INDICATOR_PADDING = 4;
+
 export function TransactionTypeToggle({ value, onChange }: TransactionTypeToggleProps) {
   const { colors } = useTheme();
   const isExpense = value === 'expense';
+  const [containerWidth, setContainerWidth] = useState(0);
 
   const slidePosition = useSharedValue(isExpense ? 0 : 1);
 
+  const halfWidth = containerWidth / 2;
+  const indicatorWidth = halfWidth - INDICATOR_PADDING;
+
   React.useEffect(() => {
-    slidePosition.value = withSpring(isExpense ? 0 : 1, {
-      damping: 18,
-      stiffness: 280,
+    slidePosition.value = withTiming(isExpense ? 0 : 1, {
+      duration: 250,
+      easing: Easing.out(Easing.cubic),
     });
   }, [isExpense]);
 
   const indicatorStyle = useAnimatedStyle(() => ({
-    left: `${slidePosition.value * 50}%` as any,
+    transform: [{ translateX: slidePosition.value * halfWidth }],
   }));
 
-  const indicatorColorStyle = useAnimatedStyle(() => {
-    const progress = slidePosition.value;
-    // Crossfade between expense (red) and income (green)
-    return {
-      backgroundColor: progress < 0.5 ? colors.expense : colors.income,
-    };
-  });
+  const indicatorColorStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      slidePosition.value,
+      [0, 1],
+      [colors.expense, colors.income]
+    ),
+  }));
 
   return (
     <View
       className="mb-4 flex-row overflow-hidden rounded-2xl p-1"
       style={{ backgroundColor: colors.muted }}
+      onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
     >
       {/* Sliding indicator */}
-      <Animated.View
-        style={[
-          indicatorStyle,
-          indicatorColorStyle,
-          {
-            position: 'absolute',
-            top: 4,
-            bottom: 4,
-            width: '48.5%',
-            borderRadius: 14,
-          },
-        ]}
-      />
+      {containerWidth > 0 && (
+        <Animated.View
+          style={[
+            indicatorStyle,
+            indicatorColorStyle,
+            {
+              position: 'absolute',
+              top: INDICATOR_PADDING,
+              bottom: INDICATOR_PADDING,
+              left: INDICATOR_PADDING,
+              width: indicatorWidth,
+              borderRadius: 14,
+            },
+          ]}
+        />
+      )}
 
       {/* Expense */}
       <Pressable

@@ -1,21 +1,18 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { Plus, ArrowUpRight, ArrowDownLeft, ArrowLeftRight, ChevronRight, AlertTriangle } from 'lucide-react-native';
+import { ArrowUpRight, ArrowDownLeft, ArrowLeftRight, ChevronRight, AlertTriangle } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { TransactionWithDetails, CategorySpending } from '../../../types/database';
 import { Screen } from '../../../shared/components/layout';
-import { Card, CardHeader, CardTitle, CardContent, FAB, IconAvatar, EmptyState } from '../../../shared/components/ui';
+import { Card, CardHeader, CardTitle, CardContent, IconAvatar, EmptyState } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransactionRepository, AccountRepository } from '../../../database/repositories';
 import { formatPHP, formatPHPCompact } from '../../../shared/utils/currency';
 import { getMonthStart, getMonthEnd, formatDate, formatMonthYear, getToday } from '../../../shared/utils/date';
 import { useTheme } from '../../../hooks/useColorScheme';
-import { FLOATING_TAB_BAR_TOTAL_HEIGHT } from '../../../shared/components/navigation/FloatingTabBar';
 import { getIconComponent } from '../../../shared/utils/icon';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -24,7 +21,6 @@ export function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { activeLedger, activeLedgerId } = useLedgerStore();
   const { colors, isDark } = useTheme();
-  const insets = useSafeAreaInsets();
   const shouldAnimateEntry = process.env.EXPO_OS !== 'android';
 
   const [isLoading, setIsLoading] = useState(true);
@@ -89,26 +85,22 @@ export function HomeScreen() {
     return <IconComponent size={16} color={color} />;
   };
 
-  const handleFABPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    navigation.navigate('AddTransaction');
-  };
+  const net = monthlyIncome - monthlySpending;
 
   return (
-    <View style={{ flex: 1 }}>
-      <Screen refreshing={refreshing} onRefresh={onRefresh} hasTabBar>
-        {error && !isLoading ? (
-          <EmptyState
-            icon={<AlertTriangle size={48} color={colors.mutedForeground} />}
-            title="Something went wrong"
-            description={error}
-            actionLabel="Try Again"
-            onAction={loadData}
-          />
-        ) : (
-        <View className="px-4 py-6">
+    <Screen refreshing={refreshing} onRefresh={onRefresh} hasTabBar>
+      {error && !isLoading ? (
+        <EmptyState
+          icon={<AlertTriangle size={48} color={colors.mutedForeground} />}
+          title="Something went wrong"
+          description={error}
+          actionLabel="Try Again"
+          onAction={loadData}
+        />
+      ) : (
+      <View className="px-4 py-6">
         {/* Hero Header */}
-        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(0).springify() : undefined} className="mb-6">
+        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(0).duration(300) : undefined} className="mb-6">
           <Text
             className="text-3xl font-bold"
             style={{ color: colors.foreground, letterSpacing: -0.8 }}
@@ -123,8 +115,8 @@ export function HomeScreen() {
           </Text>
         </Animated.View>
 
-        {/* Quick Transfer Action */}
-        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(80).springify() : undefined} className="mb-6">
+        {/* Quick Actions Row */}
+        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(80).duration(300) : undefined} className="mb-6">
           <TouchableOpacity
             onPress={() => navigation.navigate('Transfer')}
             accessibilityRole="button"
@@ -142,48 +134,57 @@ export function HomeScreen() {
           </TouchableOpacity>
         </Animated.View>
 
-        {/* Monthly Summary Card */}
-        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(160).springify() : undefined}>
+        {/* Monthly Summary — Side-by-side mini-cards + Net */}
+        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(160).duration(300) : undefined}>
           <Card variant={isDark ? 'glass' : 'default'} className="mb-4">
             <CardHeader>
               <CardTitle>Monthly Summary</CardTitle>
             </CardHeader>
-            <CardContent>
-              <View className="flex-row justify-between">
-                <View className="flex-1">
-                  <View className="flex-row items-center gap-1">
-                    <ArrowDownLeft size={16} color={colors.income} />
-                    <Text className="text-sm" style={{ color: colors.mutedForeground }}>Income</Text>
+            <CardContent className="mt-2">
+              <View className="flex-row gap-3 mb-4">
+                {/* Income mini-card */}
+                <View
+                  className="flex-1 rounded-2xl p-3"
+                  style={{ backgroundColor: colors.incomeSoft }}
+                >
+                  <View className="flex-row items-center gap-1.5">
+                    <ArrowDownLeft size={14} color={colors.income} />
+                    <Text className="text-xs font-medium" style={{ color: colors.income }}>Income</Text>
                   </View>
-                  <Text className="text-lg font-semibold" style={{ color: colors.income }}>
+                  <Text className="text-lg font-bold mt-1.5" style={{ color: colors.income }}>
                     {formatPHP(monthlyIncome)}
                   </Text>
                 </View>
-                <View className="flex-1">
-                  <View className="flex-row items-center gap-1">
-                    <ArrowUpRight size={16} color={colors.expense} />
-                    <Text className="text-sm" style={{ color: colors.mutedForeground }}>Expense</Text>
+                {/* Expense mini-card */}
+                <View
+                  className="flex-1 rounded-2xl p-3"
+                  style={{ backgroundColor: colors.expenseSoft }}
+                >
+                  <View className="flex-row items-center gap-1.5">
+                    <ArrowUpRight size={14} color={colors.expense} />
+                    <Text className="text-xs font-medium" style={{ color: colors.expense }}>Expense</Text>
                   </View>
-                  <Text className="text-lg font-semibold" style={{ color: colors.expense }}>
+                  <Text className="text-lg font-bold mt-1.5" style={{ color: colors.expense }}>
                     {formatPHP(monthlySpending)}
                   </Text>
                 </View>
-                <View className="flex-1">
-                  <Text className="text-sm" style={{ color: colors.mutedForeground }}>Net</Text>
-                  <Text
-                    className="text-lg font-semibold"
-                    style={{ color: monthlyIncome - monthlySpending >= 0 ? colors.income : colors.expense }}
-                  >
-                    {formatPHP(monthlyIncome - monthlySpending, true)}
-                  </Text>
-                </View>
+              </View>
+              {/* Net amount centered */}
+              <View className="items-center py-2">
+                <Text className="text-xs" style={{ color: colors.mutedForeground }}>Net</Text>
+                <Text
+                  className="text-xl font-bold mt-0.5"
+                  style={{ color: net >= 0 ? colors.income : colors.expense }}
+                >
+                  {formatPHP(net, true)}
+                </Text>
               </View>
             </CardContent>
           </Card>
         </Animated.View>
 
         {/* Account Balances Card */}
-        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(240).springify() : undefined}>
+        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(240).duration(300) : undefined}>
           <Card variant={isDark ? 'glass' : 'default'} className="mb-4">
             <CardHeader>
               <View className="flex-row items-center justify-between">
@@ -197,40 +198,40 @@ export function HomeScreen() {
                 </TouchableOpacity>
               </View>
             </CardHeader>
-            <CardContent>
-              <View className="flex-row flex-wrap gap-y-3">
-                <View className="w-1/2 pr-2">
+            <CardContent className="mt-2">
+              <View className="flex-row flex-wrap gap-y-4">
+                <View className="w-1/2 pr-3">
                   <Text className="text-xs" style={{ color: colors.mutedForeground }}>Cash & Bank</Text>
-                  <Text className="text-base font-semibold" style={{ color: colors.accountDebit }}>
+                  <Text className="text-base font-semibold mt-0.5" style={{ color: colors.accountDebit }}>
                     {formatPHPCompact(balanceSummary.debit)}
                   </Text>
                 </View>
-                <View className="w-1/2 pl-2">
+                <View className="w-1/2 pl-3">
                   <Text className="text-xs" style={{ color: colors.mutedForeground }}>Credit Cards</Text>
-                  <Text className="text-base font-semibold" style={{ color: colors.accountCredit }}>
+                  <Text className="text-base font-semibold mt-0.5" style={{ color: colors.accountCredit }}>
                     {formatPHPCompact(balanceSummary.credit)}
                   </Text>
                 </View>
-                <View className="w-1/2 pr-2">
+                <View className="w-1/2 pr-3">
                   <Text className="text-xs" style={{ color: colors.mutedForeground }}>Owed to Me</Text>
-                  <Text className="text-base font-semibold" style={{ color: colors.accountOwed }}>
+                  <Text className="text-base font-semibold mt-0.5" style={{ color: colors.accountOwed }}>
                     {formatPHPCompact(balanceSummary.owed)}
                   </Text>
                 </View>
-                <View className="w-1/2 pl-2">
+                <View className="w-1/2 pl-3">
                   <Text className="text-xs" style={{ color: colors.mutedForeground }}>I Owe</Text>
-                  <Text className="text-base font-semibold" style={{ color: colors.accountDebt }}>
+                  <Text className="text-base font-semibold mt-0.5" style={{ color: colors.accountDebt }}>
                     {formatPHPCompact(balanceSummary.debt)}
                   </Text>
                 </View>
               </View>
               <View
-                className="mt-3 pt-3"
+                className="mt-4 pt-3"
                 style={{ borderTopWidth: 1, borderTopColor: isDark ? colors.borderSubtle : colors.border }}
               >
                 <Text className="text-xs" style={{ color: colors.mutedForeground }}>Net Worth</Text>
                 <Text
-                  className="text-xl font-bold"
+                  className="text-xl font-bold mt-0.5"
                   style={{
                     color: balanceSummary.netWorth >= 0
                       ? (isDark ? colors.primary : colors.income)
@@ -244,15 +245,15 @@ export function HomeScreen() {
           </Card>
         </Animated.View>
 
-        {/* Top Categories */}
+        {/* Top Categories with Progress Bars */}
         {categorySpending.length > 0 && (
-          <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(320).springify() : undefined}>
+          <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(320).duration(300) : undefined}>
             <Card className="mb-4">
               <CardHeader>
                 <View className="flex-row items-center justify-between">
                   <CardTitle>Top Spending</CardTitle>
                   <TouchableOpacity
-                    onPress={() => navigation.navigate('Main', { screen: 'Charts' })}
+                    onPress={() => navigation.navigate('Charts')}
                     accessibilityRole="button"
                     accessibilityLabel="View all spending charts"
                   >
@@ -260,30 +261,42 @@ export function HomeScreen() {
                   </TouchableOpacity>
                 </View>
               </CardHeader>
-              <CardContent>
+              <CardContent className="mt-2">
                 {categorySpending.map((cat, index) => (
                   <View
                     key={cat.category_id}
-                    className="flex-row items-center justify-between py-2"
+                    className="py-3"
                     style={index < categorySpending.length - 1 ? { borderBottomWidth: 1, borderBottomColor: isDark ? colors.dividerSubtle : colors.border } : undefined}
                   >
-                    <View className="flex-row items-center gap-3">
-                      <IconAvatar
-                        size="sm"
-                        icon={getIcon(cat.category_icon, colors.onPrimary)}
-                        backgroundColor={cat.category_color}
-                      />
-                      <Text className="text-sm font-medium" style={{ color: colors.foreground }}>
-                        {cat.category_name}
-                      </Text>
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-row items-center gap-3">
+                        <IconAvatar
+                          size="sm"
+                          icon={getIcon(cat.category_icon, colors.onPrimary)}
+                          backgroundColor={cat.category_color}
+                        />
+                        <Text className="text-sm font-medium" style={{ color: colors.foreground }}>
+                          {cat.category_name}
+                        </Text>
+                      </View>
+                      <View className="items-end">
+                        <Text className="text-sm font-semibold" style={{ color: colors.foreground }}>
+                          {formatPHP(cat.total_amount)}
+                        </Text>
+                        <Text className="text-xs mt-0.5" style={{ color: colors.mutedForeground }}>
+                          {cat.percentage.toFixed(1)}%
+                        </Text>
+                      </View>
                     </View>
-                    <View className="items-end">
-                      <Text className="text-sm font-semibold" style={{ color: colors.foreground }}>
-                        {formatPHP(cat.total_amount)}
-                      </Text>
-                      <Text className="text-xs" style={{ color: colors.mutedForeground }}>
-                        {cat.percentage.toFixed(1)}%
-                      </Text>
+                    {/* Progress bar */}
+                    <View
+                      className="mt-2 h-1.5 rounded-full overflow-hidden"
+                      style={{ backgroundColor: colors.muted }}
+                    >
+                      <View
+                        className="h-full rounded-full"
+                        style={{ width: `${Math.min(cat.percentage, 100)}%`, backgroundColor: cat.category_color }}
+                      />
                     </View>
                   </View>
                 ))}
@@ -293,7 +306,7 @@ export function HomeScreen() {
         )}
 
         {/* Recent Transactions */}
-        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(400).springify() : undefined}>
+        <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(400).duration(300) : undefined}>
           <Card>
             <CardHeader>
               <View className="flex-row items-center justify-between">
@@ -307,7 +320,7 @@ export function HomeScreen() {
                 </TouchableOpacity>
               </View>
             </CardHeader>
-            <CardContent>
+            <CardContent className="mt-2">
               {recentTransactions.length === 0 ? (
                 <Text className="py-4 text-center text-sm" style={{ color: colors.mutedForeground }}>
                   No transactions yet
@@ -350,24 +363,8 @@ export function HomeScreen() {
             </CardContent>
           </Card>
         </Animated.View>
-        </View>
-        )}
-      </Screen>
-
-      {/* Floating Action Button */}
-      <View
-        style={{
-          position: 'absolute',
-          bottom: FLOATING_TAB_BAR_TOTAL_HEIGHT + insets.bottom,
-          right: insets.right,
-        }}
-      >
-        <View style={{ padding: 16 }}>
-          <FAB onPress={handleFABPress} accessibilityLabel="Add transaction">
-            <Plus size={24} color={colors.onPrimary} />
-          </FAB>
-        </View>
       </View>
-    </View>
+      )}
+    </Screen>
   );
 }

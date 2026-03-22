@@ -1,13 +1,13 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, SectionList } from 'react-native';
+import { View, Text, TouchableOpacity, SectionList, ScrollView } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { Plus, Wallet, CreditCard, Users, HandCoins, AlertTriangle } from 'lucide-react-native';
+import { Plus, Wallet, CreditCard, Users, HandCoins, AlertTriangle, List, LayoutGrid } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { AccountWithPerson, AccountType } from '../../../types/database';
 import { Screen, SimpleHeader } from '../../../shared/components/layout';
-import { Card, IconAvatar, EmptyState, AccountTypeBadge, AccountsScreenSkeleton } from '../../../shared/components/ui';
+import { Card, CardPressable, CardContent, IconAvatar, EmptyState, AccountTypeBadge, AccountsScreenSkeleton } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { AccountRepository } from '../../../database/repositories';
 import { formatPHP } from '../../../shared/utils/currency';
@@ -34,6 +34,7 @@ export function AccountsScreen() {
   const [sections, setSections] = useState<AccountSection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'cards'>('list');
 
   const loadAccounts = useCallback(async () => {
     if (!activeLedgerId) return;
@@ -105,8 +106,16 @@ export function AccountsScreen() {
     return <IconComponent size={18} color={color} />;
   };
 
+  const pillStyle = (isActive: boolean) => ({
+    backgroundColor: isActive ? colors.primary : (isDark ? colors.surfaceContainer : colors.secondaryContainer),
+    borderRadius: 20,
+  });
+
+  const pillTextColor = (isActive: boolean) =>
+    isActive ? colors.onPrimary : (isDark ? colors.mutedForeground : colors.onSecondaryContainer);
+
   const renderAccount = ({ item, index }: { item: AccountWithPerson; index: number }) => (
-    <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(index * 50).springify() : undefined}>
+    <Animated.View entering={shouldAnimateEntry ? FadeInDown.delay(index * 50).duration(300) : undefined}>
       <TouchableOpacity
         onPress={() => navigation.navigate('AccountDetail', { accountId: item.id })}
         accessibilityRole="button"
@@ -167,12 +176,117 @@ export function AccountsScreen() {
     </View>
   );
 
+  const renderCardView = () => (
+    <ScrollView
+      contentContainerStyle={{ paddingBottom: FLOATING_TAB_BAR_TOTAL_HEIGHT, paddingHorizontal: 16 }}
+    >
+      {sections.map((section) => (
+        <View key={section.type} className="mb-4">
+          {/* Section header */}
+          <View className="flex-row items-center justify-between py-2 mb-2">
+            <View className="flex-row items-center gap-2">
+              <View
+                style={{
+                  width: 3,
+                  height: 16,
+                  borderRadius: 2,
+                  backgroundColor: colors.primary,
+                  marginRight: 4,
+                }}
+              />
+              {section.icon}
+              <Text className="text-sm font-semibold" style={{ color: colors.foreground }}>{section.title}</Text>
+            </View>
+            <Text className="text-sm font-semibold" style={{ color: colors.foreground }}>{formatPHP(section.total)}</Text>
+          </View>
+          {/* 2-column grid */}
+          <View className="flex-row flex-wrap" style={{ gap: 12 }}>
+            {section.data.map((item, index) => (
+              <Animated.View
+                key={item.id}
+                entering={shouldAnimateEntry ? FadeInDown.delay(index * 50).duration(300) : undefined}
+                style={{ width: '47%', flexGrow: 1 }}
+              >
+                <CardPressable
+                  onPress={() => navigation.navigate('AccountDetail', { accountId: item.id })}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${item.name}, balance ${formatPHP(item.current_balance)}`}
+                >
+                  <IconAvatar
+                    size="md"
+                    icon={getIcon(item.icon)}
+                    backgroundColor={item.color}
+                  />
+                  <Text className="text-sm font-semibold mt-2" style={{ color: colors.foreground }} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  {item.person_name && (
+                    <Text className="text-xs" style={{ color: colors.mutedForeground }} numberOfLines={1}>
+                      {item.person_name}
+                    </Text>
+                  )}
+                  <Text
+                    className="text-base font-bold mt-1"
+                    style={{ color: item.current_balance >= 0 ? colors.foreground : colors.expense }}
+                  >
+                    {formatPHP(item.current_balance)}
+                  </Text>
+                  {item.account_type === 'credit' && item.credit_limit && (
+                    <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                      of {formatPHP(item.credit_limit)}
+                    </Text>
+                  )}
+                </CardPressable>
+              </Animated.View>
+            ))}
+          </View>
+        </View>
+      ))}
+    </ScrollView>
+  );
+
+  const hasAccounts = sections.length > 0;
+
   return (
     <Screen scrollable={false}>
       <SimpleHeader title="Accounts" />
 
-      {/* Add Account Button */}
-      <View className="flex-row justify-end px-4 py-2">
+      {/* Add Account Button + View Toggle */}
+      <View className="flex-row items-center justify-between px-4 py-2">
+        {/* View Toggle */}
+        {hasAccounts && !isLoading && !error ? (
+          <View className="flex-row gap-2">
+            <TouchableOpacity
+              onPress={() => setViewMode('list')}
+              accessibilityRole="radio"
+              accessibilityLabel="List view"
+              accessibilityState={{ selected: viewMode === 'list' }}
+              className="flex-row items-center gap-1 px-3 py-2"
+              style={pillStyle(viewMode === 'list')}
+            >
+              <List size={16} color={pillTextColor(viewMode === 'list')} />
+              <Text className="text-sm font-medium" style={{ color: pillTextColor(viewMode === 'list') }}>
+                List
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setViewMode('cards')}
+              accessibilityRole="radio"
+              accessibilityLabel="Card view"
+              accessibilityState={{ selected: viewMode === 'cards' }}
+              className="flex-row items-center gap-1 px-3 py-2"
+              style={pillStyle(viewMode === 'cards')}
+            >
+              <LayoutGrid size={16} color={pillTextColor(viewMode === 'cards')} />
+              <Text className="text-sm font-medium" style={{ color: pillTextColor(viewMode === 'cards') }}>
+                Cards
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View />
+        )}
+
         <TouchableOpacity
           onPress={() => navigation.navigate('AddAccount')}
           accessibilityRole="button"
@@ -203,6 +317,8 @@ export function AccountsScreen() {
           actionLabel="Add Account"
           onAction={() => navigation.navigate('AddAccount')}
         />
+      ) : viewMode === 'cards' ? (
+        renderCardView()
       ) : (
         <SectionList
           sections={sections}

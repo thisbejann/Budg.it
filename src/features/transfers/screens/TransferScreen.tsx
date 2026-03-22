@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Alert } from 'react-native';
+import { View, Text, Alert } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,7 +9,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import type { AccountWithPerson } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
-import { Button, CurrencyInput, Input, DateInput, Select, SelectOption, EmptyState } from '../../../shared/components/ui';
+import { Button, Input, DateInput, Select, SelectOption, EmptyState, Card, CardContent, CurrencyInput } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
 import { TransferRepository, AccountRepository } from '../../../database/repositories';
 import { getToday, getCurrentTime } from '../../../shared/utils/date';
@@ -40,7 +41,7 @@ export function TransferScreen() {
   const { activeLedgerId } = useLedgerStore();
 
   const [accounts, setAccounts] = useState<AccountWithPerson[]>([]);
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const submissionGuard = useMutationCloseGuard();
 
@@ -138,135 +139,129 @@ export function TransferScreen() {
           onAction={() => navigation.navigate('AddAccount')}
         />
       ) : (
-      <ScrollView className="flex-1 px-4 py-4">
-        {/* From Account */}
-        <View className="mb-4">
-          <Controller
-            control={control}
-            name="from_account_id"
-            render={({ field: { onChange, value } }) => (
-              <Select
-                label="From Account"
-                placeholder="Select source account"
-                value={value}
-                options={fromAccountOptions}
-                onValueChange={onChange}
-                error={errors.from_account_id?.message}
-              />
+      <KeyboardAwareScrollView
+        className="flex-1 px-4"
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={20}
+        contentContainerStyle={{ paddingBottom: 24 }}
+      >
+        {/* Accounts Card */}
+        <Card className="mb-3 mt-2">
+          <CardContent className="gap-2">
+            <Controller
+              control={control}
+              name="from_account_id"
+              render={({ field: { onChange, value } }) => (
+                <Select
+                  label="From Account"
+                  placeholder="Select source account"
+                  value={value}
+                  options={fromAccountOptions}
+                  onValueChange={onChange}
+                  error={errors.from_account_id?.message}
+                />
+              )}
+            />
+            {fromAccount && (
+              <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                Balance: ₱{fromAccount.current_balance.toLocaleString()}
+              </Text>
             )}
-          />
-          {fromAccount && (
-            <Text className="mt-1 text-xs text-muted-foreground">
-              Balance: ₱{fromAccount.current_balance.toLocaleString()}
-            </Text>
-          )}
-        </View>
 
-        {/* Arrow Icon */}
-        <View className="mb-4 items-center">
-          <View className="rounded-full bg-secondary p-2">
-            <ArrowDown size={20} color={colors.mutedForeground} />
-          </View>
-        </View>
+            <View className="my-1 items-center">
+              <View className="rounded-full bg-secondary p-1.5">
+                <ArrowDown size={16} color={colors.mutedForeground} />
+              </View>
+            </View>
 
-        {/* To Account */}
-        <View className="mb-4">
-          <Controller
-            control={control}
-            name="to_account_id"
-            render={({ field: { onChange, value } }) => (
-              <Select
-                label="To Account"
-                placeholder="Select destination account"
-                value={value}
-                options={toAccountOptions}
-                onValueChange={onChange}
-                error={errors.to_account_id?.message}
-              />
+            <Controller
+              control={control}
+              name="to_account_id"
+              render={({ field: { onChange, value } }) => (
+                <Select
+                  label="To Account"
+                  placeholder="Select destination account"
+                  value={value}
+                  options={toAccountOptions}
+                  onValueChange={onChange}
+                  error={errors.to_account_id?.message}
+                />
+              )}
+            />
+            {toAccount && (
+              <Text className="text-xs" style={{ color: colors.mutedForeground }}>
+                Balance: ₱{toAccount.current_balance.toLocaleString()}
+              </Text>
             )}
-          />
-          {toAccount && (
-            <Text className="mt-1 text-xs text-muted-foreground">
-              Balance: ₱{toAccount.current_balance.toLocaleString()}
-            </Text>
-          )}
-        </View>
+          </CardContent>
+        </Card>
 
-        {/* Amount */}
-        <View className="mb-4">
-          <Controller
-            control={control}
-            name="amount"
-            render={({ field: { onChange, value } }) => (
-              <CurrencyInput
-                label="Amount"
-                placeholder="0.00"
-                value={value}
-                onChangeValue={onChange}
-                error={errors.amount?.message}
-              />
-            )}
-          />
-        </View>
+        {/* Amount & Fee Card */}
+        <Card className="mb-3">
+          <CardContent className="gap-4">
+            <Controller
+              control={control}
+              name="amount"
+              render={({ field: { onChange, value } }) => (
+                <CurrencyInput
+                  label="Amount"
+                  value={value}
+                  onChangeValue={onChange}
+                  error={errors.amount?.message}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="fee"
+              render={({ field: { onChange, value } }) => (
+                <CurrencyInput
+                  label="Fee (optional)"
+                  value={value || ''}
+                  onChangeValue={onChange}
+                />
+              )}
+            />
+          </CardContent>
+        </Card>
 
-        {/* Fee */}
-        <View className="mb-4">
-          <Controller
-            control={control}
-            name="fee"
-            render={({ field: { onChange, value } }) => (
-              <CurrencyInput
-                label="Transfer Fee (optional)"
-                placeholder="0.00"
-                value={value || ''}
-                onChangeValue={onChange}
-              />
-            )}
-          />
-          <Text className="mt-1 text-xs text-muted-foreground">
-            Fee will be deducted from the source account but not added to the destination
-          </Text>
-        </View>
-
-        {/* Date */}
-        <View className="mb-4">
-          <Controller
-            control={control}
-            name="date"
-            render={({ field: { onChange, value } }) => (
-              <DateInput label="Date" value={value} onChangeValue={onChange} />
-            )}
-          />
-        </View>
+        {/* Date Card */}
+        <Card className="mb-3">
+          <CardContent>
+            <Controller
+              control={control}
+              name="date"
+              render={({ field: { onChange, value } }) => (
+                <DateInput label="Date" value={value} onChangeValue={onChange} />
+              )}
+            />
+          </CardContent>
+        </Card>
 
         {/* Notes */}
-        <View className="mb-6">
-          <Controller
-            control={control}
-            name="notes"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label="Notes (optional)"
-                value={value}
-                onChangeText={onChange}
-                placeholder="Add a note"
-                multiline
-                numberOfLines={2}
-              />
-            )}
-          />
-        </View>
+        <Controller
+          control={control}
+          name="notes"
+          render={({ field: { onChange, value } }) => (
+            <Input
+              label="Notes (optional)"
+              value={value}
+              onChangeText={onChange}
+              placeholder="Add a note"
+              multiline
+              numberOfLines={2}
+            />
+          )}
+        />
 
         {/* Submit */}
-        <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
-          Transfer
-        </Button>
-
-        <View className="h-8" />
-      </ScrollView>
+        <View className="mt-6">
+          <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
+            Transfer
+          </Button>
+        </View>
+      </KeyboardAwareScrollView>
       )}
     </Screen>
   );
 }
-
-

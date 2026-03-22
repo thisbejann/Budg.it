@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,11 +8,11 @@ import { z } from 'zod';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../../types/navigation';
-import type { Person, AccountType } from '../../../types/database';
+import type { AccountType } from '../../../types/database';
 import { Screen, Header } from '../../../shared/components/layout';
-import { Button, CurrencyInput, Input, Select, SelectOption, DayOfMonthPicker } from '../../../shared/components/ui';
+import { Button, Input, Select, SelectOption, DayOfMonthPicker, CurrencyInput, Card, CardContent } from '../../../shared/components/ui';
 import { useLedgerStore } from '../../../store';
-import { AccountRepository, PersonRepository } from '../../../database/repositories';
+import { AccountRepository } from '../../../database/repositories';
 import { ACCOUNT_COLORS } from '../../../constants/colors';
 import { ACCOUNT_ICONS } from '../../../constants/icons';
 import { useTheme } from '../../../hooks/useColorScheme';
@@ -40,6 +41,7 @@ const accountSchema = z.object({
   due_date: z.number().min(1).max(31).optional(),
   payment_due_days: z.number().optional(),
   person_id: z.number().optional(),
+  person_name: z.string().optional(),
   icon: z.string(),
   color: z.string(),
   notes: z.string().optional(),
@@ -60,11 +62,8 @@ export function AddAccountScreen() {
   const { activeLedgerId } = useLedgerStore();
   const { colors } = useTheme();
 
-  const [persons, setPersons] = useState<Person[]>([]);
-  
   const [isLoading, setIsLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
-  const [showColorPicker, setShowColorPicker] = useState(false);
   const submissionGuard = useMutationCloseGuard();
 
   const defaultType = (route.params?.accountType as AccountType) || 'debit';
@@ -82,6 +81,7 @@ export function AddAccountScreen() {
       account_type: defaultType,
       initial_balance: '0',
       credit_limit: '',
+      person_name: '',
       icon: 'wallet',
       color: ACCOUNT_COLORS[0],
       notes: '',
@@ -94,25 +94,14 @@ export function AddAccountScreen() {
 
   usePreventNavigationWhilePending(isLoading, submissionGuard.closeAfterRef);
 
-  useEffect(() => {
-    loadPersons();
-  }, []);
-
-  const loadPersons = async () => {
-    try {
-      const data = await PersonRepository.getAll();
-      setPersons(data);
-    } catch (error) {
-      console.error('Error loading persons:', error);
-    }
-  };
-
   const onSubmit = async (data: AccountFormSchema) => {
     if (!activeLedgerId) return;
     if (!submissionGuard.start()) return;
 
     setIsLoading(true);
     try {
+      const isPersonType = data.account_type === 'owed' || data.account_type === 'debt';
+
       await AccountRepository.create(activeLedgerId, {
         name: data.name,
         account_type: data.account_type,
@@ -121,7 +110,7 @@ export function AddAccountScreen() {
         statement_date: data.statement_date,
         due_date: data.due_date,
         payment_due_days: data.payment_due_days,
-        person_id: data.person_id,
+        person_name: isPersonType ? data.person_name : undefined,
         icon: data.icon,
         color: data.color,
         notes: data.notes,
@@ -136,11 +125,6 @@ export function AddAccountScreen() {
     }
   };
 
-  const personOptions: SelectOption[] = persons.map((p) => ({
-    label: p.name,
-    value: p.id,
-  }));
-
   const IconComponent = (LucideIcons as any)[
     selectedIcon.split('-').map((s, i) => i === 0 ? s : s.charAt(0).toUpperCase() + s.slice(1)).join('')
   ] || LucideIcons.Wallet;
@@ -149,81 +133,90 @@ export function AddAccountScreen() {
     <Screen scrollable={false}>
       <Header title="Add Account" showClose disableClose={isLoading} />
 
-      <ScrollView className="flex-1 px-4 py-4">
-        {/* Account Type */}
-        <View className="mb-4">
-          <Controller
-            control={control}
-            name="account_type"
-            render={({ field: { onChange, value } }) => (
-              <Select
-                label="Account Type"
-                placeholder="Select type"
-                value={value}
-                options={ACCOUNT_TYPE_OPTIONS}
-                onValueChange={onChange}
-                error={errors.account_type?.message}
-              />
-            )}
-          />
+      <KeyboardAwareScrollView
+        className="flex-1 px-4"
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={20}
+        contentContainerStyle={{ paddingBottom: 24 }}
+      >
+        {/* Hero Icon Section */}
+        <View className="items-center pt-4 pb-3">
+          <TouchableOpacity
+            onPress={() => setShowIconPicker(!showIconPicker)}
+            className="h-20 w-20 items-center justify-center rounded-2xl"
+            style={{ backgroundColor: selectedColor }}
+          >
+            <IconComponent size={36} color="#ffffff" />
+          </TouchableOpacity>
         </View>
 
-        {/* Name */}
-        <View className="mb-4">
-          <Controller
-            control={control}
-            name="name"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label="Account Name"
-                placeholder="e.g., BDO Savings"
-                value={value}
-                onChangeText={onChange}
-                error={errors.name?.message}
-              />
-            )}
-          />
-        </View>
-
-        {/* Initial Balance */}
-        <View className="mb-4">
-          <Controller
-            control={control}
-            name="initial_balance"
-            render={({ field: { onChange, value } }) => (
-              <CurrencyInput
-                label="Initial Balance"
-                placeholder="0.00"
-                value={value}
-                onChangeValue={onChange}
-                error={errors.initial_balance?.message}
-              />
-            )}
-          />
-        </View>
-
-        {/* Credit Limit - Only for credit type */}
-        {selectedType === 'credit' && (
-          <View className="mb-4">
+        {/* Account Info Card */}
+        <Card className="mb-3">
+          <CardContent className="gap-4">
             <Controller
               control={control}
-              name="credit_limit"
+              name="account_type"
+              render={({ field: { onChange, value } }) => (
+                <Select
+                  label="Account Type"
+                  placeholder="Select type"
+                  value={value}
+                  options={ACCOUNT_TYPE_OPTIONS}
+                  onValueChange={onChange}
+                  error={errors.account_type?.message}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Account Name"
+                  placeholder="e.g., BDO Savings"
+                  value={value}
+                  onChangeText={onChange}
+                  error={errors.name?.message}
+                />
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Balance Card */}
+        <Card className="mb-3">
+          <CardContent className="gap-4">
+            <Controller
+              control={control}
+              name="initial_balance"
               render={({ field: { onChange, value } }) => (
                 <CurrencyInput
-                  label="Credit Limit"
-                  placeholder="0.00"
-                  value={value || ''}
+                  label="Initial Balance"
+                  value={value}
                   onChangeValue={onChange}
                 />
               )}
             />
-          </View>
-        )}
+            {selectedType === 'credit' && (
+              <Controller
+                control={control}
+                name="credit_limit"
+                render={({ field: { onChange, value } }) => (
+                  <CurrencyInput
+                    label="Credit Limit"
+                    value={value || ''}
+                    onChangeValue={onChange}
+                  />
+                )}
+              />
+            )}
+          </CardContent>
+        </Card>
 
-        {/* Credit Card Date Fields */}
+        {/* Credit Card Details */}
         {selectedType === 'credit' && (
-          <>
-            <View className="mb-4">
+          <Card className="mb-3">
+            <CardContent className="gap-4">
               <Controller
                 control={control}
                 name="statement_date"
@@ -236,9 +229,6 @@ export function AddAccountScreen() {
                   />
                 )}
               />
-            </View>
-
-            <View className="mb-4">
               <Controller
                 control={control}
                 name="due_date"
@@ -251,9 +241,6 @@ export function AddAccountScreen() {
                   />
                 )}
               />
-            </View>
-
-            <View className="mb-4">
               <Controller
                 control={control}
                 name="payment_due_days"
@@ -267,49 +254,35 @@ export function AddAccountScreen() {
                   />
                 )}
               />
-            </View>
-          </>
+            </CardContent>
+          </Card>
         )}
 
         {/* Person - Only for owed/debt types */}
         {(selectedType === 'owed' || selectedType === 'debt') && (
-          <View className="mb-4">
-            <Controller
-              control={control}
-              name="person_id"
-              render={({ field: { onChange, value } }) => (
-                <Select
-                  label={selectedType === 'owed' ? 'Who owes you?' : 'Who do you owe?'}
-                  placeholder="Select person (optional)"
-                  value={value}
-                  options={personOptions}
-                  onValueChange={onChange}
-                />
-              )}
-            />
-            {persons.length === 0 && (
-              <Text className="mt-1 text-xs text-muted-foreground">
-                No persons added yet. Add from Settings → Manage Persons.
-              </Text>
-            )}
-          </View>
+          <Card className="mb-3">
+            <CardContent>
+              <Controller
+                control={control}
+                name="person_name"
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    label={selectedType === 'owed' ? 'Who owes you?' : 'Who do you owe?'}
+                    placeholder="e.g., John"
+                    value={value}
+                    onChangeText={onChange}
+                  />
+                )}
+              />
+            </CardContent>
+          </Card>
         )}
 
-        {/* Icon & Color Picker */}
-        <View className="mb-4">
-          <Text className="mb-2 text-sm font-medium text-foreground">Icon & Color</Text>
-          <View className="flex-row gap-3">
-            {/* Icon Picker Button */}
-            <TouchableOpacity
-              onPress={() => setShowIconPicker(!showIconPicker)}
-              className="h-14 w-14 items-center justify-center rounded-xl"
-              style={{ backgroundColor: selectedColor }}
-            >
-              <IconComponent size={24} color="#ffffff" />
-            </TouchableOpacity>
-
-            {/* Color Options */}
-            <View className="flex-1 flex-row flex-wrap gap-2">
+        {/* Color Picker */}
+        <Card className="mb-3">
+          <CardContent>
+            <Text className="mb-2 text-sm font-medium text-foreground">Color</Text>
+            <View className="flex-row flex-wrap gap-2">
               {ACCOUNT_COLORS.map((color) => (
                 <TouchableOpacity
                   key={color}
@@ -321,12 +294,12 @@ export function AddAccountScreen() {
                 />
               ))}
             </View>
-          </View>
-        </View>
+          </CardContent>
+        </Card>
 
         {/* Icon Grid */}
         {showIconPicker && (
-          <View className="mb-4 rounded-xl bg-secondary p-3">
+          <View className="mb-3 rounded-xl bg-secondary p-3">
             <Text className="mb-2 text-sm font-medium text-foreground">Select Icon</Text>
             <View className="flex-row flex-wrap gap-2">
               {ACCOUNT_ICONS.map((iconName) => {
@@ -357,34 +330,28 @@ export function AddAccountScreen() {
         )}
 
         {/* Notes */}
-        <View className="mb-6">
-          <Controller
-            control={control}
-            name="notes"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label="Notes"
-                value={value}
-                onChangeText={onChange}
-                placeholder="Add a note (optional)"
-                multiline
-                numberOfLines={2}
-              />
-            )}
-          />
-        </View>
+        <Controller
+          control={control}
+          name="notes"
+          render={({ field: { onChange, value } }) => (
+            <Input
+              label="Notes"
+              value={value}
+              onChangeText={onChange}
+              placeholder="Add a note (optional)"
+              multiline
+              numberOfLines={2}
+            />
+          )}
+        />
 
-        {/* Submit Button */}
-        <View className="mt-2">
+        {/* Submit */}
+        <View className="mt-6">
           <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
             Create Account
           </Button>
         </View>
-
-        <View className="h-8" />
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </Screen>
   );
 }
-
-

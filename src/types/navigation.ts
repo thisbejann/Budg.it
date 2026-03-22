@@ -27,6 +27,7 @@ export type RootStackParamList = {
   Templates: undefined;
   Ledgers: undefined;
   Export: undefined;
+  Charts: undefined;
 };
 
 // Bottom Tab Navigator params
@@ -34,7 +35,6 @@ export type MainTabParamList = {
   Home: undefined;
   Transactions: { date?: string } | undefined;
   Accounts: undefined;
-  Charts: undefined;
   Settings: undefined;
 };
 
